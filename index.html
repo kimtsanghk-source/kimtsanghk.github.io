@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal Hub - 日常小工具 Dashboard</title>
+  <meta name="theme-color" content="#8C6D53">
+  <meta name="description" content="簡約大地色系日常小工具集合Dashboard">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- QRCode.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            earth: {
+              50: '#F7F5F0',
+              100: '#E8E3D9',
+              200: '#D6CBC0',
+              500: '#8C6D53',
+              600: '#755A43',
+              700: '#5C4432',
+              sage: '#6B7A63',
+              dark: '#2D2825',
+              muted: '#7A7067'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #F7F5F0; color: #2D2825; font-family: system-ui, -apple-system, sans-serif; }
+    .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); border: 1px solid #E8E3D9; }
+    .smooth-transition { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header / Hero (Compact Size) -->
+  <header class="bg-white/60 border-b border-earth-100 sticky top-0 z-40 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('home')">
+        <div class="w-9 h-9 rounded-xl bg-earth-500 text-white flex items-center justify-center font-bold shadow-sm">
+          <i data-lucide="layout-grid" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-wide leading-none text-earth-dark">Minimal Hub</h1>
+          <p class="text-xs text-earth-muted mt-0.5">日常專注與效率小工具集</p>
+        </div>
+      </div>
+
+      <!-- Action & PWA Button -->
+      <div class="flex items-center space-x-2">
+        <button id="pwaInstallBtn" class="hidden items-center space-x-1.5 bg-earth-100 hover:bg-earth-200 text-earth-dark text-xs px-3 py-1.5 rounded-lg font-medium smooth-transition">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>安裝 App</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6">
+
+    <!-- HOME VIEW: Dashboard Grid -->
+    <section id="view-home" class="space-y-6">
+      <!-- Search & Category Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/40 p-4 rounded-2xl border border-earth-100">
+        <div>
+          <h2 class="text-xl font-bold text-earth-dark">工具面板</h2>
+          <p class="text-xs text-earth-muted">選擇工具立即使用，點擊即可進行操作</p>
+        </div>
+        <div class="relative max-w-xs w-full">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-earth-muted"></i>
+          <input type="text" id="toolSearch" oninput="filterTools()" placeholder="搜尋工具..." class="w-full pl-9 pr-4 py-1.5 bg-white rounded-xl border border-earth-100 text-sm focus:outline-none focus:border-earth-500 text-earth-dark">
+        </div>
+      </div>
+
+      <!-- Tool Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="toolsGrid">
+        
+        <!-- Card 1: Translator -->
+        <div onclick="switchView('translator')" class="tool-card group bg-white p-5 rounded-2xl border border-earth-100 shadow-sm hover:shadow-md hover:border-earth-500/40 cursor-pointer smooth-transition flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-earth-50 text-earth-500 flex items-center justify-center group-hover:bg-earth-500 group-hover:text-white smooth-transition">
+                <i data-lucide="languages" class="w-5 h-5"></i>
+              </div>
+              <span class="text-[10px] font-medium bg-earth-50 text-earth-muted px-2 py-0.5 rounded-full border border-earth-100">文本工具</span>
+            </div>
+            <h3 class="font-bold text-earth-dark group-hover:text-earth-500 smooth-transition">英文轉繁中翻譯</h3>
+            <p class="text-xs text-earth-muted mt-1 leading-relaxed">快速將英文長文或句子準確翻譯為繁體中文。</p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-earth-50 flex items-center justify-between text-xs font-medium text-earth-500">
+            <span>開啟工具</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 smooth-transition"></i>
+          </div>
+        </div>
+
+        <!-- Card 2: Pomodoro -->
+        <div onclick="switchView('pomodoro')" class="tool-card group bg-white p-5 rounded-2xl border border-earth-100 shadow-sm hover:shadow-md hover:border-earth-500/40 cursor-pointer smooth-transition flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-earth-50 text-earth-500 flex items-center justify-center group-hover:bg-earth-500 group-hover:text-white smooth-transition">
+                <i data-lucide="timer" class="w-5 h-5"></i>
+              </div>
+              <span class="text-[10px] font-medium bg-earth-50 text-earth-muted px-2 py-0.5 rounded-full border border-earth-100">生產力</span>
+            </div>
+            <h3 class="font-bold text-earth-dark group-hover:text-earth-500 smooth-transition">番茄鐘 (Pomodoro)</h3>
+            <p class="text-xs text-earth-muted mt-1 leading-relaxed">25 分鐘高效專注 + 5 分鐘短暫休息循環計時器。</p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-earth-50 flex items-center justify-between text-xs font-medium text-earth-500">
+            <span>開啟工具</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 smooth-transition"></i>
+          </div>
+        </div>
+
+        <!-- Card 3: QR Code Generator -->
+        <div onclick="switchView('qrcode')" class="tool-card group bg-white p-5 rounded-2xl border border-earth-100 shadow-sm hover:shadow-md hover:border-earth-500/40 cursor-pointer smooth-transition flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-earth-50 text-earth-500 flex items-center justify-center group-hover:bg-earth-500 group-hover:text-white smooth-transition">
+                <i data-lucide="qr-code" class="w-5 h-5"></i>
+              </div>
+              <span class="text-[10px] font-medium bg-earth-50 text-earth-muted px-2 py-0.5 rounded-full border border-earth-100">實用工具</span>
+            </div>
+            <h3 class="font-bold text-earth-dark group-hover:text-earth-500 smooth-transition">QR Code 產生器</h3>
+            <p class="text-xs text-earth-muted mt-1 leading-relaxed">即時將網址或文字轉為 QR Code 並支援高畫質圖片下載。</p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-earth-50 flex items-center justify-between text-xs font-medium text-earth-500">
+            <span>開啟工具</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 smooth-transition"></i>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TOOL VIEW 1: Translator -->
+    <section id="view-translator" class="hidden space-y-4">
+      <button onclick="switchView('home')" class="inline-flex items-center space-x-1.5 text-xs text-earth-muted hover:text-earth-dark mb-2 font-medium smooth-transition">
+        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        <span>返回工具列表</span>
+      </button>
+
+      <div class="bg-white rounded-2xl p-6 border border-earth-100 shadow-sm max-w-4xl mx-auto space-y-4">
+        <div class="border-b border-earth-100 pb-3 flex items-center justify-between">
+          <h2 class="text-lg font-bold text-earth-dark flex items-center gap-2">
+            <i data-lucide="languages" class="w-5 h-5 text-earth-500"></i>
+            英文轉繁體中文翻譯
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Input -->
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-earth-muted">英文原文 (English Input)</label>
+            <textarea id="transInput" rows="8" placeholder="請輸入需要翻譯的英文內容..." class="w-full p-3 bg-earth-50 border border-earth-100 rounded-xl text-sm focus:outline-none focus:border-earth-500 text-earth-dark resize-none"></textarea>
+          </div>
+          <!-- Output -->
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-earth-muted">繁體中文譯文 (Traditional Chinese)</label>
+            <div id="transOutput" class="w-full h-48 md:h-auto p-3 bg-earth-50 border border-earth-100 rounded-xl text-sm text-earth-dark overflow-y-auto whitespace-pre-wrap">譯文將顯示於此...</div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <button onclick="clearTranslator()" class="text-xs text-earth-muted hover:text-earth-dark px-3 py-1.5 font-medium">清空內容</button>
+          <div class="space-x-2">
+            <button onclick="copyTranslation()" class="px-4 py-2 bg-earth-100 hover:bg-earth-200 text-earth-dark rounded-xl text-xs font-medium smooth-transition">複製譯文</button>
+            <button id="transBtn" onclick="runTranslation()" class="px-5 py-2 bg-earth-500 hover:bg-earth-600 text-white rounded-xl text-xs font-medium shadow-sm smooth-transition">開始翻譯</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOOL VIEW 2: Pomodoro -->
+    <section id="view-pomodoro" class="hidden space-y-4">
+      <button onclick="switchView('home')" class="inline-flex items-center space-x-1.5 text-xs text-earth-muted hover:text-earth-dark mb-2 font-medium smooth-transition">
+        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        <span>返回工具列表</span>
+      </button>
+
+      <div class="bg-white rounded-2xl p-8 border border-earth-100 shadow-sm max-w-md mx-auto text-center space-y-6">
+        <div>
+          <span id="pomoStatusBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-earth-50 text-earth-500 border border-earth-100">專注模式 (25m)</span>
+          <h2 class="text-xl font-bold text-earth-dark mt-2">番茄鐘</h2>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="relative py-6">
+          <div id="pomoTimer" class="text-6xl font-black tracking-tight text-earth-dark font-mono">25:00</div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center justify-center space-x-3">
+          <button id="pomoResetBtn" onclick="resetPomodoro()" class="p-3 bg-earth-50 hover:bg-earth-100 text-earth-dark rounded-xl smooth-transition">
+            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+          </button>
+          <button id="pomoStartBtn" onclick="togglePomodoro()" class="px-8 py-3 bg-earth-500 hover:bg-earth-600 text-white font-medium rounded-xl shadow-md smooth-transition flex items-center space-x-2">
+            <i id="pomoPlayIcon" data-lucide="play" class="w-5 h-5"></i>
+            <span id="pomoBtnText">開始專注</span>
+          </button>
+          <button onclick="switchPomoMode()" class="p-3 bg-earth-50 hover:bg-earth-100 text-earth-dark rounded-xl smooth-transition" title="切換模式">
+            <i data-lucide="coffee" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOOL VIEW 3: QR Code Generator -->
+    <section id="view-qrcode" class="hidden space-y-4">
+      <button onclick="switchView('home')" class="inline-flex items-center space-x-1.5 text-xs text-earth-muted hover:text-earth-dark mb-2 font-medium smooth-transition">
+        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        <span>返回工具列表</span>
+      </button>
+
+      <div class="bg-white rounded-2xl p-6 border border-earth-100 shadow-sm max-w-xl mx-auto space-y-6">
+        <div class="border-b border-earth-100 pb-3">
+          <h2 class="text-lg font-bold text-earth-dark flex items-center gap-2">
+            <i data-lucide="qr-code" class="w-5 h-5 text-earth-500"></i>
+            QR Code 產生器
+          </h2>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-earth-muted">請輸入網址或任意文字：</label>
+          <input type="text" id="qrInput" oninput="generateQRCode()" placeholder="https://example.com 或 任何文字內容" class="w-full px-4 py-2.5 bg-earth-50 border border-earth-100 rounded-xl text-sm focus:outline-none focus:border-earth-500 text-earth-dark">
+        </div>
+
+        <!-- Display Area -->
+        <div class="flex flex-col items-center justify-center p-6 bg-earth-50 rounded-2xl border border-dashed border-earth-200 min-h-[220px]">
+          <div id="qrcodeBox" class="p-3 bg-white rounded-xl shadow-sm"></div>
+          <p id="qrPlaceholder" class="text-xs text-earth-muted mt-2">輸入內容後將在此自動生成 QR Code</p>
+        </div>
+
+        <button id="downloadQrBtn" onclick="downloadQRCode()" disabled class="w-full py-2.5 bg-earth-500 hover:bg-earth-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-medium shadow-sm smooth-transition">下載 QR Code 圖片 (PNG)</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-auto border-t border-earth-100 bg-white/40 py-4 text-center text-xs text-earth-muted">
+    <p>© 2026 Minimal Hub · 極簡大地色工具箱</p>
+  </footer>
+
+  <script>
+    // Initialize Icons
+    lucide.createIcons();
+
+    // Single Page Navigation (SPA View Switcher)
+    function switchView(viewName) {
+      const views = ['home', 'translator', 'pomodoro', 'qrcode'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (v === viewName) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Search Tools Logic
+    function filterTools() {
+      const query = document.getElementById('toolSearch').value.toLowerCase();
+      const cards = document.querySelectorAll('.tool-card');
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(query) ? 'flex' : 'none';
+      });
+    }
+
+    /* ----------------------------------------------------
+       TOOL 1: TRANSLATOR LOGIC
+    ---------------------------------------------------- */
+    async function runTranslation() {
+      const text = document.getElementById('transInput').value.trim();
+      const output = document.getElementById('transOutput');
+      const btn = document.getElementById('transBtn');
+
+      if (!text) {
+        output.innerText = '請先輸入需要翻譯的英文內容。';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = '翻譯中...';
+      output.innerText = '正在翻譯中，請稍候...';
+
+      try {
+        // Free Translation API Endpoint
+        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh-TW`);
+        const data = await res.json();
+        
+        if (data.responseData && data.responseData.translatedText) {
+          output.innerText = data.responseData.translatedText;
+        } else {
+          output.innerText = '翻譯失敗，請稍後再試。';
+        }
+      } catch (err) {
+        output.innerText = '網路連線失敗或 API 暫時無法回應。';
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '開始翻譯';
+      }
+    }
+
+    function clearTranslator() {
+      document.getElementById('transInput').value = '';
+      document.getElementById('transOutput').innerText = '譯文將顯示於此...';
+    }
+
+    function copyTranslation() {
+      const outputText = document.getElementById('transOutput').innerText;
+      if (outputText && outputText !== '譯文將顯示於此...') {
+        navigator.clipboard.writeText(outputText);
+        alert('已成功複製譯文！');
+      }
+    }
+
+    /* ----------------------------------------------------
+       TOOL 2: POMODORO TIMER LOGIC
+    ---------------------------------------------------- */
+    let pomoInterval = null;
+    let pomoTimeLeft = 25 * 60;
+    let pomoIsRunning = false;
+    let pomoMode = 'work'; // 'work' or 'break'
+
+    function updatePomoDisplay() {
+      const mins = Math.floor(pomoTimeLeft / 60).toString().padStart(2, '0');
+      const secs = (pomoTimeLeft % 60).toString().padStart(2, '0');
+      document.getElementById('pomoTimer').innerText = `${mins}:${secs}`;
+    }
+
+    function togglePomodoro() {
+      if (pomoIsRunning) {
+        // Pause
+        clearInterval(pomoInterval);
+        pomoIsRunning = false;
+        document.getElementById('pomoBtnText').innerText = '繼續';
+        document.getElementById('pomoPlayIcon').setAttribute('data-lucide', 'play');
+      } else {
+        // Start
+        pomoIsRunning = true;
+        document.getElementById('pomoBtnText').innerText = '暫停';
+        document.getElementById('pomoPlayIcon').setAttribute('data-lucide', 'pause');
+        
+        pomoInterval = setInterval(() => {
+          if (pomoTimeLeft > 0) {
+            pomoTimeLeft--;
+            updatePomoDisplay();
+          } else {
+            clearInterval(pomoInterval);
+            playBeepSound();
+            alert(pomoMode === 'work' ? '專注時間結束！休息 5 分鐘吧！' : '休息時間結束！準備開始專注！');
+            switchPomoMode();
+          }
+        }, 1000);
+      }
+      lucide.createIcons();
+    }
+
+    function resetPomodoro() {
+      clearInterval(pomoInterval);
+      pomoIsRunning = false;
+      pomoTimeLeft = (pomoMode === 'work') ? 25 * 60 : 5 * 60;
+      document.getElementById('pomoBtnText').innerText = '開始專注';
+      document.getElementById('pomoPlayIcon').setAttribute('data-lucide', 'play');
+      updatePomoDisplay();
+      lucide.createIcons();
+    }
+
+    function switchPomoMode() {
+      pomoMode = pomoMode === 'work' ? 'break' : 'work';
+      const badge = document.getElementById('pomoStatusBadge');
+      if (pomoMode === 'break') {
+        badge.innerText = '休息模式 (5m)';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-earth-sage/10 text-earth-sage border border-earth-sage/20';
+        pomoTimeLeft = 5 * 60;
+      } else {
+        badge.innerText = '專注模式 (25m)';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-earth-50 text-earth-500 border border-earth-100';
+        pomoTimeLeft = 25 * 60;
+      }
+      resetPomodoro();
+    }
+
+    // Audio Notification using Web Audio API
+    function playBeepSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 tone
+        osc.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.5);
+      } catch(e){}
+    }
+
+    /* ----------------------------------------------------
+       TOOL 3: QR CODE GENERATOR LOGIC
+    ---------------------------------------------------- */
+    let qrcodeObj = null;
+
+    function generateQRCode() {
+      const input = document.getElementById('qrInput').value.trim();
+      const qrcodeBox = document.getElementById('qrcodeBox');
+      const placeholder = document.getElementById('qrPlaceholder');
+      const downloadBtn = document.getElementById('downloadQrBtn');
+
+      qrcodeBox.innerHTML = '';
+
+      if (!input) {
+        placeholder.style.display = 'block';
+        downloadBtn.disabled = true;
+        return;
+      }
+
+      placeholder.style.display = 'none';
+      downloadBtn.disabled = false;
+
+      qrcodeObj = new QRCode(qrcodeBox, {
+        text: input,
+        width: 160,
+        height: 160,
+        colorDark : "#2D2825",
+        colorLight : "#FFFFFF",
+        correctLevel : QRCode.CorrectLevel.H
+      });
+    }
+
+    function downloadQRCode() {
+      const img = document.querySelector('#qrcodeBox img');
+      const canvas = document.querySelector('#qrcodeBox canvas');
+      
+      let imageSrc = '';
+      if (img && img.src) {
+        imageSrc = img.src;
+      } else if (canvas) {
+        imageSrc = canvas.toDataURL("image/png");
+      }
+
+      if (imageSrc) {
+        const a = document.createElement('a');
+        a.href = imageSrc;
+        a.download = 'qrcode.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    }
+
+    /* ----------------------------------------------------
+       PWA SERVICE WORKER & INSTALL PROMPT
+    ---------------------------------------------------- */
+    let deferredPrompt;
+    const pwaBtn = document.getElementById('pwaInstallBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      pwaBtn.classList.remove('hidden');
+      pwaBtn.classList.add('flex');
+    });
+
+    pwaBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          pwaBtn.classList.add('hidden');
+        }
+        deferredPrompt = null;
+      }
+    });
+
+    // Dynamic Manifest & Service Worker Blob Creation
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swCode = `
+          self.addEventListener('install', (e) => self.skipWaiting());
+          self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+      });
+    }
+
+    // Dynamic Web App Manifest
+    const manifestData = {
+      name: "Minimal Hub",
+      short_name: "MinimalHub",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#F7F5F0",
+      theme_color: "#8C6D53",
+      icons: [{
+        src: "https://cdn-icons-png.flaticon.com/512/1006/1006771.png",
+        sizes: "512x512",
+        type: "image/png"
+      }]
+    };
+    const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    manifestLink.href = URL.createObjectURL(manifestBlob);
+    document.head.appendChild(manifestLink);
+  </script>
+</body>
+</html>
