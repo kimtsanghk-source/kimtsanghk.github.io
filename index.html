@@ -5,14 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CYBER_FLEET // Operational Command & Dashboard</title>
   <meta name="theme-color" content="#181820">
-  <meta name="description" content="Modern Dark Mode Fleet Operations & Utility Dashboard">
+  <meta name="description" content="Fleet Operations Dashboard">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js Library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- QRCode.js Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- SheetJS (XLSX Parser) -->
@@ -22,34 +20,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            dash: {
-              main: '#181820',
-              card: '#242430',
-              border: '#333342',
-              hover: '#2a2a38',
-              text: '#ffffff',
-              muted: '#8e8e9e',
-              green: '#2cd997',
-              blue: '#38a5ff',
-              yellow: '#ffb020',
-              purple: '#7c5cfc',
-              red: '#ff5252'
-            }
-          },
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace']
-          }
-        }
-      }
-    }
-  </script>
   <style>
     body {
       background-color: #181820;
@@ -87,15 +57,43 @@
     ::-webkit-scrollbar-thumb { background: #333342; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #38a5ff; }
   </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            dash: {
+              main: '#181820',
+              card: '#242430',
+              border: '#333342',
+              hover: '#2a2a38',
+              text: '#ffffff',
+              muted: '#8e8e9e',
+              green: '#2cd997',
+              blue: '#38a5ff',
+              yellow: '#ffb020',
+              purple: '#7c5cfc',
+              red: '#ff5252'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
 </head>
 <body class="min-h-screen flex flex-col relative overflow-x-hidden">
 
-  <!-- Header / Dashboard Navigation -->
+  <!-- Header / Navigation -->
   <header class="bg-dash-main/90 border-b border-dash-border sticky top-0 z-40 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('home')">
+      <div class="flex items-center space-x-3">
         <div class="w-10 h-10 rounded-xl bg-dash-blue/10 border border-dash-blue/30 text-dash-blue flex items-center justify-center font-bold shadow-sm">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          <i data-lucide="truck" class="w-5 h-5"></i>
         </div>
         <div>
           <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
@@ -125,134 +123,15 @@
   <!-- Main Container -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 z-10">
 
-    <!-- HOME VIEW -->
-    <section id="view-home" class="space-y-6">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 dash-card p-6">
-        <div>
-          <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-dash-green bg-dash-green/10 border border-dash-green/20 px-2.5 py-1 rounded-full mb-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-dash-green"></span>
-            OPERATIONAL MODULES
-          </div>
-          <h2 class="text-2xl font-bold text-white tracking-tight">系統工具面板</h2>
-          <p class="text-xs text-dash-muted mt-1">請選擇要存取的車隊營運數據或日常生產力模組</p>
-        </div>
-        <div class="relative max-w-xs w-full">
-          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-dash-muted"></i>
-          <input type="text" id="toolSearch" oninput="filterTools()" placeholder="搜尋模組 [SEARCH]..." class="w-full pl-10 pr-4 py-2.5 bg-dash-main border border-dash-border rounded-xl text-xs text-white placeholder-dash-muted focus:outline-none focus:border-dash-blue focus:ring-1 focus:ring-dash-blue transition-all">
-        </div>
-      </div>
-
-      <!-- Tool Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5" id="toolsGrid">
-        
-        <!-- CARD 1: FLEET KPI DASHBOARD -->
-        <div onclick="switchView('fleet')" class="tool-card group dash-card p-6 cursor-pointer hover:border-dash-blue/60 transition-all duration-300 flex flex-col justify-between hover:shadow-xl">
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <div class="w-12 h-12 rounded-xl bg-dash-blue/10 border border-dash-blue/20 text-dash-blue flex items-center justify-center group-hover:bg-dash-blue group-hover:text-white transition-all">
-                <i data-lucide="truck" class="w-6 h-6"></i>
-              </div>
-              <span class="text-[11px] font-semibold bg-dash-blue/10 text-dash-blue border border-dash-blue/30 px-2.5 py-0.5 rounded-full">
-                CORE MATRIX
-              </span>
-            </div>
-            <h3 class="text-base font-bold text-white group-hover:text-dash-blue transition-colors">
-              車隊 KPI 營運儀表板
-            </h3>
-            <p class="text-xs text-dash-muted mt-2 leading-relaxed">
-              即時監控車隊配送效率、CBM 承載極限、西藥與腎水物料運輸比例及數據預測。
-            </p>
-          </div>
-          <div class="mt-6 pt-4 border-t border-dash-border flex items-center justify-between text-xs font-semibold text-dash-blue">
-            <span>ACCESS SYSTEM</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-          </div>
-        </div>
-
-        <!-- CARD 2: TRANSLATOR -->
-        <div onclick="switchView('translator')" class="tool-card group dash-card p-6 cursor-pointer hover:border-dash-yellow/60 transition-all duration-300 flex flex-col justify-between hover:shadow-xl">
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <div class="w-12 h-12 rounded-xl bg-dash-yellow/10 border border-dash-yellow/20 text-dash-yellow flex items-center justify-center group-hover:bg-dash-yellow group-hover:text-dash-main transition-all">
-                <i data-lucide="languages" class="w-6 h-6"></i>
-              </div>
-              <span class="text-[11px] font-semibold bg-dash-yellow/10 text-dash-yellow border border-dash-yellow/30 px-2.5 py-0.5 rounded-full">
-                TEXT NODE
-              </span>
-            </div>
-            <h3 class="text-base font-bold text-white group-hover:text-dash-yellow transition-colors">
-              英文轉繁中翻譯
-            </h3>
-            <p class="text-xs text-dash-muted mt-2 leading-relaxed">
-              神經網絡智能長文翻譯模組，即時解析英漢語意與長句轉換。
-            </p>
-          </div>
-          <div class="mt-6 pt-4 border-t border-dash-border flex items-center justify-between text-xs font-semibold text-dash-yellow">
-            <span>ACCESS SYSTEM</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-          </div>
-        </div>
-
-        <!-- CARD 3: POMODORO -->
-        <div onclick="switchView('pomodoro')" class="tool-card group dash-card p-6 cursor-pointer hover:border-dash-purple/60 transition-all duration-300 flex flex-col justify-between hover:shadow-xl">
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <div class="w-12 h-12 rounded-xl bg-dash-purple/10 border border-dash-purple/20 text-dash-purple flex items-center justify-center group-hover:bg-dash-purple group-hover:text-white transition-all">
-                <i data-lucide="timer" class="w-6 h-6"></i>
-              </div>
-              <span class="text-[11px] font-semibold bg-dash-purple/10 text-dash-purple border border-dash-purple/30 px-2.5 py-0.5 rounded-full">
-                CHRONO
-              </span>
-            </div>
-            <h3 class="text-base font-bold text-white group-hover:text-dash-purple transition-colors">
-              賽博番茄鐘
-            </h3>
-            <p class="text-xs text-dash-muted mt-2 leading-relaxed">
-              25M 專注脈衝與 5M 間歇休息超載倒數控制器，極致提升人機運作效率。
-            </p>
-          </div>
-          <div class="mt-6 pt-4 border-t border-dash-border flex items-center justify-between text-xs font-semibold text-dash-purple">
-            <span>ACCESS SYSTEM</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-          </div>
-        </div>
-
-        <!-- CARD 4: QR CODE GENERATOR -->
-        <div onclick="switchView('qrcode')" class="tool-card group dash-card p-6 cursor-pointer hover:border-dash-green/60 transition-all duration-300 flex flex-col justify-between hover:shadow-xl">
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <div class="w-12 h-12 rounded-xl bg-dash-green/10 border border-dash-green/20 text-dash-green flex items-center justify-center group-hover:bg-dash-green group-hover:text-dash-main transition-all">
-                <i data-lucide="qr-code" class="w-6 h-6"></i>
-              </div>
-              <span class="text-[11px] font-semibold bg-dash-green/10 text-dash-green border border-dash-green/30 px-2.5 py-0.5 rounded-full">
-                ENCODER
-              </span>
-            </div>
-            <h3 class="text-base font-bold text-white group-hover:text-dash-green transition-colors">
-              QR Code 矩陣生成器
-            </h3>
-            <p class="text-xs text-dash-muted mt-2 leading-relaxed">
-              即時將網址或數據編碼轉換為高密度二維碼，支援高解析度圖檔導出。
-            </p>
-          </div>
-          <div class="mt-6 pt-4 border-t border-dash-border flex items-center justify-between text-xs font-semibold text-dash-green">
-            <span>ACCESS SYSTEM</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- TOOL VIEW 1: FLEET KPI DASHBOARD -->
-    <section id="view-fleet" class="hidden space-y-6">
+    <!-- FLEET KPI DASHBOARD SECTION -->
+    <section id="view-fleet" class="space-y-6">
       
-      <!-- Back Action & Upload Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-semibold text-dash-blue hover:text-white transition-colors">
-          <i data-lucide="chevron-left" class="w-4 h-4"></i>
-          <span>RETURN TO DASHBOARD</span>
-        </button>
+      <!-- Excel Upload Action Bar -->
+      <div class="flex items-center justify-between gap-4">
+        <div class="text-xs font-mono text-dash-muted flex items-center gap-2">
+          <i data-lucide="database" class="w-4 h-4 text-dash-blue"></i>
+          <span>DATA MATRIX ENGINE</span>
+        </div>
 
         <div class="flex items-center space-x-3">
           <!-- Excel Upload Button -->
@@ -279,7 +158,7 @@
               <span id="lastUpdateTag" class="text-xs font-mono text-dash-muted">LAST_UPDATE: --</span>
             </div>
             <h2 class="text-2xl font-bold text-white tracking-tight">
-              FLEET KPI <span class="text-dash-blue">OPERATIONS</span>
+              Transportation KPI <span class="text-dash-blue">Dashboard</span>
             </h2>
           </div>
           <div class="flex items-center space-x-3 text-xs font-mono">
@@ -390,7 +269,7 @@
             <div>
               <h3 class="font-bold text-white text-base flex items-center gap-2">
                 <i data-lucide="pie-chart" class="w-4 h-4 text-dash-yellow"></i>
-                物料結構拆分 (<span id="pieMonthLabel">最新</span>)
+                結構拆分表 (<span id="pieMonthLabel">最新</span>)
               </h3>
               <p class="text-xs text-dash-muted mt-1">西藥與腎水物料之訂單總數比例</p>
             </div>
@@ -477,107 +356,6 @@
 
     </section>
 
-    <!-- TOOL VIEW 2: TRANSLATOR -->
-    <section id="view-translator" class="hidden space-y-4">
-      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-semibold text-dash-yellow hover:text-white transition-colors">
-        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        <span>RETURN TO DASHBOARD</span>
-      </button>
-
-      <div class="dash-card p-6 max-w-4xl mx-auto space-y-5">
-        <div class="border-b border-dash-border pb-4">
-          <h2 class="text-lg font-bold text-white flex items-center gap-2">
-            <i data-lucide="languages" class="w-5 h-5 text-dash-yellow"></i>
-            英文轉繁體中文神經翻譯模組
-          </h2>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <label class="text-xs font-mono text-dash-muted">// ENGLISH INPUT MATRIX</label>
-            <textarea id="transInput" rows="8" placeholder="Enter English raw text..." class="w-full p-3 bg-dash-main border border-dash-border rounded-xl text-xs font-mono text-white focus:outline-none focus:border-dash-yellow resize-none"></textarea>
-          </div>
-          <div class="space-y-2">
-            <label class="text-xs font-mono text-dash-muted">// TRADITIONAL CHINESE OUTPUT</label>
-            <div id="transOutput" class="w-full h-48 md:h-auto p-3 bg-dash-main border border-dash-border rounded-xl text-xs font-mono text-dash-green overflow-y-auto whitespace-pre-wrap">譯文輸出區域...</div>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between pt-2">
-          <button onclick="clearTranslator()" class="text-xs font-semibold text-dash-muted hover:text-white transition-colors">CLEAR ALL</button>
-          <div class="space-x-2">
-            <button onclick="copyTranslation()" class="px-4 py-2 border border-dash-border bg-dash-main text-white text-xs font-semibold rounded-xl hover:border-dash-blue transition-all">COPY RESULT</button>
-            <button id="transBtn" onclick="runTranslation()" class="px-5 py-2 bg-dash-yellow text-dash-main text-xs font-bold rounded-xl dash-btn hover:bg-dash-yellow/90">TRANSLATE</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TOOL VIEW 3: POMODORO -->
-    <section id="view-pomodoro" class="hidden space-y-4">
-      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-semibold text-dash-purple hover:text-white transition-colors">
-        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        <span>RETURN TO DASHBOARD</span>
-      </button>
-
-      <div class="dash-card p-8 max-w-md mx-auto text-center space-y-6">
-        <div>
-          <span id="pomoStatusBadge" class="px-3 py-1 text-xs font-semibold bg-dash-purple/10 text-dash-purple border border-dash-purple/30 rounded-full">
-            FOCUS PULSE (25M)
-          </span>
-          <h2 class="text-2xl font-bold text-white mt-3">CHRONO_PULSE</h2>
-        </div>
-
-        <div class="py-6">
-          <div id="pomoTimer" class="text-6xl font-bold font-mono text-dash-blue tracking-wider">25:00</div>
-        </div>
-
-        <div class="flex items-center justify-center space-x-3">
-          <button id="pomoResetBtn" onclick="resetPomodoro()" class="p-3 border border-dash-border bg-dash-main text-white rounded-xl hover:border-dash-blue transition-all">
-            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
-          </button>
-          <button id="pomoStartBtn" onclick="togglePomodoro()" class="px-8 py-3 bg-dash-purple text-white font-bold text-xs rounded-xl dash-btn hover:bg-dash-purple/90 transition-all flex items-center space-x-2">
-            <i id="pomoPlayIcon" data-lucide="play" class="w-5 h-5"></i>
-            <span id="pomoBtnText">START PULSE</span>
-          </button>
-          <button onclick="switchPomoMode()" class="p-3 border border-dash-border bg-dash-main text-white rounded-xl hover:border-dash-purple transition-all" title="SWITCH MODE">
-            <i data-lucide="coffee" class="w-5 h-5"></i>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- TOOL VIEW 4: QR CODE GENERATOR -->
-    <section id="view-qrcode" class="hidden space-y-4">
-      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-semibold text-dash-green hover:text-white transition-colors">
-        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        <span>RETURN TO DASHBOARD</span>
-      </button>
-
-      <div class="dash-card p-6 max-w-xl mx-auto space-y-6">
-        <div class="border-b border-dash-border pb-4">
-          <h2 class="text-lg font-bold text-white flex items-center gap-2">
-            <i data-lucide="qr-code" class="w-5 h-5 text-dash-green"></i>
-            二維碼數據矩陣編碼器
-          </h2>
-        </div>
-
-        <div class="space-y-2">
-          <label class="text-xs font-mono text-dash-muted">// INPUT STRING OR URL</label>
-          <input type="text" id="qrInput" oninput="generateQRCode()" placeholder="https://domain.com or string content..." class="w-full px-4 py-2.5 bg-dash-main border border-dash-border rounded-xl font-mono text-xs text-white focus:outline-none focus:border-dash-green">
-        </div>
-
-        <div class="flex flex-col items-center justify-center p-6 bg-dash-main border border-dashed border-dash-border rounded-xl min-h-[220px]">
-          <div id="qrcodeBox" class="p-3 bg-white rounded-lg"></div>
-          <p id="qrPlaceholder" class="text-xs font-mono text-dash-muted mt-2">// WAITING FOR DATA INPUT...</p>
-        </div>
-
-        <button id="downloadQrBtn" onclick="downloadQRCode()" disabled class="w-full py-2.5 bg-dash-green disabled:opacity-30 text-dash-main font-bold text-xs rounded-xl dash-btn hover:bg-dash-green/90 transition-all">
-          DOWNLOAD MATRIX IMAGE (PNG)
-        </button>
-      </div>
-    </section>
-
   </main>
 
   <footer class="mt-auto border-t border-dash-border bg-dash-main/80 py-4 text-center text-xs font-mono text-dash-muted z-10">
@@ -617,6 +395,7 @@
       } else {
         fleetData = [...defaultFleetData];
       }
+      initFleetCharts();
     }
 
     // 重置數據為預設值
@@ -694,7 +473,7 @@
       document.getElementById('kpiEfficiency').innerText = latest.effOrders;
       document.getElementById('kpiCbm').innerText = latest.cbm;
       document.getElementById('kpiHours').innerText = latest.hours.toLocaleString();
-      document.getElementById('pieMonthLabel').innerText = `${latest.month}月`;
+      document.getElementById('pieMonthLabel').innerText = `${latest.month}`;
 
       if (prev && prev.totalOrders > 0) {
         const diffPercent = (((latest.totalOrders - prev.totalOrders) / prev.totalOrders) * 100).toFixed(1);
@@ -839,7 +618,7 @@
         }
       });
 
-      // 2. Doughnut Chart (自動抓取最新一筆數據)
+      // 2. Doughnut Chart
       const latest = fleetData[fleetData.length - 1];
       const ctxCat = document.getElementById('fleetCategoryChart').getContext('2d');
       if (categoryChartInstance) categoryChartInstance.destroy();
@@ -893,202 +672,6 @@
       document.getElementById('resOrdersHr').innerText = effOrders;
       document.getElementById('resPalletsHr').innerText = effPallets;
       document.getElementById('calcResult').classList.remove('hidden');
-    }
-
-    function switchView(viewName) {
-      const views = ['home', 'fleet', 'translator', 'pomodoro', 'qrcode'];
-      views.forEach(v => {
-        const el = document.getElementById(`view-${v}`);
-        if (v === viewName) {
-          el.classList.remove('hidden');
-        } else {
-          el.classList.add('hidden');
-        }
-      });
-
-      if (viewName === 'fleet') {
-        setTimeout(initFleetCharts, 150);
-      } else {
-        if (trendAutoTimer) clearInterval(trendAutoTimer);
-        if (categoryAutoTimer) clearInterval(categoryAutoTimer);
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function filterTools() {
-      const query = document.getElementById('toolSearch').value.toLowerCase();
-      const cards = document.querySelectorAll('.tool-card');
-      cards.forEach(card => {
-        const text = card.innerText.toLowerCase();
-        card.style.display = text.includes(query) ? 'flex' : 'none';
-      });
-    }
-
-    async function runTranslation() {
-      const text = document.getElementById('transInput').value.trim();
-      const output = document.getElementById('transOutput');
-      const btn = document.getElementById('transBtn');
-
-      if (!text) {
-        output.innerText = '// PLEASE ENTER ENGLISH TEXT CONTENT...';
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerText = 'TRANSLATING...';
-      output.innerText = '// PROCESSING NEURAL TRANSLATION...';
-
-      try {
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh-TW`);
-        const data = await res.json();
-        if (data.responseData && data.responseData.translatedText) {
-          output.innerText = data.responseData.translatedText;
-        } else {
-          output.innerText = '[ERROR] TRANSLATION FAILED.';
-        }
-      } catch (err) {
-        output.innerText = '[ERROR] NETWORK CONNECTION FAILED.';
-      } finally {
-        btn.disabled = false;
-        btn.innerText = 'TRANSLATE';
-      }
-    }
-
-    function clearTranslator() {
-      document.getElementById('transInput').value = '';
-      document.getElementById('transOutput').innerText = '譯文輸出區域...';
-    }
-
-    function copyTranslation() {
-      const outputText = document.getElementById('transOutput').innerText;
-      if (outputText && outputText !== '譯文輸出區域...') {
-        navigator.clipboard.writeText(outputText);
-        alert('[SUCCESS] RESULT COPIED TO CLIPBOARD');
-      }
-    }
-
-    let pomoInterval = null;
-    let pomoTimeLeft = 25 * 60;
-    let pomoIsRunning = false;
-    let pomoMode = 'work';
-
-    function updatePomoDisplay() {
-      const mins = Math.floor(pomoTimeLeft / 60).toString().padStart(2, '0');
-      const secs = (pomoTimeLeft % 60).toString().padStart(2, '0');
-      document.getElementById('pomoTimer').innerText = `${mins}:${secs}`;
-    }
-
-    function togglePomodoro() {
-      if (pomoIsRunning) {
-        clearInterval(pomoInterval);
-        pomoIsRunning = false;
-        document.getElementById('pomoBtnText').innerText = 'RESUME PULSE';
-        document.getElementById('pomoPlayIcon').setAttribute('data-lucide', 'play');
-      } else {
-        pomoIsRunning = true;
-        document.getElementById('pomoBtnText').innerText = 'PAUSE PULSE';
-        document.getElementById('pomoPlayIcon').setAttribute('data-lucide', 'pause');
-        
-        pomoInterval = setInterval(() => {
-          if (pomoTimeLeft > 0) {
-            pomoTimeLeft--;
-            updatePomoDisplay();
-          } else {
-            clearInterval(pomoInterval);
-            playBeepSound();
-            alert(pomoMode === 'work' ? '[PULSE COMPLETE] Take a 5-minute break!' : '[REST COMPLETE] Ready for focus pulse!');
-            switchPomoMode();
-          }
-        }, 1000);
-      }
-      lucide.createIcons();
-    }
-
-    function resetPomodoro() {
-      clearInterval(pomoInterval);
-      pomoIsRunning = false;
-      pomoTimeLeft = (pomoMode === 'work') ? 25 * 60 : 5 * 60;
-      document.getElementById('pomoBtnText').innerText = 'START PULSE';
-      document.getElementById('pomoPlayIcon').setAttribute('data-lucide', 'play');
-      updatePomoDisplay();
-      lucide.createIcons();
-    }
-
-    function switchPomoMode() {
-      pomoMode = pomoMode === 'work' ? 'break' : 'work';
-      const badge = document.getElementById('pomoStatusBadge');
-      if (pomoMode === 'break') {
-        badge.innerText = 'REST PULSE (5M)';
-        badge.className = 'px-3 py-1 text-xs font-semibold bg-dash-green/10 text-dash-green border border-dash-green/30 rounded-full';
-        pomoTimeLeft = 5 * 60;
-      } else {
-        badge.innerText = 'FOCUS PULSE (25M)';
-        badge.className = 'px-3 py-1 text-xs font-semibold bg-dash-purple/10 text-dash-purple border border-dash-purple/30 rounded-full';
-        pomoTimeLeft = 25 * 60;
-      }
-      resetPomodoro();
-    }
-
-    function playBeepSound() {
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        osc.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.3);
-      } catch(e){}
-    }
-
-    let qrcodeObj = null;
-
-    function generateQRCode() {
-      const input = document.getElementById('qrInput').value.trim();
-      const qrcodeBox = document.getElementById('qrcodeBox');
-      const placeholder = document.getElementById('qrPlaceholder');
-      const downloadBtn = document.getElementById('downloadQrBtn');
-
-      qrcodeBox.innerHTML = '';
-
-      if (!input) {
-        placeholder.style.display = 'block';
-        downloadBtn.disabled = true;
-        return;
-      }
-
-      placeholder.style.display = 'none';
-      downloadBtn.disabled = false;
-
-      qrcodeObj = new QRCode(qrcodeBox, {
-        text: input,
-        width: 160,
-        height: 160,
-        colorDark : "#181820",
-        colorLight : "#FFFFFF",
-        correctLevel : QRCode.CorrectLevel.H
-      });
-    }
-
-    function downloadQRCode() {
-      const img = document.querySelector('#qrcodeBox img');
-      const canvas = document.querySelector('#qrcodeBox canvas');
-      
-      let imageSrc = '';
-      if (img && img.src) {
-        imageSrc = img.src;
-      } else if (canvas) {
-        imageSrc = canvas.toDataURL("image/png");
-      }
-
-      if (imageSrc) {
-        const a = document.createElement('a');
-        a.href = imageSrc;
-        a.download = 'qrcode_matrix.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
     }
 
     // 頁面初始化
