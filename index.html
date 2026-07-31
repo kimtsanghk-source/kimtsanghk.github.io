@@ -15,6 +15,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- SheetJS (XLSX Parser) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,7 +51,6 @@
     }
   </script>
   <style>
-    /* Global Dashboard Base Styling */
     body {
       background-color: #181820;
       color: #ffffff;
@@ -60,7 +61,6 @@
       background-attachment: fixed;
     }
 
-    /* Rounded Glass Cards */
     .dash-card {
       background-color: #242430;
       border: 1px solid #333342;
@@ -73,12 +73,6 @@
       border-color: #424254;
     }
 
-    /* Soft Glow Text & Badges */
-    .glow-green { text-shadow: 0 0 12px rgba(44, 217, 151, 0.4); }
-    .glow-blue { text-shadow: 0 0 12px rgba(56, 165, 255, 0.4); }
-    .glow-yellow { text-shadow: 0 0 12px rgba(255, 176, 32, 0.4); }
-
-    /* Interactive Smooth Buttons */
     .dash-btn {
       border-radius: 0.75rem;
       transition: all 0.2s ease-in-out;
@@ -88,7 +82,6 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
     }
 
-    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #181820; }
     ::-webkit-scrollbar-thumb { background: #333342; border-radius: 9999px; }
@@ -114,7 +107,6 @@
         </div>
       </div>
 
-      <!-- Action & Live Time Indicator -->
       <div class="flex items-center space-x-4">
         <div class="hidden sm:flex items-center space-x-2 text-xs font-mono text-dash-muted border border-dash-border px-3.5 py-1.5 rounded-full bg-dash-card">
           <span class="w-2 h-2 rounded-full bg-dash-green animate-pulse"></span>
@@ -133,10 +125,8 @@
   <!-- Main Container -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 z-10">
 
-    <!-- HOME VIEW: Main Grid Matrix -->
+    <!-- HOME VIEW -->
     <section id="view-home" class="space-y-6">
-      
-      <!-- Top Banner / Filter -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 dash-card p-6">
         <div>
           <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-dash-green bg-dash-green/10 border border-dash-green/20 px-2.5 py-1 rounded-full mb-2">
@@ -257,16 +247,24 @@
     <!-- TOOL VIEW 1: FLEET KPI DASHBOARD -->
     <section id="view-fleet" class="hidden space-y-6">
       
-      <!-- Back Action Header -->
-      <div class="flex items-center justify-between">
+      <!-- Back Action & Upload Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-semibold text-dash-blue hover:text-white transition-colors">
           <i data-lucide="chevron-left" class="w-4 h-4"></i>
           <span>RETURN TO DASHBOARD</span>
         </button>
 
-        <div class="text-xs font-mono text-dash-muted flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-dash-green animate-pulse"></span>
-          AUTO-CYCLE: <span class="text-dash-green font-bold">ACTIVE (2s)</span>
+        <div class="flex items-center space-x-3">
+          <!-- Excel Upload Button -->
+          <label class="cursor-pointer bg-dash-green hover:bg-dash-green/90 text-dash-main text-xs font-bold px-4 py-2 rounded-xl dash-btn transition-all flex items-center space-x-1.5 shadow-lg">
+            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+            <span>上傳最新 update.xlsx</span>
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="handleFileUpload(event)">
+          </label>
+          
+          <button onclick="resetDefaultData()" class="text-xs font-mono text-dash-muted hover:text-dash-red transition-colors" title="重置為預設數據">
+            [RESET]
+          </button>
         </div>
       </div>
 
@@ -278,7 +276,7 @@
               <span class="px-2.5 py-0.5 text-[10px] font-bold bg-dash-blue/20 text-dash-blue rounded-md uppercase tracking-wider">
                 FLEET COMMAND
               </span>
-              <span class="text-xs font-mono text-dash-muted">LAST_UPDATE: 2025.OCT</span>
+              <span id="lastUpdateTag" class="text-xs font-mono text-dash-muted">LAST_UPDATE: --</span>
             </div>
             <h2 class="text-2xl font-bold text-white tracking-tight">
               FLEET KPI <span class="text-dash-blue">OPERATIONS</span>
@@ -287,11 +285,11 @@
           <div class="flex items-center space-x-3 text-xs font-mono">
             <div class="bg-dash-main/80 border border-dash-border p-2.5 rounded-xl text-center min-w-[120px]">
               <div class="text-dash-muted text-[10px]">TOTAL FLEET HOURS</div>
-              <div class="text-dash-yellow font-bold text-sm mt-0.5">9,861 HRS</div>
+              <div id="hdrTotalHours" class="text-dash-yellow font-bold text-sm mt-0.5">-- HRS</div>
             </div>
             <div class="bg-dash-main/80 border border-dash-border p-2.5 rounded-xl text-center min-w-[120px]">
               <div class="text-dash-muted text-[10px]">RECORD EFFICIENCY</div>
-              <div class="text-dash-green font-bold text-sm mt-0.5">4.5 ORDERS/HR</div>
+              <div id="hdrRecordEff" class="text-dash-green font-bold text-sm mt-0.5">-- ORDERS/HR</div>
             </div>
           </div>
         </div>
@@ -309,11 +307,11 @@
             </div>
           </div>
           <div class="text-3xl font-bold text-white tracking-tight">
-            44,412 <span class="text-xs font-normal text-dash-muted">單</span>
+            <span id="kpiTotalOrders">--</span> <span class="text-xs font-normal text-dash-muted">單</span>
           </div>
-          <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
+          <div id="kpiOrdersDiff" class="text-xs text-dash-yellow flex items-center gap-1 font-semibold">
             <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-            <span>+2.6% vs AUG (OCT DATA)</span>
+            <span>LATEST MONTH</span>
           </div>
         </div>
 
@@ -326,11 +324,11 @@
             </div>
           </div>
           <div class="text-3xl font-bold text-dash-yellow tracking-tight">
-            4.5 <span class="text-xs font-normal text-dash-muted">單/小時</span>
+            <span id="kpiEfficiency">--</span> <span class="text-xs font-normal text-dash-muted">單/小時</span>
           </div>
           <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
-            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-            <span>PEAK EFFICIENCY (JUL: 4.1)</span>
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>REAL-TIME METRIC</span>
           </div>
         </div>
 
@@ -343,11 +341,11 @@
             </div>
           </div>
           <div class="text-3xl font-bold text-dash-green tracking-tight">
-            7.9 <span class="text-xs font-normal text-dash-muted">CBM</span>
+            <span id="kpiCbm">--</span> <span class="text-xs font-normal text-dash-muted">CBM</span>
           </div>
           <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
             <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            <span>HISTORIC HIGH CAPACITY</span>
+            <span>CAPACITY UTILIZATION</span>
           </div>
         </div>
 
@@ -360,11 +358,11 @@
             </div>
           </div>
           <div class="text-3xl font-bold text-white tracking-tight">
-            9,861 <span class="text-xs font-normal text-dash-muted">小時</span>
+            <span id="kpiHours">--</span> <span class="text-xs font-normal text-dash-muted">小時</span>
           </div>
           <div class="text-xs text-dash-blue flex items-center gap-1 font-semibold">
             <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-            <span>OPTIMIZED WORKFLOW</span>
+            <span>WORKFLOW EFFICIENCY</span>
           </div>
         </div>
       </div>
@@ -392,7 +390,7 @@
             <div>
               <h3 class="font-bold text-white text-base flex items-center gap-2">
                 <i data-lucide="pie-chart" class="w-4 h-4 text-dash-yellow"></i>
-                物料結構拆分 (10月)
+                物料結構拆分 (<span id="pieMonthLabel">最新</span>)
               </h3>
               <p class="text-xs text-dash-muted mt-1">西藥與腎水物料之訂單總數比例</p>
             </div>
@@ -582,16 +580,13 @@
 
   </main>
 
-  <!-- Cyber Footer -->
   <footer class="mt-auto border-t border-dash-border bg-dash-main/80 py-4 text-center text-xs font-mono text-dash-muted z-10">
     <p>© 2026 FLEET MATRIX · DARK MODE DASHBOARD</p>
   </footer>
 
   <script>
-    // Initialize Icons
     lucide.createIcons();
 
-    // Live Clock Logic
     function updateClock() {
       const now = new Date();
       document.getElementById('liveClock').innerText = now.toTimeString().split(' ')[0];
@@ -599,15 +594,124 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Fleet Excel Dataset
-    const fleetData = [
+    // 預設基礎數據
+    const defaultFleetData = [
       { year: 2025, month: 'JUL', hours: 10914, effOrders: 4.1, effPallets: 0.26, cbm: 7.0, totalOrders: 44252, totalPallets: 2810, wMedOrders: 42482, wMedPallets: 2268, renalOrders: 1770, renalPallets: 543 },
       { year: 2025, month: 'AUG', hours: 10074, effOrders: 4.2, effPallets: 0.30, cbm: 7.6, totalOrders: 42677, totalPallets: 3056, wMedOrders: 40987, wMedPallets: 2492, renalOrders: 1690, renalPallets: 564 },
       { year: 2025, month: 'SEP', hours: 9848,  effOrders: 4.4, effPallets: 0.31, cbm: 7.7, totalOrders: 43287, totalPallets: 3017, wMedOrders: 41393, wMedPallets: 2410, renalOrders: 1894, renalPallets: 607 },
-      { year: 2025, month: 'OCT', hours: 9861,  effOrders: 4.5, effPallets: 0.31, cbm: 7.9, totalOrders: 44412, totalPallets: 3022, wMedOrders: 42660, wMedPallets: 2431, renalOrders: 1752, renalPallets: 592 }
+      { year: 2025, month: 'OCT', hours: 9861,  effOrders: 4.5, effPallets: 0.31, cbm: 7.9, totalOrders: 44412, totalPallets: 3022, wMedOrders: 42660, wMedPallets: 2431, renalOrders: 1752, renalPallets: 592 },
+      { year: 2025, month: 'NOV', hours: 10074, effOrders: 4.2, effPallets: 0.30, cbm: 7.6, totalOrders: 42677, totalPallets: 3056, wMedOrders: 40987, wMedPallets: 2492, renalOrders: 1690, renalPallets: 564 }
     ];
 
-    // Render Cyber Table Data
+    let fleetData = [];
+
+    // 初始化讀取本地快取或預設值
+    function loadInitialData() {
+      const saved = localStorage.getItem('fleet_dashboard_data');
+      if (saved) {
+        try {
+          fleetData = JSON.parse(saved);
+        } catch(e) {
+          fleetData = [...defaultFleetData];
+        }
+      } else {
+        fleetData = [...defaultFleetData];
+      }
+    }
+
+    // 重置數據為預設值
+    function resetDefaultData() {
+      if (confirm('確定要清除上傳的 Excel 數據並重置為預設狀態嗎？')) {
+        localStorage.removeItem('fleet_dashboard_data');
+        fleetData = [...defaultFleetData];
+        initFleetCharts();
+      }
+    }
+
+    // 處理 Excel 檔案上傳
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const rawJson = XLSX.utils.sheet_to_json(worksheet);
+
+          // 自動清洗與格式轉換
+          const parsedData = rawJson
+            .filter(row => row['總訂單數量'] !== undefined && row['總訂單數量'] !== null && !isNaN(row['總訂單數量']))
+            .map(row => ({
+              year: Number(row['年份']) || 2026,
+              month: String(row['月份']).toUpperCase(),
+              hours: Number(row['總配送時間(小時):']) || 0,
+              effOrders: Number(row['每小時配送效率(訂單)']) || 0,
+              effPallets: Number(row['每小時配送效率(板數)']) || 0,
+              cbm: Number(row['每車平均每日承載CBM']) || 0,
+              totalOrders: Number(row['總訂單數量']) || 0,
+              totalPallets: Number(row['總配送板數']) || 0,
+              wMedOrders: Number(row['西藥訂單數量']) || 0,
+              wMedPallets: Number(row['西藥配送板數']) || 0,
+              renalOrders: Number(row['腎水訂單數量']) || 0,
+              renalPallets: Number(row['腎水配送板數']) || 0
+            }));
+
+          if (parsedData.length === 0) {
+            alert('[錯誤] 無法在 Excel 中找到有效數據列，請檢查欄位名稱！');
+            return;
+          }
+
+          fleetData = parsedData;
+          localStorage.setItem('fleet_dashboard_data', JSON.stringify(fleetData));
+          initFleetCharts();
+          alert(`[成功] 已成功讀取 ${fleetData.length} 個月份的最新數據！`);
+        } catch (err) {
+          alert('[失敗] 解析 Excel 檔案時出錯：' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // 更新頂部數據指標卡片
+    function updateHeaderAndCards() {
+      if (!fleetData || fleetData.length === 0) return;
+
+      const latest = fleetData[fleetData.length - 1];
+      const prev = fleetData.length > 1 ? fleetData[fleetData.length - 2] : null;
+
+      document.getElementById('lastUpdateTag').innerText = `LAST_UPDATE: ${latest.year}.${latest.month}`;
+      document.getElementById('hdrTotalHours').innerText = `${latest.hours.toLocaleString()} HRS`;
+      
+      const maxEff = Math.max(...fleetData.map(d => d.effOrders));
+      document.getElementById('hdrRecordEff').innerText = `${maxEff} ORDERS/HR`;
+
+      document.getElementById('kpiTotalOrders').innerText = latest.totalOrders.toLocaleString();
+      document.getElementById('kpiEfficiency').innerText = latest.effOrders;
+      document.getElementById('kpiCbm').innerText = latest.cbm;
+      document.getElementById('kpiHours').innerText = latest.hours.toLocaleString();
+      document.getElementById('pieMonthLabel').innerText = `${latest.month}月`;
+
+      if (prev && prev.totalOrders > 0) {
+        const diffPercent = (((latest.totalOrders - prev.totalOrders) / prev.totalOrders) * 100).toFixed(1);
+        const diffIcon = diffPercent >= 0 ? 'trending-up' : 'trending-down';
+        const diffClass = diffPercent >= 0 ? 'text-dash-green' : 'text-dash-yellow';
+        
+        document.getElementById('kpiOrdersDiff').className = `text-xs ${diffClass} flex items-center gap-1 font-semibold`;
+        document.getElementById('kpiOrdersDiff').innerHTML = `
+          <i data-lucide="${diffIcon}" class="w-3.5 h-3.5"></i>
+          <span>${diffPercent >= 0 ? '+' : ''}${diffPercent}% vs ${prev.month}</span>
+        `;
+      } else {
+        document.getElementById('kpiOrdersDiff').innerHTML = `<span>LATEST RECORD</span>`;
+      }
+      lucide.createIcons();
+    }
+
     function renderFleetTable() {
       const tbody = document.getElementById('fleetTableBody');
       tbody.innerHTML = fleetData.map(item => `
@@ -627,13 +731,11 @@
       `).join('');
     }
 
-    // Chart Instances & Auto-cycle Timers
     let trendChartInstance = null;
     let categoryChartInstance = null;
     let trendAutoTimer = null;
     let categoryAutoTimer = null;
 
-    // Helper: Start continuous auto loop for Chart.js tooltips & active elements (Every 2s)
     function startChartAutoLoop(chart, timerVarSetter) {
       let currentIndex = 0;
       const interval = setInterval(() => {
@@ -645,7 +747,6 @@
           index: currentIndex
         }));
 
-        // Set active points/slices & open programmatic tooltips
         chart.setActiveElements(activeElements);
         chart.tooltip.setActiveElements(activeElements, { x: 0, y: 0 });
         chart.update();
@@ -657,9 +758,9 @@
     }
 
     function initFleetCharts() {
+      updateHeaderAndCards();
       renderFleetTable();
 
-      // Clear existing auto timers if re-initializing
       if (trendAutoTimer) clearInterval(trendAutoTimer);
       if (categoryAutoTimer) clearInterval(categoryAutoTimer);
 
@@ -667,7 +768,7 @@
       const effOrdersData = fleetData.map(d => d.effOrders);
       const totalOrdersData = fleetData.map(d => d.totalOrders);
 
-      // 1. Line Chart (趨勢圖)
+      // 1. Line Chart
       const ctxTrend = document.getElementById('fleetTrendChart').getContext('2d');
       if (trendChartInstance) trendChartInstance.destroy();
       trendChartInstance = new Chart(ctxTrend, {
@@ -738,7 +839,7 @@
         }
       });
 
-      // 2. Pie Chart (圓餅圖 / 甜甜圈圖)
+      // 2. Doughnut Chart (自動抓取最新一筆數據)
       const latest = fleetData[fleetData.length - 1];
       const ctxCat = document.getElementById('fleetCategoryChart').getContext('2d');
       if (categoryChartInstance) categoryChartInstance.destroy();
@@ -747,7 +848,7 @@
         data: {
           labels: ['西藥訂單', '腎水訂單'],
           datasets: [{
-            data: [latest.wMedOrders, latest.renalOrders],
+            data: [latest ? latest.wMedOrders : 0, latest ? latest.renalOrders : 0],
             backgroundColor: ['#38a5ff', '#ffb020'],
             borderColor: '#242430',
             borderWidth: 4,
@@ -772,12 +873,10 @@
         }
       });
 
-      // 啟動 2 秒自動遊走循環
       startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
       startChartAutoLoop(categoryChartInstance, (t) => categoryAutoTimer = t);
     }
 
-    // KPI Calculator
     function calculateKPI() {
       const hours = parseFloat(document.getElementById('calcHours').value) || 0;
       const orders = parseFloat(document.getElementById('calcOrders').value) || 0;
@@ -796,7 +895,6 @@
       document.getElementById('calcResult').classList.remove('hidden');
     }
 
-    // Navigation Switcher
     function switchView(viewName) {
       const views = ['home', 'fleet', 'translator', 'pomodoro', 'qrcode'];
       views.forEach(v => {
@@ -811,14 +909,12 @@
       if (viewName === 'fleet') {
         setTimeout(initFleetCharts, 150);
       } else {
-        // 清除圖表計時器以節省效能
         if (trendAutoTimer) clearInterval(trendAutoTimer);
         if (categoryAutoTimer) clearInterval(categoryAutoTimer);
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Search Tools Logic
     function filterTools() {
       const query = document.getElementById('toolSearch').value.toLowerCase();
       const cards = document.querySelectorAll('.tool-card');
@@ -828,7 +924,6 @@
       });
     }
 
-    /* TRANSLATOR LOGIC */
     async function runTranslation() {
       const text = document.getElementById('transInput').value.trim();
       const output = document.getElementById('transOutput');
@@ -872,7 +967,6 @@
       }
     }
 
-    /* POMODORO TIMER LOGIC */
     let pomoInterval = null;
     let pomoTimeLeft = 25 * 60;
     let pomoIsRunning = false;
@@ -947,7 +1041,6 @@
       } catch(e){}
     }
 
-    /* QR CODE LOGIC */
     let qrcodeObj = null;
 
     function generateQRCode() {
@@ -998,7 +1091,11 @@
       }
     }
 
-    /* PWA LOGIC */
+    // 頁面初始化
+    window.addEventListener('DOMContentLoaded', () => {
+      loadInitialData();
+    });
+
     let deferredPrompt;
     const pwaBtn = document.getElementById('pwaInstallBtn');
 
