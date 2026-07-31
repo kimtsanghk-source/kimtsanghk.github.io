@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minimal Hub - 日常小工具 Dashboard</title>
+  <title>Minimal Hub - 日常小工具與車隊 KPI Dashboard</title>
   <meta name="theme-color" content="#8C6D53">
-  <meta name="description" content="簡約大地色系日常小工具集合Dashboard">
+  <meta name="description" content="簡約大地色系日常小工具與車隊營運數據 Dashboard">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- QRCode.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Lucide Icons -->
@@ -43,7 +45,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- Header / Hero (Compact Size) -->
+  <!-- Header / Hero -->
   <header class="bg-white/60 border-b border-earth-100 sticky top-0 z-40 backdrop-blur-md">
     <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
       <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('home')">
@@ -52,7 +54,7 @@
         </div>
         <div>
           <h1 class="text-lg font-bold tracking-wide leading-none text-earth-dark">Minimal Hub</h1>
-          <p class="text-xs text-earth-muted mt-0.5">日常專注與效率小工具集</p>
+          <p class="text-xs text-earth-muted mt-0.5">日常專注與營運效率小工具集</p>
         </div>
       </div>
 
@@ -74,18 +76,36 @@
       <!-- Search & Category Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/40 p-4 rounded-2xl border border-earth-100">
         <div>
-          <h2 class="text-xl font-bold text-earth-dark">工具面板</h2>
-          <p class="text-xs text-earth-muted">選擇工具立即使用，點擊即可進行操作</p>
+          <h2 class="text-xl font-bold text-earth-dark">工具與營運面板</h2>
+          <p class="text-xs text-earth-muted">選擇工具或查看車隊營運數據，點擊即可進行操作</p>
         </div>
         <div class="relative max-w-xs w-full">
           <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-earth-muted"></i>
-          <input type="text" id="toolSearch" oninput="filterTools()" placeholder="搜尋工具..." class="w-full pl-9 pr-4 py-1.5 bg-white rounded-xl border border-earth-100 text-sm focus:outline-none focus:border-earth-500 text-earth-dark">
+          <input type="text" id="toolSearch" oninput="filterTools()" placeholder="搜尋工具或 KPI..." class="w-full pl-9 pr-4 py-1.5 bg-white rounded-xl border border-earth-100 text-sm focus:outline-none focus:border-earth-500 text-earth-dark">
         </div>
       </div>
 
       <!-- Tool Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="toolsGrid">
         
+        <!-- Fleet KPI Dashboard Card (NEW) -->
+        <div onclick="switchView('fleet')" class="tool-card group bg-white p-5 rounded-2xl border border-earth-100 shadow-sm hover:shadow-md hover:border-earth-500/40 cursor-pointer smooth-transition flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-earth-50 text-earth-500 flex items-center justify-center group-hover:bg-earth-500 group-hover:text-white smooth-transition">
+                <i data-lucide="truck" class="w-5 h-5"></i>
+              </div>
+              <span class="text-[10px] font-medium bg-earth-sage/10 text-earth-sage px-2 py-0.5 rounded-full border border-earth-sage/20">車隊營運</span>
+            </div>
+            <h3 class="font-bold text-earth-dark group-hover:text-earth-500 smooth-transition">車隊 KPI 營運儀表板</h3>
+            <p class="text-xs text-earth-muted mt-1 leading-relaxed">追蹤車隊每小時配送效率、CBM 承載量及西藥與腎水配送數據分析。</p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-earth-50 flex items-center justify-between text-xs font-medium text-earth-500">
+            <span>檢視 KPI 面板</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 smooth-transition"></i>
+          </div>
+        </div>
+
         <!-- Card 1: Translator -->
         <div onclick="switchView('translator')" class="tool-card group bg-white p-5 rounded-2xl border border-earth-100 shadow-sm hover:shadow-md hover:border-earth-500/40 cursor-pointer smooth-transition flex flex-col justify-between">
           <div>
@@ -141,6 +161,184 @@
         </div>
 
       </div>
+    </section>
+
+    <!-- NEW TOOL VIEW: FLEET KPI DASHBOARD -->
+    <section id="view-fleet" class="hidden space-y-6">
+      <button onclick="switchView('home')" class="inline-flex items-center space-x-1.5 text-xs text-earth-muted hover:text-earth-dark font-medium smooth-transition">
+        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        <span>返回工具列表</span>
+      </button>
+
+      <!-- Dashboard Title Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-earth-100 shadow-sm">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-earth-sage/10 text-earth-sage border border-earth-sage/20">營運效能</span>
+            <span class="text-xs text-earth-muted">數據更新至: 2025 Oct</span>
+          </div>
+          <h2 class="text-2xl font-bold text-earth-dark mt-1 flex items-center gap-2">
+            <i data-lucide="truck" class="w-6 h-6 text-earth-500"></i>
+            車隊營運核心 KPI 儀表板
+          </h2>
+        </div>
+      </div>
+
+      <!-- Core Summary KPI Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI Card 1 -->
+        <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm space-y-2">
+          <div class="flex items-center justify-between text-earth-muted text-xs font-medium">
+            <span>最新單月總訂單數</span>
+            <i data-lucide="package" class="w-4 h-4 text-earth-500"></i>
+          </div>
+          <div class="text-2xl font-black text-earth-dark">44,412 <span class="text-xs font-normal text-earth-muted">單</span></div>
+          <div class="text-[11px] text-earth-sage flex items-center gap-1 font-medium">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+            <span>較前月 +2.6% (10月)</span>
+          </div>
+        </div>
+
+        <!-- KPI Card 2 -->
+        <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm space-y-2">
+          <div class="flex items-center justify-between text-earth-muted text-xs font-medium">
+            <span>每小時配送效率 (訂單)</span>
+            <i data-lucide="zap" class="w-4 h-4 text-earth-500"></i>
+          </div>
+          <div class="text-2xl font-black text-earth-dark">4.5 <span class="text-xs font-normal text-earth-muted">單/小時</span></div>
+          <div class="text-[11px] text-earth-sage flex items-center gap-1 font-medium">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+            <span>從 7月 (4.1) 連續 4個月提升</span>
+          </div>
+        </div>
+
+        <!-- KPI Card 3 -->
+        <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm space-y-2">
+          <div class="flex items-center justify-between text-earth-muted text-xs font-medium">
+            <span>每車平均每日承載</span>
+            <i data-lucide="box" class="w-4 h-4 text-earth-500"></i>
+          </div>
+          <div class="text-2xl font-black text-earth-dark">7.9 <span class="text-xs font-normal text-earth-muted">CBM</span></div>
+          <div class="text-[11px] text-earth-sage flex items-center gap-1 font-medium">
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            <span>歷史新高 (優於 7月 7.0 CBM)</span>
+          </div>
+        </div>
+
+        <!-- KPI Card 4 -->
+        <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm space-y-2">
+          <div class="flex items-center justify-between text-earth-muted text-xs font-medium">
+            <span>總配送時間</span>
+            <i data-lucide="clock" class="w-4 h-4 text-earth-500"></i>
+          </div>
+          <div class="text-2xl font-black text-earth-dark">9,861 <span class="text-xs font-normal text-earth-muted">小時</span></div>
+          <div class="text-[11px] text-earth-muted flex items-center gap-1">
+            <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-earth-sage"></i>
+            <span>總配送工時保持平穩</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Line Chart -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-earth-100 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-earth-dark text-base flex items-center gap-2">
+              <i data-lucide="line-chart" class="w-4 h-4 text-earth-500"></i>
+              月度配送效率與訂單增長趨勢
+            </h3>
+            <span class="text-xs text-earth-muted">2025 Jul - Oct</span>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="fleetTrendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Product Category Distribution Chart -->
+        <div class="bg-white p-6 rounded-2xl border border-earth-100 shadow-sm space-y-4 flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-earth-dark text-base flex items-center gap-2 mb-2">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-earth-500"></i>
+              貨品類別結構 (西藥 vs 腎水)
+            </h3>
+            <p class="text-xs text-earth-muted">10 月訂單與配送板數比例分析</p>
+          </div>
+          <div class="relative h-52 w-full my-auto flex items-center justify-center">
+            <canvas id="fleetCategoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fleet Excel Data Table -->
+      <div class="bg-white p-6 rounded-2xl border border-earth-100 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-earth-dark text-base flex items-center gap-2">
+            <i data-lucide="table" class="w-4 h-4 text-earth-500"></i>
+            車隊營運明細數據表 (來自 Excel)
+          </h3>
+          <span class="text-xs text-earth-muted">包含西藥與腎水拆分</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left text-earth-dark border-collapse">
+            <thead>
+              <tr class="bg-earth-50 text-earth-muted font-semibold border-b border-earth-100">
+                <th class="p-3">月份</th>
+                <th class="p-3">總配送時間 (小時)</th>
+                <th class="p-3">效率 (訂單/小時)</th>
+                <th class="p-3">效率 (板數/小時)</th>
+                <th class="p-3">每車每日承載 CBM</th>
+                <th class="p-3">總訂單數</th>
+                <th class="p-3">總配送板數</th>
+                <th class="p-3">西藥訂單</th>
+                <th class="p-3">西藥板數</th>
+                <th class="p-3">腎水訂單</th>
+                <th class="p-3">腎水板數</th>
+              </tr>
+            </thead>
+            <tbody id="fleetTableBody" class="divide-y divide-earth-100">
+              <!-- JS Populated Row Data -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- New Entry Calculator Form -->
+      <div class="bg-white p-6 rounded-2xl border border-earth-100 shadow-sm space-y-4">
+        <h3 class="font-bold text-earth-dark text-base flex items-center gap-2">
+          <i data-lucide="calculator" class="w-4 h-4 text-earth-500"></i>
+          單月 KPI 數據計算與預測工具
+        </h3>
+        <p class="text-xs text-earth-muted">輸入月度工時與配送量，自動試算配送效率與車隊 KPI：</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+          <div>
+            <label class="text-xs text-earth-muted font-medium">總配送時間 (小時)</label>
+            <input type="number" id="calcHours" value="10000" class="w-full mt-1 p-2.5 bg-earth-50 border border-earth-100 rounded-xl text-xs text-earth-dark focus:outline-none focus:border-earth-500">
+          </div>
+          <div>
+            <label class="text-xs text-earth-muted font-medium">總訂單數量 (單)</label>
+            <input type="number" id="calcOrders" value="45000" class="w-full mt-1 p-2.5 bg-earth-50 border border-earth-100 rounded-xl text-xs text-earth-dark focus:outline-none focus:border-earth-500">
+          </div>
+          <div>
+            <label class="text-xs text-earth-muted font-medium">總配送板數 (板)</label>
+            <input type="number" id="calcPallets" value="3100" class="w-full mt-1 p-2.5 bg-earth-50 border border-earth-100 rounded-xl text-xs text-earth-dark focus:outline-none focus:border-earth-500">
+          </div>
+          <div class="flex items-end">
+            <button onclick="calculateKPI()" class="w-full py-2.5 bg-earth-500 hover:bg-earth-600 text-white rounded-xl text-xs font-medium smooth-transition">計算配送效率</button>
+          </div>
+        </div>
+
+        <div id="calcResult" class="hidden mt-4 p-4 bg-earth-50 rounded-xl border border-earth-100 text-xs space-y-2">
+          <div class="font-bold text-earth-dark">試算結果分析：</div>
+          <div class="grid grid-cols-2 md:grid-cols-2 gap-2 text-earth-dark">
+            <div>• 每小時配送效率 (訂單)： <span id="resOrdersHr" class="font-bold text-earth-500">--</span> 單/小時</div>
+            <div>• 每小時配送效率 (板數)： <span id="resPalletsHr" class="font-bold text-earth-500">--</span> 板/小時</div>
+          </div>
+        </div>
+      </div>
+
     </section>
 
     <!-- TOOL VIEW 1: Translator -->
@@ -249,16 +447,152 @@
 
   <!-- Footer -->
   <footer class="mt-auto border-t border-earth-100 bg-white/40 py-4 text-center text-xs text-earth-muted">
-    <p>© 2026 Minimal Hub · 極簡大地色工具箱</p>
+    <p>© 2026 Minimal Hub · 極簡大地色工具箱與車隊 KPI 面板</p>
   </footer>
 
   <script>
     // Initialize Icons
     lucide.createIcons();
 
+    // Excel Source Data Array
+    const fleetData = [
+      { year: 2025, month: 'Jul', hours: 10914, effOrders: 4.1, effPallets: 0.26, cbm: 7.0, totalOrders: 44252, totalPallets: 2810, wMedOrders: 42482, wMedPallets: 2268, renalOrders: 1770, renalPallets: 543 },
+      { year: 2025, month: 'Aug', hours: 10074, effOrders: 4.2, effPallets: 0.30, cbm: 7.6, totalOrders: 42677, totalPallets: 3056, wMedOrders: 40987, wMedPallets: 2492, renalOrders: 1690, renalPallets: 564 },
+      { year: 2025, month: 'Sep', hours: 9848,  effOrders: 4.4, effPallets: 0.31, cbm: 7.7, totalOrders: 43287, totalPallets: 3017, wMedOrders: 41393, wMedPallets: 2410, renalOrders: 1894, renalPallets: 607 },
+      { year: 2025, month: 'Oct', hours: 9861,  effOrders: 4.5, effPallets: 0.31, cbm: 7.9, totalOrders: 44412, totalPallets: 3022, wMedOrders: 42660, wMedPallets: 2431, renalOrders: 1752, renalPallets: 592 }
+    ];
+
+    // Render Table Data
+    function renderFleetTable() {
+      const tbody = document.getElementById('fleetTableBody');
+      tbody.innerHTML = fleetData.map(item => `
+        <tr class="hover:bg-earth-50/60 smooth-transition">
+          <td class="p-3 font-bold">${item.year} ${item.month}</td>
+          <td class="p-3">${item.hours.toLocaleString()}</td>
+          <td class="p-3 font-semibold text-earth-500">${item.effOrders}</td>
+          <td class="p-3">${item.effPallets}</td>
+          <td class="p-3 font-semibold text-earth-sage">${item.cbm}</td>
+          <td class="p-3 font-bold">${item.totalOrders.toLocaleString()}</td>
+          <td class="p-3">${item.totalPallets.toLocaleString()}</td>
+          <td class="p-3 text-earth-muted">${item.wMedOrders.toLocaleString()}</td>
+          <td class="p-3 text-earth-muted">${item.wMedPallets.toLocaleString()}</td>
+          <td class="p-3 text-earth-muted">${item.renalOrders.toLocaleString()}</td>
+          <td class="p-3 text-earth-muted">${item.renalPallets.toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Initialize Fleet Charts
+    let trendChartInstance = null;
+    let categoryChartInstance = null;
+
+    function initFleetCharts() {
+      renderFleetTable();
+
+      const labels = fleetData.map(d => `${d.month}`);
+      const effOrdersData = fleetData.map(d => d.effOrders);
+      const totalOrdersData = fleetData.map(d => d.totalOrders);
+
+      // 1. Line Chart
+      const ctxTrend = document.getElementById('fleetTrendChart').getContext('2d');
+      if (trendChartInstance) trendChartInstance.destroy();
+      trendChartInstance = new Chart(ctxTrend, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '每小時配送訂單數 (效率)',
+              data: effOrdersData,
+              borderColor: '#8C6D53',
+              backgroundColor: 'rgba(140, 109, 83, 0.1)',
+              borderWidth: 3,
+              fill: true,
+              yAxisID: 'y1',
+              tension: 0.3
+            },
+            {
+              label: '總訂單數量',
+              data: totalOrdersData,
+              borderColor: '#6B7A63',
+              borderDash: [5, 5],
+              borderWidth: 2,
+              pointRadius: 4,
+              yAxisID: 'y2',
+              tension: 0.3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'left',
+              title: { display: true, text: '單 / 小時', color: '#7A7067' },
+              grid: { color: '#E8E3D9' }
+            },
+            y2: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              title: { display: true, text: '總訂單數', color: '#7A7067' },
+              grid: { drawOnChartArea: false }
+            },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+
+      // 2. Pie Chart (Oct 2025 breakdown)
+      const latest = fleetData[fleetData.length - 1];
+      const ctxCat = document.getElementById('fleetCategoryChart').getContext('2d');
+      if (categoryChartInstance) categoryChartInstance.destroy();
+      categoryChartInstance = new Chart(ctxCat, {
+        type: 'doughnut',
+        data: {
+          labels: ['西藥訂單', '腎水訂單'],
+          datasets: [{
+            data: [latest.wMedOrders, latest.renalOrders],
+            backgroundColor: ['#8C6D53', '#D6CBC0'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, color: '#2D2825' } }
+          }
+        }
+      });
+    }
+
+    // KPI Calculator
+    function calculateKPI() {
+      const hours = parseFloat(document.getElementById('calcHours').value) || 0;
+      const orders = parseFloat(document.getElementById('calcOrders').value) || 0;
+      const pallets = parseFloat(document.getElementById('calcPallets').value) || 0;
+
+      if (hours <= 0) {
+        alert('請輸入有效的配送小時數');
+        return;
+      }
+
+      const effOrders = (orders / hours).toFixed(2);
+      const effPallets = (pallets / hours).toFixed(2);
+
+      document.getElementById('resOrdersHr').innerText = effOrders;
+      document.getElementById('resPalletsHr').innerText = effPallets;
+      document.getElementById('calcResult').classList.remove('hidden');
+    }
+
     // Single Page Navigation (SPA View Switcher)
     function switchView(viewName) {
-      const views = ['home', 'translator', 'pomodoro', 'qrcode'];
+      const views = ['home', 'fleet', 'translator', 'pomodoro', 'qrcode'];
       views.forEach(v => {
         const el = document.getElementById(`view-${v}`);
         if (v === viewName) {
@@ -267,6 +601,10 @@
           el.classList.add('hidden');
         }
       });
+
+      if (viewName === 'fleet') {
+        setTimeout(initFleetCharts, 100);
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -280,9 +618,7 @@
       });
     }
 
-    /* ----------------------------------------------------
-       TOOL 1: TRANSLATOR LOGIC
-    ---------------------------------------------------- */
+    /* TRANSLATOR LOGIC */
     async function runTranslation() {
       const text = document.getElementById('transInput').value.trim();
       const output = document.getElementById('transOutput');
@@ -298,10 +634,8 @@
       output.innerText = '正在翻譯中，請稍候...';
 
       try {
-        // Free Translation API Endpoint
         const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh-TW`);
         const data = await res.json();
-        
         if (data.responseData && data.responseData.translatedText) {
           output.innerText = data.responseData.translatedText;
         } else {
@@ -328,13 +662,11 @@
       }
     }
 
-    /* ----------------------------------------------------
-       TOOL 2: POMODORO TIMER LOGIC
-    ---------------------------------------------------- */
+    /* POMODORO TIMER LOGIC */
     let pomoInterval = null;
     let pomoTimeLeft = 25 * 60;
     let pomoIsRunning = false;
-    let pomoMode = 'work'; // 'work' or 'break'
+    let pomoMode = 'work';
 
     function updatePomoDisplay() {
       const mins = Math.floor(pomoTimeLeft / 60).toString().padStart(2, '0');
@@ -344,13 +676,11 @@
 
     function togglePomodoro() {
       if (pomoIsRunning) {
-        // Pause
         clearInterval(pomoInterval);
         pomoIsRunning = false;
         document.getElementById('pomoBtnText').innerText = '繼續';
         document.getElementById('pomoPlayIcon').setAttribute('data-lucide', 'play');
       } else {
-        // Start
         pomoIsRunning = true;
         document.getElementById('pomoBtnText').innerText = '暫停';
         document.getElementById('pomoPlayIcon').setAttribute('data-lucide', 'pause');
@@ -395,22 +725,19 @@
       resetPomodoro();
     }
 
-    // Audio Notification using Web Audio API
     function playBeepSound() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 tone
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
         osc.connect(ctx.destination);
         osc.start();
         osc.stop(ctx.currentTime + 0.5);
       } catch(e){}
     }
 
-    /* ----------------------------------------------------
-       TOOL 3: QR CODE GENERATOR LOGIC
-    ---------------------------------------------------- */
+    /* QR CODE LOGIC */
     let qrcodeObj = null;
 
     function generateQRCode() {
@@ -461,9 +788,7 @@
       }
     }
 
-    /* ----------------------------------------------------
-       PWA SERVICE WORKER & INSTALL PROMPT
-    ---------------------------------------------------- */
+    /* PWA LOGIC */
     let deferredPrompt;
     const pwaBtn = document.getElementById('pwaInstallBtn');
 
@@ -485,7 +810,6 @@
       }
     });
 
-    // Dynamic Manifest & Service Worker Blob Creation
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         const swCode = `
@@ -497,7 +821,6 @@
       });
     }
 
-    // Dynamic Web App Manifest
     const manifestData = {
       name: "Minimal Hub",
       short_name: "MinimalHub",
