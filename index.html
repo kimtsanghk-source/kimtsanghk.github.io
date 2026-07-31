@@ -20,13 +20,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-<iframe 
-    src="https://kimtsanghkappio-ux2yeaxrf7eejmyknqphpg.streamlit.app//?embed=true" 
-    width="100%" 
-    height="700px" 
-    style="border:none;">
-</iframe>
-  
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -272,8 +265,8 @@
         </button>
 
         <div class="text-xs font-mono text-dash-muted flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-dash-green"></span>
-          DATA SINK STATUS: <span class="text-dash-green font-bold">SYNCHRONIZED</span>
+          <span class="w-2 h-2 rounded-full bg-dash-green animate-pulse"></span>
+          AUTO-CYCLE: <span class="text-dash-green font-bold">ACTIVE (2s)</span>
         </div>
       </div>
 
@@ -384,9 +377,9 @@
           <div class="flex items-center justify-between border-b border-dash-border pb-4">
             <h3 class="font-bold text-white text-base flex items-center gap-2">
               <i data-lucide="line-chart" class="w-4 h-4 text-dash-blue"></i>
-              月度效率與訂單運量趨勢分析
+              Monthly Efficiency & Order Volume Trend Analysis
             </h3>
-            <span class="text-xs font-mono text-dash-muted">// 2025 JUL - OCT</span>
+            <span class="text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
           </div>
           <div class="relative h-64 w-full">
             <canvas id="fleetTrendChart"></canvas>
@@ -395,12 +388,15 @@
 
         <!-- Category Pie Chart -->
         <div class="dash-card p-6 space-y-4 flex flex-col justify-between">
-          <div class="border-b border-dash-border pb-4">
-            <h3 class="font-bold text-white text-base flex items-center gap-2">
-              <i data-lucide="pie-chart" class="w-4 h-4 text-dash-yellow"></i>
-              物料結構拆分 (10月)
-            </h3>
-            <p class="text-xs text-dash-muted mt-1">西藥與腎水物料之訂單總數比例</p>
+          <div class="border-b border-dash-border pb-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-dash-yellow"></i>
+                物料結構拆分 (10月)
+              </h3>
+              <p class="text-xs text-dash-muted mt-1">西藥與腎水物料之訂單總數比例</p>
+            </div>
+            <span class="text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
           </div>
           <div class="relative h-52 w-full my-auto flex items-center justify-center">
             <canvas id="fleetCategoryChart"></canvas>
@@ -631,18 +627,47 @@
       `).join('');
     }
 
-    // Chart Instances
+    // Chart Instances & Auto-cycle Timers
     let trendChartInstance = null;
     let categoryChartInstance = null;
+    let trendAutoTimer = null;
+    let categoryAutoTimer = null;
+
+    // Helper: Start continuous auto loop for Chart.js tooltips & active elements (Every 2s)
+    function startChartAutoLoop(chart, timerVarSetter) {
+      let currentIndex = 0;
+      const interval = setInterval(() => {
+        if (!chart || !chart.data || !chart.data.labels || chart.data.labels.length === 0) return;
+        
+        const dataLength = chart.data.labels.length;
+        const activeElements = chart.data.datasets.map((_, dsIndex) => ({
+          datasetIndex: dsIndex,
+          index: currentIndex
+        }));
+
+        // Set active points/slices & open programmatic tooltips
+        chart.setActiveElements(activeElements);
+        chart.tooltip.setActiveElements(activeElements, { x: 0, y: 0 });
+        chart.update();
+
+        currentIndex = (currentIndex + 1) % dataLength;
+      }, 2000);
+
+      timerVarSetter(interval);
+    }
 
     function initFleetCharts() {
       renderFleetTable();
+
+      // Clear existing auto timers if re-initializing
+      if (trendAutoTimer) clearInterval(trendAutoTimer);
+      if (categoryAutoTimer) clearInterval(categoryAutoTimer);
 
       const labels = fleetData.map(d => `${d.month}`);
       const effOrdersData = fleetData.map(d => d.effOrders);
       const totalOrdersData = fleetData.map(d => d.totalOrders);
 
-      // Line Chart (Matching Palette Theme)
+      // 1. Line Chart (趨勢圖)
       const ctxTrend = document.getElementById('fleetTrendChart').getContext('2d');
       if (trendChartInstance) trendChartInstance.destroy();
       trendChartInstance = new Chart(ctxTrend, {
@@ -660,7 +685,8 @@
               yAxisID: 'y1',
               tension: 0.3,
               pointBackgroundColor: '#38a5ff',
-              pointRadius: 5
+              pointRadius: 6,
+              pointHoverRadius: 9
             },
             {
               label: '總訂單數',
@@ -668,7 +694,8 @@
               borderColor: '#ffb020',
               borderDash: [4, 4],
               borderWidth: 2,
-              pointRadius: 4,
+              pointRadius: 5,
+              pointHoverRadius: 8,
               yAxisID: 'y2',
               tension: 0.3,
               pointBackgroundColor: '#ffb020'
@@ -680,7 +707,17 @@
           maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
           plugins: {
-            legend: { labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans', size: 11 } } }
+            legend: { labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans', size: 11 } } },
+            tooltip: {
+              enabled: true,
+              backgroundColor: '#242430',
+              borderColor: '#333342',
+              borderWidth: 1,
+              titleColor: '#ffffff',
+              bodyColor: '#38a5ff',
+              padding: 10,
+              displayColors: true
+            }
           },
           scales: {
             y1: {
@@ -701,7 +738,7 @@
         }
       });
 
-      // Pie Chart (Doughnut Theme)
+      // 2. Pie Chart (圓餅圖 / 甜甜圈圖)
       const latest = fleetData[fleetData.length - 1];
       const ctxCat = document.getElementById('fleetCategoryChart').getContext('2d');
       if (categoryChartInstance) categoryChartInstance.destroy();
@@ -713,17 +750,31 @@
             data: [latest.wMedOrders, latest.renalOrders],
             backgroundColor: ['#38a5ff', '#ffb020'],
             borderColor: '#242430',
-            borderWidth: 4
+            borderWidth: 4,
+            hoverOffset: 12
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom', labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans' } } }
+            legend: { position: 'bottom', labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans' } } },
+            tooltip: {
+              enabled: true,
+              backgroundColor: '#242430',
+              borderColor: '#333342',
+              borderWidth: 1,
+              titleColor: '#ffffff',
+              bodyColor: '#2cd997',
+              padding: 10
+            }
           }
         }
       });
+
+      // 啟動 2 秒自動遊走循環
+      startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
+      startChartAutoLoop(categoryChartInstance, (t) => categoryAutoTimer = t);
     }
 
     // KPI Calculator
@@ -758,7 +809,11 @@
       });
 
       if (viewName === 'fleet') {
-        setTimeout(initFleetCharts, 100);
+        setTimeout(initFleetCharts, 150);
+      } else {
+        // 清除圖表計時器以節省效能
+        if (trendAutoTimer) clearInterval(trendAutoTimer);
+        if (categoryAutoTimer) clearInterval(categoryAutoTimer);
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
