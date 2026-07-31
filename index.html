@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CYBER_FLEET // Operational Command & Dashboard</title>
-  <meta name="theme-color" content="#0d0f18">
-  <meta name="description" content="Cyberpunk Style Fleet Operations & Utility Dashboard">
+  <meta name="theme-color" content="#181820">
+  <meta name="description" content="Modern Dark Mode Fleet Operations & Utility Dashboard">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,10 +15,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Google Fonts: Orbitron & Share Tech Mono & Rajdhani -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
@@ -26,137 +26,103 @@
       theme: {
         extend: {
           colors: {
-            cyber: {
-              black: '#07080d',
-              dark: '#0d0f18',
-              card: '#121524',
-              border: '#1f263e',
-              yellow: '#ffe600',
-              cyan: '#00f0ff',
-              magenta: '#ff0055',
-              green: '#00ff66',
-              dim: '#6272a4'
+            dash: {
+              main: '#181820',
+              card: '#242430',
+              border: '#333342',
+              hover: '#2a2a38',
+              text: '#ffffff',
+              muted: '#8e8e9e',
+              green: '#2cd997',
+              blue: '#38a5ff',
+              yellow: '#ffb020',
+              purple: '#7c5cfc',
+              red: '#ff5252'
             }
           },
           fontFamily: {
-            orbitron: ['Orbitron', 'sans-serif'],
-            mono: ['"Share Tech Mono"', 'monospace'],
-            sans: ['Rajdhani', 'system-ui', 'sans-serif']
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
           }
         }
       }
     }
   </script>
   <style>
-    /* Global Cyberpunk Base Styling */
+    /* Global Dashboard Base Styling */
     body {
-      background-color: #07080d;
-      color: #e2e8f0;
-      font-family: 'Rajdhani', sans-serif;
+      background-color: #181820;
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       background-image: 
-        radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.08) 0%, transparent 60%),
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      background-size: 100% 100%, 30px 30px, 30px 30px;
+        radial-gradient(circle at 10% 10%, rgba(56, 165, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(44, 217, 151, 0.04) 0%, transparent 40%);
+      background-attachment: fixed;
     }
 
-    /* Cyber Panel & Glass Effect */
-    .cyber-panel {
-      background: rgba(18, 21, 36, 0.85);
-      border: 1px solid #1f263e;
-      position: relative;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(12px);
+    /* Rounded Glass Cards */
+    .dash-card {
+      background-color: #242430;
+      border: 1px solid #333342;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(8px);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .cyber-panel::before {
-      content: '';
-      position: absolute;
-      top: -1px; left: -1px;
-      width: 8px; height: 8px;
-      border-top: 2px solid #00f0ff;
-      border-left: 2px solid #00f0ff;
-    }
-    .cyber-panel::after {
-      content: '';
-      position: absolute;
-      bottom: -1px; right: -1px;
-      width: 8px; height: 8px;
-      border-bottom: 2px solid #ffe600;
-      border-right: 2px solid #ffe600;
+    .dash-card:hover {
+      border-color: #424254;
     }
 
-    /* High Tech Text Glow */
-    .glow-cyan { text-shadow: 0 0 8px rgba(0, 240, 255, 0.7), 0 0 15px rgba(0, 240, 255, 0.3); }
-    .glow-yellow { text-shadow: 0 0 8px rgba(255, 230, 0, 0.7), 0 0 15px rgba(255, 230, 0, 0.3); }
-    .glow-magenta { text-shadow: 0 0 8px rgba(255, 0, 85, 0.7), 0 0 15px rgba(255, 0, 85, 0.3); }
-    .glow-green { text-shadow: 0 0 8px rgba(0, ff, 102, 0.7); }
+    /* Soft Glow Text & Badges */
+    .glow-green { text-shadow: 0 0 12px rgba(44, 217, 151, 0.4); }
+    .glow-blue { text-shadow: 0 0 12px rgba(56, 165, 255, 0.4); }
+    .glow-yellow { text-shadow: 0 0 12px rgba(255, 176, 32, 0.4); }
 
-    /* Neon Borders */
-    .border-cyber-glow {
-      border-color: #00f0ff;
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3), inset 0 0 10px rgba(0, 240, 255, 0.1);
-    }
-
-    /* Cut Corner Cyber Buttons */
-    .cyber-btn {
-      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    /* Interactive Smooth Buttons */
+    .dash-btn {
+      border-radius: 0.75rem;
       transition: all 0.2s ease-in-out;
     }
-    .cyber-btn:hover {
-      box-shadow: 0 0 15px currentColor;
+    .dash-btn:hover {
       transform: translateY(-1px);
-    }
-
-    /* Scanline Overlay Effect */
-    .scanlines {
-      background: linear-gradient(
-        to bottom,
-        rgba(255,255,255,0),
-        rgba(255,255,255,0) 50%,
-        rgba(0, 0, 0, 0.3) 50%,
-        rgba(0, 0, 0, 0.3)
-      );
-      background-size: 100% 4px;
-      pointer-events: none;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
     }
 
     /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #07080d; }
-    ::-webkit-scrollbar-thumb { background: #1f263e; border: 1px solid #00f0ff; }
+    ::-webkit-scrollbar-track { background: #181820; }
+    ::-webkit-scrollbar-thumb { background: #333342; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #38a5ff; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col relative overflow-x-hidden">
 
-  <!-- Scanline Screen Effect Layer -->
-  <div class="fixed inset-0 scanlines z-50 pointer-events-none opacity-40"></div>
-
-  <!-- Header / Cyber Navigation -->
-  <header class="bg-cyber-dark/90 border-b border-cyber-border sticky top-0 z-40 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+  <!-- Header / Dashboard Navigation -->
+  <header class="bg-dash-main/90 border-b border-dash-border sticky top-0 z-40 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
       <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('home')">
-        <div class="w-10 h-10 rounded-none bg-cyber-yellow text-cyber-black flex items-center justify-center font-black shadow-[0_0_12px_rgba(255,230,0,0.5)] cyber-btn">
-          <i data-lucide="cpu" class="w-6 h-6"></i>
+        <div class="w-10 h-10 rounded-xl bg-dash-blue/10 border border-dash-blue/30 text-dash-blue flex items-center justify-center font-bold shadow-sm">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
         </div>
         <div>
-          <h1 class="text-xl font-black tracking-widest leading-none font-orbitron text-white">
-            CYBER<span class="text-cyber-cyan glow-cyan">_HUB</span>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            FLEET<span class="text-dash-blue">_HUB</span>
           </h1>
-          <p class="text-[10px] font-mono text-cyber-yellow mt-1 tracking-wider uppercase">
-            // FLEET COMMAND & UTILITY MATRIX v3.0
+          <p class="text-xs font-mono text-dash-muted">
+            OPERATIONAL COMMAND & MATRIX v3.0
           </p>
         </div>
       </div>
 
       <!-- Action & Live Time Indicator -->
       <div class="flex items-center space-x-4">
-        <div class="hidden sm:flex items-center space-x-2 text-xs font-mono text-cyber-dim border border-cyber-border px-3 py-1 rounded bg-cyber-black">
-          <span class="w-2 h-2 rounded-full bg-cyber-green animate-pulse"></span>
-          <span>SYSTEM: ONLINE</span>
-          <span class="text-cyber-cyan font-bold" id="liveClock">00:00:00</span>
+        <div class="hidden sm:flex items-center space-x-2 text-xs font-mono text-dash-muted border border-dash-border px-3.5 py-1.5 rounded-full bg-dash-card">
+          <span class="w-2 h-2 rounded-full bg-dash-green animate-pulse"></span>
+          <span>SYSTEM ONLINE</span>
+          <span class="text-white font-bold ml-1" id="liveClock">00:00:00</span>
         </div>
 
-        <button id="pwaInstallBtn" class="hidden items-center space-x-1.5 bg-cyber-cyan hover:bg-cyber-yellow text-cyber-black text-xs font-bold font-mono px-3 py-1.5 cyber-btn transition-all">
+        <button id="pwaInstallBtn" class="hidden items-center space-x-1.5 bg-dash-blue hover:bg-dash-blue/90 text-white text-xs font-semibold px-4 py-2 rounded-xl dash-btn transition-all">
           <i data-lucide="download" class="w-3.5 h-3.5"></i>
           <span>INSTALL APP</span>
         </button>
@@ -165,121 +131,122 @@
   </header>
 
   <!-- Main Container -->
-  <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 z-10">
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 z-10">
 
     <!-- HOME VIEW: Main Grid Matrix -->
     <section id="view-home" class="space-y-6">
       
-      <!-- Top Cyber Banner / Filter -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 cyber-panel p-5">
+      <!-- Top Banner / Filter -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 dash-card p-6">
         <div>
-          <div class="inline-block text-[10px] font-mono font-bold text-cyber-yellow bg-cyber-yellow/10 border border-cyber-yellow/30 px-2 py-0.5 mb-1 uppercase tracking-widest">
+          <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-dash-green bg-dash-green/10 border border-dash-green/20 px-2.5 py-1 rounded-full mb-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-dash-green"></span>
             OPERATIONAL MODULES
           </div>
-          <h2 class="text-2xl font-black font-orbitron text-white tracking-wide">系統工具面板</h2>
-          <p class="text-xs font-mono text-cyber-dim mt-0.5">請選擇要存取的車隊營運數據或日常生產力模組</p>
+          <h2 class="text-2xl font-bold text-white tracking-tight">系統工具面板</h2>
+          <p class="text-xs text-dash-muted mt-1">請選擇要存取的車隊營運數據或日常生產力模組</p>
         </div>
         <div class="relative max-w-xs w-full">
-          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyber-cyan"></i>
-          <input type="text" id="toolSearch" oninput="filterTools()" placeholder="搜尋模組 [SEARCH]..." class="w-full pl-9 pr-4 py-2 bg-cyber-black border border-cyber-border text-xs font-mono text-cyber-cyan placeholder-cyber-dim focus:outline-none focus:border-cyber-cyan focus:ring-1 focus:ring-00f0ff">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-dash-muted"></i>
+          <input type="text" id="toolSearch" oninput="filterTools()" placeholder="搜尋模組 [SEARCH]..." class="w-full pl-10 pr-4 py-2.5 bg-dash-main border border-dash-border rounded-xl text-xs text-white placeholder-dash-muted focus:outline-none focus:border-dash-blue focus:ring-1 focus:ring-dash-blue transition-all">
         </div>
       </div>
 
       <!-- Tool Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5" id="toolsGrid">
         
-        <!-- CARD 1: FLEET KPI DASHBOARD (HIGHLIGHT) -->
-        <div onclick="switchView('fleet')" class="tool-card group cyber-panel p-5 hover:border-cyber-cyan cursor-pointer transition-all duration-300 flex flex-col justify-between hover:shadow-[0_0_20px_rgba(0,240,255,0.2)]">
+        <!-- CARD 1: FLEET KPI DASHBOARD -->
+        <div onclick="switchView('fleet')" class="tool-card group dash-card p-6 cursor-pointer hover:border-dash-blue/60 transition-all duration-300 flex flex-col justify-between hover:shadow-xl">
           <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-10 h-10 bg-cyber-cyan/10 border border-cyber-cyan text-cyber-cyan flex items-center justify-center group-hover:bg-cyber-cyan group-hover:text-cyber-black transition-all">
-                <i data-lucide="truck" class="w-5 h-5"></i>
+            <div class="flex items-center justify-between mb-5">
+              <div class="w-12 h-12 rounded-xl bg-dash-blue/10 border border-dash-blue/20 text-dash-blue flex items-center justify-center group-hover:bg-dash-blue group-hover:text-white transition-all">
+                <i data-lucide="truck" class="w-6 h-6"></i>
               </div>
-              <span class="text-[10px] font-mono font-bold bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/40 px-2 py-0.5 uppercase tracking-wider glow-cyan">
+              <span class="text-[11px] font-semibold bg-dash-blue/10 text-dash-blue border border-dash-blue/30 px-2.5 py-0.5 rounded-full">
                 CORE MATRIX
               </span>
             </div>
-            <h3 class="text-lg font-bold font-orbitron text-white group-hover:text-cyber-cyan transition-colors">
+            <h3 class="text-base font-bold text-white group-hover:text-dash-blue transition-colors">
               車隊 KPI 營運儀表板
             </h3>
-            <p class="text-xs text-cyber-dim mt-2 leading-relaxed font-sans">
+            <p class="text-xs text-dash-muted mt-2 leading-relaxed">
               即時監控車隊配送效率、CBM 承載極限、西藥與腎水物料運輸比例及數據預測。
             </p>
           </div>
-          <div class="mt-6 pt-3 border-t border-cyber-border flex items-center justify-between text-xs font-mono font-bold text-cyber-cyan group-hover:text-cyber-yellow">
-            <span>// ACCESS SYSTEM</span>
+          <div class="mt-6 pt-4 border-t border-dash-border flex items-center justify-between text-xs font-semibold text-dash-blue">
+            <span>ACCESS SYSTEM</span>
             <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
           </div>
         </div>
 
         <!-- CARD 2: TRANSLATOR -->
-        <div onclick="switchView('translator')" class="tool-card group cyber-panel p-5 hover:border-cyber-yellow cursor-pointer transition-all duration-300 flex flex-col justify-between hover:shadow-[0_0_20px_rgba(255,230,0,0.15)]">
+        <div onclick="switchView('translator')" class="tool-card group dash-card p-6 cursor-pointer hover:border-dash-yellow/60 transition-all duration-300 flex flex-col justify-between hover:shadow-xl">
           <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-10 h-10 bg-cyber-yellow/10 border border-cyber-yellow text-cyber-yellow flex items-center justify-center group-hover:bg-cyber-yellow group-hover:text-cyber-black transition-all">
-                <i data-lucide="languages" class="w-5 h-5"></i>
+            <div class="flex items-center justify-between mb-5">
+              <div class="w-12 h-12 rounded-xl bg-dash-yellow/10 border border-dash-yellow/20 text-dash-yellow flex items-center justify-center group-hover:bg-dash-yellow group-hover:text-dash-main transition-all">
+                <i data-lucide="languages" class="w-6 h-6"></i>
               </div>
-              <span class="text-[10px] font-mono font-bold bg-cyber-yellow/10 text-cyber-yellow border border-cyber-yellow/30 px-2 py-0.5 uppercase">
+              <span class="text-[11px] font-semibold bg-dash-yellow/10 text-dash-yellow border border-dash-yellow/30 px-2.5 py-0.5 rounded-full">
                 TEXT NODE
               </span>
             </div>
-            <h3 class="text-lg font-bold font-orbitron text-white group-hover:text-cyber-yellow transition-colors">
+            <h3 class="text-base font-bold text-white group-hover:text-dash-yellow transition-colors">
               英文轉繁中翻譯
             </h3>
-            <p class="text-xs text-cyber-dim mt-2 leading-relaxed font-sans">
+            <p class="text-xs text-dash-muted mt-2 leading-relaxed">
               神經網絡智能長文翻譯模組，即時解析英漢語意與長句轉換。
             </p>
           </div>
-          <div class="mt-6 pt-3 border-t border-cyber-border flex items-center justify-between text-xs font-mono font-bold text-cyber-yellow">
-            <span>// ACCESS SYSTEM</span>
+          <div class="mt-6 pt-4 border-t border-dash-border flex items-center justify-between text-xs font-semibold text-dash-yellow">
+            <span>ACCESS SYSTEM</span>
             <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
           </div>
         </div>
 
         <!-- CARD 3: POMODORO -->
-        <div onclick="switchView('pomodoro')" class="tool-card group cyber-panel p-5 hover:border-cyber-magenta cursor-pointer transition-all duration-300 flex flex-col justify-between hover:shadow-[0_0_20px_rgba(255,0,85,0.2)]">
+        <div onclick="switchView('pomodoro')" class="tool-card group dash-card p-6 cursor-pointer hover:border-dash-purple/60 transition-all duration-300 flex flex-col justify-between hover:shadow-xl">
           <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-10 h-10 bg-cyber-magenta/10 border border-cyber-magenta text-cyber-magenta flex items-center justify-center group-hover:bg-cyber-magenta group-hover:text-cyber-black transition-all">
-                <i data-lucide="timer" class="w-5 h-5"></i>
+            <div class="flex items-center justify-between mb-5">
+              <div class="w-12 h-12 rounded-xl bg-dash-purple/10 border border-dash-purple/20 text-dash-purple flex items-center justify-center group-hover:bg-dash-purple group-hover:text-white transition-all">
+                <i data-lucide="timer" class="w-6 h-6"></i>
               </div>
-              <span class="text-[10px] font-mono font-bold bg-cyber-magenta/10 text-cyber-magenta border border-cyber-magenta/30 px-2 py-0.5 uppercase">
+              <span class="text-[11px] font-semibold bg-dash-purple/10 text-dash-purple border border-dash-purple/30 px-2.5 py-0.5 rounded-full">
                 CHRONO
               </span>
             </div>
-            <h3 class="text-lg font-bold font-orbitron text-white group-hover:text-cyber-magenta transition-colors">
+            <h3 class="text-base font-bold text-white group-hover:text-dash-purple transition-colors">
               賽博番茄鐘
             </h3>
-            <p class="text-xs text-cyber-dim mt-2 leading-relaxed font-sans">
+            <p class="text-xs text-dash-muted mt-2 leading-relaxed">
               25M 專注脈衝與 5M 間歇休息超載倒數控制器，極致提升人機運作效率。
             </p>
           </div>
-          <div class="mt-6 pt-3 border-t border-cyber-border flex items-center justify-between text-xs font-mono font-bold text-cyber-magenta">
-            <span>// ACCESS SYSTEM</span>
+          <div class="mt-6 pt-4 border-t border-dash-border flex items-center justify-between text-xs font-semibold text-dash-purple">
+            <span>ACCESS SYSTEM</span>
             <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
           </div>
         </div>
 
         <!-- CARD 4: QR CODE GENERATOR -->
-        <div onclick="switchView('qrcode')" class="tool-card group cyber-panel p-5 hover:border-cyber-green cursor-pointer transition-all duration-300 flex flex-col justify-between hover:shadow-[0_0_20px_rgba(0,255,102,0.2)]">
+        <div onclick="switchView('qrcode')" class="tool-card group dash-card p-6 cursor-pointer hover:border-dash-green/60 transition-all duration-300 flex flex-col justify-between hover:shadow-xl">
           <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-10 h-10 bg-cyber-green/10 border border-cyber-green text-cyber-green flex items-center justify-center group-hover:bg-cyber-green group-hover:text-cyber-black transition-all">
-                <i data-lucide="qr-code" class="w-5 h-5"></i>
+            <div class="flex items-center justify-between mb-5">
+              <div class="w-12 h-12 rounded-xl bg-dash-green/10 border border-dash-green/20 text-dash-green flex items-center justify-center group-hover:bg-dash-green group-hover:text-dash-main transition-all">
+                <i data-lucide="qr-code" class="w-6 h-6"></i>
               </div>
-              <span class="text-[10px] font-mono font-bold bg-cyber-green/10 text-cyber-green border border-cyber-green/30 px-2 py-0.5 uppercase">
-                MATRIX ENCODER
+              <span class="text-[11px] font-semibold bg-dash-green/10 text-dash-green border border-dash-green/30 px-2.5 py-0.5 rounded-full">
+                ENCODER
               </span>
             </div>
-            <h3 class="text-lg font-bold font-orbitron text-white group-hover:text-cyber-green transition-colors">
+            <h3 class="text-base font-bold text-white group-hover:text-dash-green transition-colors">
               QR Code 矩陣生成器
             </h3>
-            <p class="text-xs text-cyber-dim mt-2 leading-relaxed font-sans">
+            <p class="text-xs text-dash-muted mt-2 leading-relaxed">
               即時將網址或數據編碼轉換為高密度二維碼，支援高解析度圖檔導出。
             </p>
           </div>
-          <div class="mt-6 pt-3 border-t border-cyber-border flex items-center justify-between text-xs font-mono font-bold text-cyber-green">
-            <span>// ACCESS SYSTEM</span>
+          <div class="mt-6 pt-4 border-t border-dash-border flex items-center justify-between text-xs font-semibold text-dash-green">
+            <span>ACCESS SYSTEM</span>
             <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
           </div>
         </div>
@@ -287,107 +254,116 @@
       </div>
     </section>
 
-    <!-- TOOL VIEW 1: FLEET KPI DASHBOARD (CYBERPUNK HIGH CONTRAST) -->
+    <!-- TOOL VIEW 1: FLEET KPI DASHBOARD -->
     <section id="view-fleet" class="hidden space-y-6">
       
       <!-- Back Action Header -->
       <div class="flex items-center justify-between">
-        <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-mono text-cyber-cyan hover:text-cyber-yellow font-bold uppercase tracking-wider transition-colors">
+        <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-semibold text-dash-blue hover:text-white transition-colors">
           <i data-lucide="chevron-left" class="w-4 h-4"></i>
-          <span>[ RETURN TO MATRIX ]</span>
+          <span>RETURN TO DASHBOARD</span>
         </button>
 
-        <div class="text-xs font-mono text-cyber-dim">
-          DATA SINK STATUS: <span class="text-cyber-green font-bold glow-green">SYNCHRONIZED</span>
+        <div class="text-xs font-mono text-dash-muted flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-dash-green"></span>
+          DATA SINK STATUS: <span class="text-dash-green font-bold">SYNCHRONIZED</span>
         </div>
       </div>
 
       <!-- Dashboard Header Banner -->
-      <div class="cyber-panel p-6 border-l-4 border-l-cyber-cyan">
+      <div class="dash-card p-6 border-l-4 border-l-dash-blue">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div class="flex items-center space-x-3">
-              <span class="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-cyber-cyan text-cyber-black uppercase">
+            <div class="flex items-center space-x-3 mb-1.5">
+              <span class="px-2.5 py-0.5 text-[10px] font-bold bg-dash-blue/20 text-dash-blue rounded-md uppercase tracking-wider">
                 FLEET COMMAND
               </span>
-              <span class="text-xs font-mono text-cyber-yellow">LAST_UPDATE: 2025.OCT</span>
+              <span class="text-xs font-mono text-dash-muted">LAST_UPDATE: 2025.OCT</span>
             </div>
-            <h2 class="text-3xl font-black font-orbitron text-white mt-1 tracking-wider">
-              FLEET_KPI <span class="text-cyber-cyan glow-cyan">OPERATIONS</span>
+            <h2 class="text-2xl font-bold text-white tracking-tight">
+              FLEET KPI <span class="text-dash-blue">OPERATIONS</span>
             </h2>
           </div>
           <div class="flex items-center space-x-3 text-xs font-mono">
-            <div class="bg-cyber-black/80 border border-cyber-border p-2 text-center">
-              <div class="text-cyber-dim text-[10px]">TOTAL FLEET HOURS</div>
-              <div class="text-cyber-yellow font-bold text-sm">9,861 HRS</div>
+            <div class="bg-dash-main/80 border border-dash-border p-2.5 rounded-xl text-center min-w-[120px]">
+              <div class="text-dash-muted text-[10px]">TOTAL FLEET HOURS</div>
+              <div class="text-dash-yellow font-bold text-sm mt-0.5">9,861 HRS</div>
             </div>
-            <div class="bg-cyber-black/80 border border-cyber-border p-2 text-center">
-              <div class="text-cyber-dim text-[10px]">RECORD EFFICIENCY</div>
-              <div class="text-cyber-cyan font-bold text-sm">4.5 ORDERS/HR</div>
+            <div class="bg-dash-main/80 border border-dash-border p-2.5 rounded-xl text-center min-w-[120px]">
+              <div class="text-dash-muted text-[10px]">RECORD EFFICIENCY</div>
+              <div class="text-dash-green font-bold text-sm mt-0.5">4.5 ORDERS/HR</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Core Summary KPI Cards Grid (4 Key Highlights) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Core Summary KPI Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
         <!-- KPI Card 1 -->
-        <div class="cyber-panel p-5 border-t-2 border-t-cyber-cyan space-y-2">
-          <div class="flex items-center justify-between text-cyber-dim text-xs font-mono">
+        <div class="dash-card p-5 space-y-3">
+          <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
             <span>MONTHLY TOTAL ORDERS</span>
-            <i data-lucide="package" class="w-4 h-4 text-cyber-cyan"></i>
+            <div class="p-2 rounded-lg bg-dash-blue/10 text-dash-blue">
+              <i data-lucide="package" class="w-4 h-4"></i>
+            </div>
           </div>
-          <div class="text-3xl font-black font-orbitron text-white glow-cyan">
-            44,412 <span class="text-xs font-mono font-normal text-cyber-dim">單</span>
+          <div class="text-3xl font-bold text-white tracking-tight">
+            44,412 <span class="text-xs font-normal text-dash-muted">單</span>
           </div>
-          <div class="text-xs font-mono text-cyber-green flex items-center gap-1">
+          <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
             <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
             <span>+2.6% vs AUG (OCT DATA)</span>
           </div>
         </div>
 
         <!-- KPI Card 2 -->
-        <div class="cyber-panel p-5 border-t-2 border-t-cyber-yellow space-y-2">
-          <div class="flex items-center justify-between text-cyber-dim text-xs font-mono">
-            <span>DELIVERY EFFICIENCY (ORDER/HR)</span>
-            <i data-lucide="zap" class="w-4 h-4 text-cyber-yellow"></i>
+        <div class="dash-card p-5 space-y-3">
+          <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
+            <span>DELIVERY EFFICIENCY</span>
+            <div class="p-2 rounded-lg bg-dash-yellow/10 text-dash-yellow">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+            </div>
           </div>
-          <div class="text-3xl font-black font-orbitron text-cyber-yellow glow-yellow">
-            4.5 <span class="text-xs font-mono font-normal text-cyber-dim">單/小時</span>
+          <div class="text-3xl font-bold text-dash-yellow tracking-tight">
+            4.5 <span class="text-xs font-normal text-dash-muted">單/小時</span>
           </div>
-          <div class="text-xs font-mono text-cyber-green flex items-center gap-1">
+          <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
             <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
             <span>PEAK EFFICIENCY (JUL: 4.1)</span>
           </div>
         </div>
 
         <!-- KPI Card 3 -->
-        <div class="cyber-panel p-5 border-t-2 border-t-cyber-green space-y-2">
-          <div class="flex items-center justify-between text-cyber-dim text-xs font-mono">
+        <div class="dash-card p-5 space-y-3">
+          <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
             <span>AVG DAILY CBM PER TRUCK</span>
-            <i data-lucide="box" class="w-4 h-4 text-cyber-green"></i>
+            <div class="p-2 rounded-lg bg-dash-green/10 text-dash-green">
+              <i data-lucide="box" class="w-4 h-4"></i>
+            </div>
           </div>
-          <div class="text-3xl font-black font-orbitron text-cyber-green glow-green">
-            7.9 <span class="text-xs font-mono font-normal text-cyber-dim">CBM</span>
+          <div class="text-3xl font-bold text-dash-green tracking-tight">
+            7.9 <span class="text-xs font-normal text-dash-muted">CBM</span>
           </div>
-          <div class="text-xs font-mono text-cyber-green flex items-center gap-1">
+          <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
             <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            <span>HISTORIC HIGH (CAPACITY)</span>
+            <span>HISTORIC HIGH CAPACITY</span>
           </div>
         </div>
 
         <!-- KPI Card 4 -->
-        <div class="cyber-panel p-5 border-t-2 border-t-cyber-magenta space-y-2">
-          <div class="flex items-center justify-between text-cyber-dim text-xs font-mono">
+        <div class="dash-card p-5 space-y-3">
+          <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
             <span>TOTAL OPERATION HOURS</span>
-            <i data-lucide="clock" class="w-4 h-4 text-cyber-magenta"></i>
+            <div class="p-2 rounded-lg bg-dash-purple/10 text-dash-purple">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+            </div>
           </div>
-          <div class="text-3xl font-black font-orbitron text-white glow-magenta">
-            9,861 <span class="text-xs font-mono font-normal text-cyber-dim">小時</span>
+          <div class="text-3xl font-bold text-white tracking-tight">
+            9,861 <span class="text-xs font-normal text-dash-muted">小時</span>
           </div>
-          <div class="text-xs font-mono text-cyber-cyan flex items-center gap-1">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyber-cyan"></i>
+          <div class="text-xs text-dash-blue flex items-center gap-1 font-semibold">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
             <span>OPTIMIZED WORKFLOW</span>
           </div>
         </div>
@@ -397,13 +373,13 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Main Line Chart -->
-        <div class="lg:col-span-2 cyber-panel p-6 space-y-4">
-          <div class="flex items-center justify-between border-b border-cyber-border pb-3">
-            <h3 class="font-bold font-orbitron text-white text-base flex items-center gap-2">
-              <i data-lucide="line-chart" class="w-4 h-4 text-cyber-cyan"></i>
+        <div class="lg:col-span-2 dash-card p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-dash-border pb-4">
+            <h3 class="font-bold text-white text-base flex items-center gap-2">
+              <i data-lucide="line-chart" class="w-4 h-4 text-dash-blue"></i>
               月度效率與訂單運量趨勢分析
             </h3>
-            <span class="text-xs font-mono text-cyber-yellow">// 2025 JUL - OCT</span>
+            <span class="text-xs font-mono text-dash-muted">// 2025 JUL - OCT</span>
           </div>
           <div class="relative h-64 w-full">
             <canvas id="fleetTrendChart"></canvas>
@@ -411,13 +387,13 @@
         </div>
 
         <!-- Category Pie Chart -->
-        <div class="cyber-panel p-6 space-y-4 flex flex-col justify-between">
-          <div class="border-b border-cyber-border pb-3">
-            <h3 class="font-bold font-orbitron text-white text-base flex items-center gap-2">
-              <i data-lucide="pie-chart" class="w-4 h-4 text-cyber-magenta"></i>
+        <div class="dash-card p-6 space-y-4 flex flex-col justify-between">
+          <div class="border-b border-dash-border pb-4">
+            <h3 class="font-bold text-white text-base flex items-center gap-2">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-dash-yellow"></i>
               物料結構拆分 (10月)
             </h3>
-            <p class="text-xs font-mono text-cyber-dim mt-1">西藥與腎水物料之訂單總數比例</p>
+            <p class="text-xs text-dash-muted mt-1">西藥與腎水物料之訂單總數比例</p>
           </div>
           <div class="relative h-52 w-full my-auto flex items-center justify-center">
             <canvas id="fleetCategoryChart"></canvas>
@@ -426,33 +402,33 @@
       </div>
 
       <!-- Data Table Cyber Style -->
-      <div class="cyber-panel p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-cyber-border pb-3">
-          <h3 class="font-bold font-orbitron text-white text-base flex items-center gap-2">
-            <i data-lucide="database" class="w-4 h-4 text-cyber-yellow"></i>
+      <div class="dash-card p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-dash-border pb-4">
+          <h3 class="font-bold text-white text-base flex items-center gap-2">
+            <i data-lucide="database" class="w-4 h-4 text-dash-green"></i>
             車隊歷史營運數據總表 (EXCEL DATASET)
           </h3>
-          <span class="text-xs font-mono text-cyber-dim">[ READ-ONLY MATRIX ]</span>
+          <span class="text-xs font-mono text-dash-muted">[ READ-ONLY MATRIX ]</span>
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-xs font-mono text-left border-collapse">
+          <table class="w-full text-xs text-left border-collapse">
             <thead>
-              <tr class="bg-cyber-black text-cyber-cyan border-b border-cyber-border">
-                <th class="p-3 uppercase">MONTH</th>
-                <th class="p-3 uppercase">TOTAL HRS</th>
-                <th class="p-3 uppercase text-cyber-yellow">EFF (ORD/HR)</th>
-                <th class="p-3 uppercase">EFF (PAL/HR)</th>
-                <th class="p-3 uppercase text-cyber-green">AVG CBM</th>
-                <th class="p-3 uppercase">TOTAL ORDERS</th>
-                <th class="p-3 uppercase">TOTAL PALLETS</th>
-                <th class="p-3 uppercase">MED ORDERS</th>
-                <th class="p-3 uppercase">MED PALLETS</th>
-                <th class="p-3 uppercase">RENAL ORDERS</th>
-                <th class="p-3 uppercase">RENAL PALLETS</th>
+              <tr class="bg-dash-main text-dash-muted border-b border-dash-border font-mono">
+                <th class="p-3.5 rounded-l-lg">MONTH</th>
+                <th class="p-3.5">TOTAL HRS</th>
+                <th class="p-3.5 text-dash-yellow">EFF (ORD/HR)</th>
+                <th class="p-3.5">EFF (PAL/HR)</th>
+                <th class="p-3.5 text-dash-green">AVG CBM</th>
+                <th class="p-3.5">TOTAL ORDERS</th>
+                <th class="p-3.5">TOTAL PALLETS</th>
+                <th class="p-3.5">MED ORDERS</th>
+                <th class="p-3.5">MED PALLETS</th>
+                <th class="p-3.5">RENAL ORDERS</th>
+                <th class="p-3.5 rounded-r-lg">RENAL PALLETS</th>
               </tr>
             </thead>
-            <tbody id="fleetTableBody" class="divide-y divide-cyber-border text-slate-300">
+            <tbody id="fleetTableBody" class="divide-y divide-dash-border/60 text-gray-200 font-mono">
               <!-- JS Populated Row Data -->
             </tbody>
           </table>
@@ -460,40 +436,40 @@
       </div>
 
       <!-- Live KPI Simulator Form -->
-      <div class="cyber-panel p-6 space-y-4">
-        <div class="border-b border-cyber-border pb-3">
-          <h3 class="font-bold font-orbitron text-white text-base flex items-center gap-2">
-            <i data-lucide="cpu" class="w-4 h-4 text-cyber-cyan"></i>
+      <div class="dash-card p-6 space-y-4">
+        <div class="border-b border-dash-border pb-4">
+          <h3 class="font-bold text-white text-base flex items-center gap-2">
+            <i data-lucide="cpu" class="w-4 h-4 text-dash-blue"></i>
             單月 KPI 數據模擬與試算器
           </h3>
-          <p class="text-xs font-mono text-cyber-dim mt-0.5">輸入預測工時與訂單數量，算定車隊運載效率指標：</p>
+          <p class="text-xs text-dash-muted mt-1">輸入預測工時與訂單數量，算定車隊運載效率指標：</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label class="text-xs font-mono text-cyber-dim">預估總配送小時 (HRS)</label>
-            <input type="number" id="calcHours" value="10000" class="w-full mt-1 p-2.5 bg-cyber-black border border-cyber-border font-mono text-xs text-cyber-cyan focus:outline-none focus:border-cyber-cyan">
+            <label class="text-xs font-medium text-dash-muted">預估總配送小時 (HRS)</label>
+            <input type="number" id="calcHours" value="10000" class="w-full mt-1.5 p-2.5 bg-dash-main border border-dash-border rounded-xl font-mono text-xs text-white focus:outline-none focus:border-dash-blue">
           </div>
           <div>
-            <label class="text-xs font-mono text-cyber-dim">預估總訂單量 (ORDERS)</label>
-            <input type="number" id="calcOrders" value="45000" class="w-full mt-1 p-2.5 bg-cyber-black border border-cyber-border font-mono text-xs text-cyber-cyan focus:outline-none focus:border-cyber-cyan">
+            <label class="text-xs font-medium text-dash-muted">預估總訂單量 (ORDERS)</label>
+            <input type="number" id="calcOrders" value="45000" class="w-full mt-1.5 p-2.5 bg-dash-main border border-dash-border rounded-xl font-mono text-xs text-white focus:outline-none focus:border-dash-blue">
           </div>
           <div>
-            <label class="text-xs font-mono text-cyber-dim">預估總板數 (PALLETS)</label>
-            <input type="number" id="calcPallets" value="3100" class="w-full mt-1 p-2.5 bg-cyber-black border border-cyber-border font-mono text-xs text-cyber-cyan focus:outline-none focus:border-cyber-cyan">
+            <label class="text-xs font-medium text-dash-muted">預估總板數 (PALLETS)</label>
+            <input type="number" id="calcPallets" value="3100" class="w-full mt-1.5 p-2.5 bg-dash-main border border-dash-border rounded-xl font-mono text-xs text-white focus:outline-none focus:border-dash-blue">
           </div>
           <div class="flex items-end">
-            <button onclick="calculateKPI()" class="w-full py-2.5 bg-cyber-cyan text-cyber-black font-bold font-mono text-xs cyber-btn hover:bg-cyber-yellow transition-all">
-              // EXECUTE CALC
+            <button onclick="calculateKPI()" class="w-full py-2.5 bg-dash-blue text-white font-semibold text-xs rounded-xl dash-btn hover:bg-dash-blue/90 transition-all">
+              EXECUTE CALC
             </button>
           </div>
         </div>
 
-        <div id="calcResult" class="hidden mt-4 p-4 bg-cyber-black border border-cyber-cyan text-xs font-mono space-y-2">
-          <div class="font-bold text-cyber-yellow">// SIMULATION_OUTPUT:</div>
+        <div id="calcResult" class="hidden mt-4 p-4 bg-dash-main border border-dash-blue/40 rounded-xl text-xs font-mono space-y-2">
+          <div class="font-bold text-dash-yellow">// SIMULATION_OUTPUT:</div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div>> 每小時配送訂單效率: <span id="resOrdersHr" class="font-bold text-cyber-cyan text-sm">--</span> 單/小時</div>
-            <div>> 每小時配送板數效率: <span id="resPalletsHr" class="font-bold text-cyber-green text-sm">--</span> 板/小時</div>
+            <div>> 每小時配送訂單效率: <span id="resOrdersHr" class="font-bold text-dash-green text-sm">--</span> 單/小時</div>
+            <div>> 每小時配送板數效率: <span id="resPalletsHr" class="font-bold text-dash-blue text-sm">--</span> 板/小時</div>
           </div>
         </div>
       </div>
@@ -502,35 +478,35 @@
 
     <!-- TOOL VIEW 2: TRANSLATOR -->
     <section id="view-translator" class="hidden space-y-4">
-      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-mono text-cyber-yellow hover:text-white font-bold uppercase transition-colors">
+      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-semibold text-dash-yellow hover:text-white transition-colors">
         <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        <span>[ RETURN TO MATRIX ]</span>
+        <span>RETURN TO DASHBOARD</span>
       </button>
 
-      <div class="cyber-panel p-6 max-w-4xl mx-auto space-y-4">
-        <div class="border-b border-cyber-border pb-3">
-          <h2 class="text-xl font-bold font-orbitron text-white flex items-center gap-2">
-            <i data-lucide="languages" class="w-5 h-5 text-cyber-yellow"></i>
+      <div class="dash-card p-6 max-w-4xl mx-auto space-y-5">
+        <div class="border-b border-dash-border pb-4">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="languages" class="w-5 h-5 text-dash-yellow"></i>
             英文轉繁體中文神經翻譯模組
           </h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-2">
-            <label class="text-xs font-mono text-cyber-dim">// ENGLISH INPUT MATRIX</label>
-            <textarea id="transInput" rows="8" placeholder="Enter English raw text..." class="w-full p-3 bg-cyber-black border border-cyber-border text-xs font-mono text-cyber-yellow focus:outline-none focus:border-cyber-yellow resize-none"></textarea>
+            <label class="text-xs font-mono text-dash-muted">// ENGLISH INPUT MATRIX</label>
+            <textarea id="transInput" rows="8" placeholder="Enter English raw text..." class="w-full p-3 bg-dash-main border border-dash-border rounded-xl text-xs font-mono text-white focus:outline-none focus:border-dash-yellow resize-none"></textarea>
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-mono text-cyber-dim">// TRADITIONAL CHINESE OUTPUT</label>
-            <div id="transOutput" class="w-full h-48 md:h-auto p-3 bg-cyber-black border border-cyber-border text-xs font-mono text-cyber-cyan overflow-y-auto whitespace-pre-wrap">譯文輸出區域...</div>
+            <label class="text-xs font-mono text-dash-muted">// TRADITIONAL CHINESE OUTPUT</label>
+            <div id="transOutput" class="w-full h-48 md:h-auto p-3 bg-dash-main border border-dash-border rounded-xl text-xs font-mono text-dash-green overflow-y-auto whitespace-pre-wrap">譯文輸出區域...</div>
           </div>
         </div>
 
         <div class="flex items-center justify-between pt-2">
-          <button onclick="clearTranslator()" class="text-xs font-mono text-cyber-dim hover:text-white">CLEAR ALL</button>
+          <button onclick="clearTranslator()" class="text-xs font-semibold text-dash-muted hover:text-white transition-colors">CLEAR ALL</button>
           <div class="space-x-2">
-            <button onclick="copyTranslation()" class="px-4 py-2 border border-cyber-border bg-cyber-black text-cyber-cyan text-xs font-mono font-bold hover:border-cyber-cyan">COPY RESULT</button>
-            <button id="transBtn" onclick="runTranslation()" class="px-5 py-2 bg-cyber-yellow text-cyber-black text-xs font-mono font-bold cyber-btn hover:bg-cyber-cyan">TRANSLATE</button>
+            <button onclick="copyTranslation()" class="px-4 py-2 border border-dash-border bg-dash-main text-white text-xs font-semibold rounded-xl hover:border-dash-blue transition-all">COPY RESULT</button>
+            <button id="transBtn" onclick="runTranslation()" class="px-5 py-2 bg-dash-yellow text-dash-main text-xs font-bold rounded-xl dash-btn hover:bg-dash-yellow/90">TRANSLATE</button>
           </div>
         </div>
       </div>
@@ -538,32 +514,32 @@
 
     <!-- TOOL VIEW 3: POMODORO -->
     <section id="view-pomodoro" class="hidden space-y-4">
-      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-mono text-cyber-magenta hover:text-white font-bold uppercase transition-colors">
+      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-semibold text-dash-purple hover:text-white transition-colors">
         <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        <span>[ RETURN TO MATRIX ]</span>
+        <span>RETURN TO DASHBOARD</span>
       </button>
 
-      <div class="cyber-panel p-8 max-w-md mx-auto text-center space-y-6">
+      <div class="dash-card p-8 max-w-md mx-auto text-center space-y-6">
         <div>
-          <span id="pomoStatusBadge" class="px-3 py-1 text-xs font-mono font-bold bg-cyber-magenta/20 text-cyber-magenta border border-cyber-magenta/40 glow-magenta">
+          <span id="pomoStatusBadge" class="px-3 py-1 text-xs font-semibold bg-dash-purple/10 text-dash-purple border border-dash-purple/30 rounded-full">
             FOCUS PULSE (25M)
           </span>
-          <h2 class="text-2xl font-black font-orbitron text-white mt-3">CHRONO_PULSE</h2>
+          <h2 class="text-2xl font-bold text-white mt-3">CHRONO_PULSE</h2>
         </div>
 
         <div class="py-6">
-          <div id="pomoTimer" class="text-6xl font-black font-orbitron text-cyber-cyan glow-cyan tracking-wider">25:00</div>
+          <div id="pomoTimer" class="text-6xl font-bold font-mono text-dash-blue tracking-wider">25:00</div>
         </div>
 
         <div class="flex items-center justify-center space-x-3">
-          <button id="pomoResetBtn" onclick="resetPomodoro()" class="p-3 border border-cyber-border bg-cyber-black text-white hover:border-cyber-cyan">
+          <button id="pomoResetBtn" onclick="resetPomodoro()" class="p-3 border border-dash-border bg-dash-main text-white rounded-xl hover:border-dash-blue transition-all">
             <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
           </button>
-          <button id="pomoStartBtn" onclick="togglePomodoro()" class="px-8 py-3 bg-cyber-magenta text-white font-bold font-mono text-sm cyber-btn hover:bg-cyber-cyan hover:text-cyber-black transition-all flex items-center space-x-2">
+          <button id="pomoStartBtn" onclick="togglePomodoro()" class="px-8 py-3 bg-dash-purple text-white font-bold text-xs rounded-xl dash-btn hover:bg-dash-purple/90 transition-all flex items-center space-x-2">
             <i id="pomoPlayIcon" data-lucide="play" class="w-5 h-5"></i>
             <span id="pomoBtnText">START PULSE</span>
           </button>
-          <button onclick="switchPomoMode()" class="p-3 border border-cyber-border bg-cyber-black text-white hover:border-cyber-magenta" title="SWITCH MODE">
+          <button onclick="switchPomoMode()" class="p-3 border border-dash-border bg-dash-main text-white rounded-xl hover:border-dash-purple transition-all" title="SWITCH MODE">
             <i data-lucide="coffee" class="w-5 h-5"></i>
           </button>
         </div>
@@ -572,30 +548,30 @@
 
     <!-- TOOL VIEW 4: QR CODE GENERATOR -->
     <section id="view-qrcode" class="hidden space-y-4">
-      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-mono text-cyber-green hover:text-white font-bold uppercase transition-colors">
+      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-semibold text-dash-green hover:text-white transition-colors">
         <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        <span>[ RETURN TO MATRIX ]</span>
+        <span>RETURN TO DASHBOARD</span>
       </button>
 
-      <div class="cyber-panel p-6 max-w-xl mx-auto space-y-6">
-        <div class="border-b border-cyber-border pb-3">
-          <h2 class="text-xl font-bold font-orbitron text-white flex items-center gap-2">
-            <i data-lucide="qr-code" class="w-5 h-5 text-cyber-green"></i>
+      <div class="dash-card p-6 max-w-xl mx-auto space-y-6">
+        <div class="border-b border-dash-border pb-4">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="qr-code" class="w-5 h-5 text-dash-green"></i>
             二維碼數據矩陣編碼器
           </h2>
         </div>
 
         <div class="space-y-2">
-          <label class="text-xs font-mono text-cyber-dim">// INPUT STRING OR URL</label>
-          <input type="text" id="qrInput" oninput="generateQRCode()" placeholder="https://domain.com or string content..." class="w-full px-4 py-2.5 bg-cyber-black border border-cyber-border font-mono text-xs text-cyber-green focus:outline-none focus:border-cyber-green">
+          <label class="text-xs font-mono text-dash-muted">// INPUT STRING OR URL</label>
+          <input type="text" id="qrInput" oninput="generateQRCode()" placeholder="https://domain.com or string content..." class="w-full px-4 py-2.5 bg-dash-main border border-dash-border rounded-xl font-mono text-xs text-white focus:outline-none focus:border-dash-green">
         </div>
 
-        <div class="flex flex-col items-center justify-center p-6 bg-cyber-black border border-dashed border-cyber-border min-h-[220px]">
-          <div id="qrcodeBox" class="p-3 bg-white"></div>
-          <p id="qrPlaceholder" class="text-xs font-mono text-cyber-dim mt-2">// WAITING FOR DATA INPUT...</p>
+        <div class="flex flex-col items-center justify-center p-6 bg-dash-main border border-dashed border-dash-border rounded-xl min-h-[220px]">
+          <div id="qrcodeBox" class="p-3 bg-white rounded-lg"></div>
+          <p id="qrPlaceholder" class="text-xs font-mono text-dash-muted mt-2">// WAITING FOR DATA INPUT...</p>
         </div>
 
-        <button id="downloadQrBtn" onclick="downloadQRCode()" disabled class="w-full py-2.5 bg-cyber-green disabled:opacity-30 text-cyber-black font-bold font-mono text-xs cyber-btn hover:bg-cyber-yellow transition-all">
+        <button id="downloadQrBtn" onclick="downloadQRCode()" disabled class="w-full py-2.5 bg-dash-green disabled:opacity-30 text-dash-main font-bold text-xs rounded-xl dash-btn hover:bg-dash-green/90 transition-all">
           DOWNLOAD MATRIX IMAGE (PNG)
         </button>
       </div>
@@ -604,8 +580,8 @@
   </main>
 
   <!-- Cyber Footer -->
-  <footer class="mt-auto border-t border-cyber-border bg-cyber-dark/80 py-4 text-center text-xs font-mono text-cyber-dim z-10">
-    <p>© 2026 CYBER_FLEET MATRIX · HIGH-CONTRAST TACTICAL DASHBOARD</p>
+  <footer class="mt-auto border-t border-dash-border bg-dash-main/80 py-4 text-center text-xs font-mono text-dash-muted z-10">
+    <p>© 2026 FLEET MATRIX · DARK MODE DASHBOARD</p>
   </footer>
 
   <script>
@@ -632,18 +608,18 @@
     function renderFleetTable() {
       const tbody = document.getElementById('fleetTableBody');
       tbody.innerHTML = fleetData.map(item => `
-        <tr class="hover:bg-cyber-card transition-colors">
-          <td class="p-3 font-bold text-white">${item.year} ${item.month}</td>
-          <td class="p-3 text-slate-300">${item.hours.toLocaleString()}</td>
-          <td class="p-3 font-bold text-cyber-yellow glow-yellow">${item.effOrders}</td>
-          <td class="p-3 text-slate-300">${item.effPallets}</td>
-          <td class="p-3 font-bold text-cyber-green glow-green">${item.cbm}</td>
-          <td class="p-3 font-bold text-white">${item.totalOrders.toLocaleString()}</td>
-          <td class="p-3 text-slate-300">${item.totalPallets.toLocaleString()}</td>
-          <td class="p-3 text-cyber-dim">${item.wMedOrders.toLocaleString()}</td>
-          <td class="p-3 text-cyber-dim">${item.wMedPallets.toLocaleString()}</td>
-          <td class="p-3 text-cyber-dim">${item.renalOrders.toLocaleString()}</td>
-          <td class="p-3 text-cyber-dim">${item.renalPallets.toLocaleString()}</td>
+        <tr class="hover:bg-dash-hover transition-colors">
+          <td class="p-3.5 font-bold text-white">${item.year} ${item.month}</td>
+          <td class="p-3.5 text-dash-muted">${item.hours.toLocaleString()}</td>
+          <td class="p-3.5 font-bold text-dash-yellow">${item.effOrders}</td>
+          <td class="p-3.5 text-dash-muted">${item.effPallets}</td>
+          <td class="p-3.5 font-bold text-dash-green">${item.cbm}</td>
+          <td class="p-3.5 font-bold text-white">${item.totalOrders.toLocaleString()}</td>
+          <td class="p-3.5 text-dash-muted">${item.totalPallets.toLocaleString()}</td>
+          <td class="p-3.5 text-dash-muted">${item.wMedOrders.toLocaleString()}</td>
+          <td class="p-3.5 text-dash-muted">${item.wMedPallets.toLocaleString()}</td>
+          <td class="p-3.5 text-dash-muted">${item.renalOrders.toLocaleString()}</td>
+          <td class="p-3.5 text-dash-muted">${item.renalPallets.toLocaleString()}</td>
         </tr>
       `).join('');
     }
@@ -659,7 +635,7 @@
       const effOrdersData = fleetData.map(d => d.effOrders);
       const totalOrdersData = fleetData.map(d => d.totalOrders);
 
-      // Line Chart (High Contrast Cyber Theme)
+      // Line Chart (Matching Palette Theme)
       const ctxTrend = document.getElementById('fleetTrendChart').getContext('2d');
       if (trendChartInstance) trendChartInstance.destroy();
       trendChartInstance = new Chart(ctxTrend, {
@@ -670,25 +646,25 @@
             {
               label: '配送效率 (訂單/小時)',
               data: effOrdersData,
-              borderColor: '#00f0ff',
-              backgroundColor: 'rgba(0, 240, 255, 0.12)',
+              borderColor: '#38a5ff',
+              backgroundColor: 'rgba(56, 165, 255, 0.15)',
               borderWidth: 3,
               fill: true,
               yAxisID: 'y1',
-              tension: 0.2,
-              pointBackgroundColor: '#00f0ff',
+              tension: 0.3,
+              pointBackgroundColor: '#38a5ff',
               pointRadius: 5
             },
             {
               label: '總訂單數',
               data: totalOrdersData,
-              borderColor: '#ffe600',
+              borderColor: '#ffb020',
               borderDash: [4, 4],
               borderWidth: 2,
               pointRadius: 4,
               yAxisID: 'y2',
-              tension: 0.2,
-              pointBackgroundColor: '#ffe600'
+              tension: 0.3,
+              pointBackgroundColor: '#ffb020'
             }
           ]
         },
@@ -697,28 +673,28 @@
           maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
           plugins: {
-            legend: { labels: { color: '#e2e8f0', font: { family: 'Share Tech Mono', size: 11 } } }
+            legend: { labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans', size: 11 } } }
           },
           scales: {
             y1: {
               type: 'linear', display: true, position: 'left',
-              ticks: { color: '#00f0ff', font: { family: 'Share Tech Mono' } },
-              grid: { color: '#1f263e' }
+              ticks: { color: '#38a5ff', font: { family: 'JetBrains Mono' } },
+              grid: { color: '#333342' }
             },
             y2: {
               type: 'linear', display: true, position: 'right',
-              ticks: { color: '#ffe600', font: { family: 'Share Tech Mono' } },
+              ticks: { color: '#ffb020', font: { family: 'JetBrains Mono' } },
               grid: { drawOnChartArea: false }
             },
             x: {
-              ticks: { color: '#e2e8f0', font: { family: 'Share Tech Mono' } },
-              grid: { color: '#1f263e' }
+              ticks: { color: '#8e8e9e', font: { family: 'JetBrains Mono' } },
+              grid: { color: '#333342' }
             }
           }
         }
       });
 
-      // Pie Chart (Doughnut Cyber)
+      // Pie Chart (Doughnut Theme)
       const latest = fleetData[fleetData.length - 1];
       const ctxCat = document.getElementById('fleetCategoryChart').getContext('2d');
       if (categoryChartInstance) categoryChartInstance.destroy();
@@ -728,16 +704,16 @@
           labels: ['西藥訂單', '腎水訂單'],
           datasets: [{
             data: [latest.wMedOrders, latest.renalOrders],
-            backgroundColor: ['#00f0ff', '#ff0055'],
-            borderColor: '#07080d',
-            borderWidth: 3
+            backgroundColor: ['#38a5ff', '#ffb020'],
+            borderColor: '#242430',
+            borderWidth: 4
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom', labels: { color: '#e2e8f0', font: { family: 'Share Tech Mono' } } }
+            legend: { position: 'bottom', labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans' } } }
           }
         }
       });
@@ -887,11 +863,11 @@
       const badge = document.getElementById('pomoStatusBadge');
       if (pomoMode === 'break') {
         badge.innerText = 'REST PULSE (5M)';
-        badge.className = 'px-3 py-1 text-xs font-mono font-bold bg-cyber-green/20 text-cyber-green border border-cyber-green/40 glow-green';
+        badge.className = 'px-3 py-1 text-xs font-semibold bg-dash-green/10 text-dash-green border border-dash-green/30 rounded-full';
         pomoTimeLeft = 5 * 60;
       } else {
         badge.innerText = 'FOCUS PULSE (25M)';
-        badge.className = 'px-3 py-1 text-xs font-mono font-bold bg-cyber-magenta/20 text-cyber-magenta border border-cyber-magenta/40 glow-magenta';
+        badge.className = 'px-3 py-1 text-xs font-semibold bg-dash-purple/10 text-dash-purple border border-dash-purple/30 rounded-full';
         pomoTimeLeft = 25 * 60;
       }
       resetPomodoro();
@@ -933,7 +909,7 @@
         text: input,
         width: 160,
         height: 160,
-        colorDark : "#07080d",
+        colorDark : "#181820",
         colorLight : "#FFFFFF",
         correctLevel : QRCode.CorrectLevel.H
       });
@@ -953,7 +929,7 @@
       if (imageSrc) {
         const a = document.createElement('a');
         a.href = imageSrc;
-        a.download = 'cyber_qrcode.png';
+        a.download = 'qrcode_matrix.png';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
