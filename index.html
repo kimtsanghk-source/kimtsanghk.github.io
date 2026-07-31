@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="zh-HK" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minimal Hub - 日常小工具與車隊 KPI Dashboard</title>
-  <meta name="theme-color" content="#8C6D53">
-  <meta name="description" content="簡約大地色系日常小工具與車隊營運數據 Dashboard">
+  <title>CYBER_FLEET // Operational Command & Dashboard</title>
+  <meta name="theme-color" content="#0d0f18">
+  <meta name="description" content="Cyberpunk Style Fleet Operations & Utility Dashboard">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,254 +15,409 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Orbitron & Share Tech Mono & Rajdhani -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            earth: {
-              50: '#F7F5F0',
-              100: '#E8E3D9',
-              200: '#D6CBC0',
-              500: '#8C6D53',
-              600: '#755A43',
-              700: '#5C4432',
-              sage: '#6B7A63',
-              dark: '#2D2825',
-              muted: '#7A7067'
+            cyber: {
+              black: '#07080d',
+              dark: '#0d0f18',
+              card: '#121524',
+              border: '#1f263e',
+              yellow: '#ffe600',
+              cyan: '#00f0ff',
+              magenta: '#ff0055',
+              green: '#00ff66',
+              dim: '#6272a4'
             }
+          },
+          fontFamily: {
+            orbitron: ['Orbitron', 'sans-serif'],
+            mono: ['"Share Tech Mono"', 'monospace'],
+            sans: ['Rajdhani', 'system-ui', 'sans-serif']
           }
         }
       }
     }
   </script>
   <style>
-    body { background-color: #F7F5F0; color: #2D2825; font-family: system-ui, -apple-system, sans-serif; }
-    .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); border: 1px solid #E8E3D9; }
-    .smooth-transition { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    /* Global Cyberpunk Base Styling */
+    body {
+      background-color: #07080d;
+      color: #e2e8f0;
+      font-family: 'Rajdhani', sans-serif;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.08) 0%, transparent 60%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 30px 30px, 30px 30px;
+    }
+
+    /* Cyber Panel & Glass Effect */
+    .cyber-panel {
+      background: rgba(18, 21, 36, 0.85);
+      border: 1px solid #1f263e;
+      position: relative;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+    }
+    .cyber-panel::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: -1px;
+      width: 8px; height: 8px;
+      border-top: 2px solid #00f0ff;
+      border-left: 2px solid #00f0ff;
+    }
+    .cyber-panel::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; right: -1px;
+      width: 8px; height: 8px;
+      border-bottom: 2px solid #ffe600;
+      border-right: 2px solid #ffe600;
+    }
+
+    /* High Tech Text Glow */
+    .glow-cyan { text-shadow: 0 0 8px rgba(0, 240, 255, 0.7), 0 0 15px rgba(0, 240, 255, 0.3); }
+    .glow-yellow { text-shadow: 0 0 8px rgba(255, 230, 0, 0.7), 0 0 15px rgba(255, 230, 0, 0.3); }
+    .glow-magenta { text-shadow: 0 0 8px rgba(255, 0, 85, 0.7), 0 0 15px rgba(255, 0, 85, 0.3); }
+    .glow-green { text-shadow: 0 0 8px rgba(0, ff, 102, 0.7); }
+
+    /* Neon Borders */
+    .border-cyber-glow {
+      border-color: #00f0ff;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3), inset 0 0 10px rgba(0, 240, 255, 0.1);
+    }
+
+    /* Cut Corner Cyber Buttons */
+    .cyber-btn {
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+      transition: all 0.2s ease-in-out;
+    }
+    .cyber-btn:hover {
+      box-shadow: 0 0 15px currentColor;
+      transform: translateY(-1px);
+    }
+
+    /* Scanline Overlay Effect */
+    .scanlines {
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0, 0, 0, 0.3) 50%,
+        rgba(0, 0, 0, 0.3)
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #07080d; }
+    ::-webkit-scrollbar-thumb { background: #1f263e; border: 1px solid #00f0ff; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col relative overflow-x-hidden">
 
-  <!-- Header / Hero -->
-  <header class="bg-white/60 border-b border-earth-100 sticky top-0 z-40 backdrop-blur-md">
-    <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
+  <!-- Scanline Screen Effect Layer -->
+  <div class="fixed inset-0 scanlines z-50 pointer-events-none opacity-40"></div>
+
+  <!-- Header / Cyber Navigation -->
+  <header class="bg-cyber-dark/90 border-b border-cyber-border sticky top-0 z-40 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('home')">
-        <div class="w-9 h-9 rounded-xl bg-earth-500 text-white flex items-center justify-center font-bold shadow-sm">
-          <i data-lucide="layout-grid" class="w-5 h-5"></i>
+        <div class="w-10 h-10 rounded-none bg-cyber-yellow text-cyber-black flex items-center justify-center font-black shadow-[0_0_12px_rgba(255,230,0,0.5)] cyber-btn">
+          <i data-lucide="cpu" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold tracking-wide leading-none text-earth-dark">Minimal Hub</h1>
-          <p class="text-xs text-earth-muted mt-0.5">日常專注與營運效率小工具集</p>
+          <h1 class="text-xl font-black tracking-widest leading-none font-orbitron text-white">
+            CYBER<span class="text-cyber-cyan glow-cyan">_HUB</span>
+          </h1>
+          <p class="text-[10px] font-mono text-cyber-yellow mt-1 tracking-wider uppercase">
+            // FLEET COMMAND & UTILITY MATRIX v3.0
+          </p>
         </div>
       </div>
 
-      <!-- Action & PWA Button -->
-      <div class="flex items-center space-x-2">
-        <button id="pwaInstallBtn" class="hidden items-center space-x-1.5 bg-earth-100 hover:bg-earth-200 text-earth-dark text-xs px-3 py-1.5 rounded-lg font-medium smooth-transition">
+      <!-- Action & Live Time Indicator -->
+      <div class="flex items-center space-x-4">
+        <div class="hidden sm:flex items-center space-x-2 text-xs font-mono text-cyber-dim border border-cyber-border px-3 py-1 rounded bg-cyber-black">
+          <span class="w-2 h-2 rounded-full bg-cyber-green animate-pulse"></span>
+          <span>SYSTEM: ONLINE</span>
+          <span class="text-cyber-cyan font-bold" id="liveClock">00:00:00</span>
+        </div>
+
+        <button id="pwaInstallBtn" class="hidden items-center space-x-1.5 bg-cyber-cyan hover:bg-cyber-yellow text-cyber-black text-xs font-bold font-mono px-3 py-1.5 cyber-btn transition-all">
           <i data-lucide="download" class="w-3.5 h-3.5"></i>
-          <span>安裝 App</span>
+          <span>INSTALL APP</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- Main Container -->
-  <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6">
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 z-10">
 
-    <!-- HOME VIEW: Dashboard Grid -->
+    <!-- HOME VIEW: Main Grid Matrix -->
     <section id="view-home" class="space-y-6">
-      <!-- Search & Category Header -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/40 p-4 rounded-2xl border border-earth-100">
+      
+      <!-- Top Cyber Banner / Filter -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 cyber-panel p-5">
         <div>
-          <h2 class="text-xl font-bold text-earth-dark">工具與營運面板</h2>
-          <p class="text-xs text-earth-muted">選擇工具或查看車隊營運數據，點擊即可進行操作</p>
+          <div class="inline-block text-[10px] font-mono font-bold text-cyber-yellow bg-cyber-yellow/10 border border-cyber-yellow/30 px-2 py-0.5 mb-1 uppercase tracking-widest">
+            OPERATIONAL MODULES
+          </div>
+          <h2 class="text-2xl font-black font-orbitron text-white tracking-wide">系統工具面板</h2>
+          <p class="text-xs font-mono text-cyber-dim mt-0.5">請選擇要存取的車隊營運數據或日常生產力模組</p>
         </div>
         <div class="relative max-w-xs w-full">
-          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-earth-muted"></i>
-          <input type="text" id="toolSearch" oninput="filterTools()" placeholder="搜尋工具或 KPI..." class="w-full pl-9 pr-4 py-1.5 bg-white rounded-xl border border-earth-100 text-sm focus:outline-none focus:border-earth-500 text-earth-dark">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyber-cyan"></i>
+          <input type="text" id="toolSearch" oninput="filterTools()" placeholder="搜尋模組 [SEARCH]..." class="w-full pl-9 pr-4 py-2 bg-cyber-black border border-cyber-border text-xs font-mono text-cyber-cyan placeholder-cyber-dim focus:outline-none focus:border-cyber-cyan focus:ring-1 focus:ring-00f0ff">
         </div>
       </div>
 
       <!-- Tool Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="toolsGrid">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5" id="toolsGrid">
         
-        <!-- Fleet KPI Dashboard Card (NEW) -->
-        <div onclick="switchView('fleet')" class="tool-card group bg-white p-5 rounded-2xl border border-earth-100 shadow-sm hover:shadow-md hover:border-earth-500/40 cursor-pointer smooth-transition flex flex-col justify-between">
+        <!-- CARD 1: FLEET KPI DASHBOARD (HIGHLIGHT) -->
+        <div onclick="switchView('fleet')" class="tool-card group cyber-panel p-5 hover:border-cyber-cyan cursor-pointer transition-all duration-300 flex flex-col justify-between hover:shadow-[0_0_20px_rgba(0,240,255,0.2)]">
           <div>
             <div class="flex items-center justify-between mb-4">
-              <div class="w-10 h-10 rounded-xl bg-earth-50 text-earth-500 flex items-center justify-center group-hover:bg-earth-500 group-hover:text-white smooth-transition">
+              <div class="w-10 h-10 bg-cyber-cyan/10 border border-cyber-cyan text-cyber-cyan flex items-center justify-center group-hover:bg-cyber-cyan group-hover:text-cyber-black transition-all">
                 <i data-lucide="truck" class="w-5 h-5"></i>
               </div>
-              <span class="text-[10px] font-medium bg-earth-sage/10 text-earth-sage px-2 py-0.5 rounded-full border border-earth-sage/20">車隊營運</span>
+              <span class="text-[10px] font-mono font-bold bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/40 px-2 py-0.5 uppercase tracking-wider glow-cyan">
+                CORE MATRIX
+              </span>
             </div>
-            <h3 class="font-bold text-earth-dark group-hover:text-earth-500 smooth-transition">車隊 KPI 營運儀表板</h3>
-            <p class="text-xs text-earth-muted mt-1 leading-relaxed">追蹤車隊每小時配送效率、CBM 承載量及西藥與腎水配送數據分析。</p>
+            <h3 class="text-lg font-bold font-orbitron text-white group-hover:text-cyber-cyan transition-colors">
+              車隊 KPI 營運儀表板
+            </h3>
+            <p class="text-xs text-cyber-dim mt-2 leading-relaxed font-sans">
+              即時監控車隊配送效率、CBM 承載極限、西藥與腎水物料運輸比例及數據預測。
+            </p>
           </div>
-          <div class="mt-5 pt-3 border-t border-earth-50 flex items-center justify-between text-xs font-medium text-earth-500">
-            <span>檢視 KPI 面板</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 smooth-transition"></i>
+          <div class="mt-6 pt-3 border-t border-cyber-border flex items-center justify-between text-xs font-mono font-bold text-cyber-cyan group-hover:text-cyber-yellow">
+            <span>// ACCESS SYSTEM</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
           </div>
         </div>
 
-        <!-- Card 1: Translator -->
-        <div onclick="switchView('translator')" class="tool-card group bg-white p-5 rounded-2xl border border-earth-100 shadow-sm hover:shadow-md hover:border-earth-500/40 cursor-pointer smooth-transition flex flex-col justify-between">
+        <!-- CARD 2: TRANSLATOR -->
+        <div onclick="switchView('translator')" class="tool-card group cyber-panel p-5 hover:border-cyber-yellow cursor-pointer transition-all duration-300 flex flex-col justify-between hover:shadow-[0_0_20px_rgba(255,230,0,0.15)]">
           <div>
             <div class="flex items-center justify-between mb-4">
-              <div class="w-10 h-10 rounded-xl bg-earth-50 text-earth-500 flex items-center justify-center group-hover:bg-earth-500 group-hover:text-white smooth-transition">
+              <div class="w-10 h-10 bg-cyber-yellow/10 border border-cyber-yellow text-cyber-yellow flex items-center justify-center group-hover:bg-cyber-yellow group-hover:text-cyber-black transition-all">
                 <i data-lucide="languages" class="w-5 h-5"></i>
               </div>
-              <span class="text-[10px] font-medium bg-earth-50 text-earth-muted px-2 py-0.5 rounded-full border border-earth-100">文本工具</span>
+              <span class="text-[10px] font-mono font-bold bg-cyber-yellow/10 text-cyber-yellow border border-cyber-yellow/30 px-2 py-0.5 uppercase">
+                TEXT NODE
+              </span>
             </div>
-            <h3 class="font-bold text-earth-dark group-hover:text-earth-500 smooth-transition">英文轉繁中翻譯</h3>
-            <p class="text-xs text-earth-muted mt-1 leading-relaxed">快速將英文長文或句子準確翻譯為繁體中文。</p>
+            <h3 class="text-lg font-bold font-orbitron text-white group-hover:text-cyber-yellow transition-colors">
+              英文轉繁中翻譯
+            </h3>
+            <p class="text-xs text-cyber-dim mt-2 leading-relaxed font-sans">
+              神經網絡智能長文翻譯模組，即時解析英漢語意與長句轉換。
+            </p>
           </div>
-          <div class="mt-5 pt-3 border-t border-earth-50 flex items-center justify-between text-xs font-medium text-earth-500">
-            <span>開啟工具</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 smooth-transition"></i>
+          <div class="mt-6 pt-3 border-t border-cyber-border flex items-center justify-between text-xs font-mono font-bold text-cyber-yellow">
+            <span>// ACCESS SYSTEM</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
           </div>
         </div>
 
-        <!-- Card 2: Pomodoro -->
-        <div onclick="switchView('pomodoro')" class="tool-card group bg-white p-5 rounded-2xl border border-earth-100 shadow-sm hover:shadow-md hover:border-earth-500/40 cursor-pointer smooth-transition flex flex-col justify-between">
+        <!-- CARD 3: POMODORO -->
+        <div onclick="switchView('pomodoro')" class="tool-card group cyber-panel p-5 hover:border-cyber-magenta cursor-pointer transition-all duration-300 flex flex-col justify-between hover:shadow-[0_0_20px_rgba(255,0,85,0.2)]">
           <div>
             <div class="flex items-center justify-between mb-4">
-              <div class="w-10 h-10 rounded-xl bg-earth-50 text-earth-500 flex items-center justify-center group-hover:bg-earth-500 group-hover:text-white smooth-transition">
+              <div class="w-10 h-10 bg-cyber-magenta/10 border border-cyber-magenta text-cyber-magenta flex items-center justify-center group-hover:bg-cyber-magenta group-hover:text-cyber-black transition-all">
                 <i data-lucide="timer" class="w-5 h-5"></i>
               </div>
-              <span class="text-[10px] font-medium bg-earth-50 text-earth-muted px-2 py-0.5 rounded-full border border-earth-100">生產力</span>
+              <span class="text-[10px] font-mono font-bold bg-cyber-magenta/10 text-cyber-magenta border border-cyber-magenta/30 px-2 py-0.5 uppercase">
+                CHRONO
+              </span>
             </div>
-            <h3 class="font-bold text-earth-dark group-hover:text-earth-500 smooth-transition">番茄鐘 (Pomodoro)</h3>
-            <p class="text-xs text-earth-muted mt-1 leading-relaxed">25 分鐘高效專注 + 5 分鐘短暫休息循環計時器。</p>
+            <h3 class="text-lg font-bold font-orbitron text-white group-hover:text-cyber-magenta transition-colors">
+              賽博番茄鐘
+            </h3>
+            <p class="text-xs text-cyber-dim mt-2 leading-relaxed font-sans">
+              25M 專注脈衝與 5M 間歇休息超載倒數控制器，極致提升人機運作效率。
+            </p>
           </div>
-          <div class="mt-5 pt-3 border-t border-earth-50 flex items-center justify-between text-xs font-medium text-earth-500">
-            <span>開啟工具</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 smooth-transition"></i>
+          <div class="mt-6 pt-3 border-t border-cyber-border flex items-center justify-between text-xs font-mono font-bold text-cyber-magenta">
+            <span>// ACCESS SYSTEM</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
           </div>
         </div>
 
-        <!-- Card 3: QR Code Generator -->
-        <div onclick="switchView('qrcode')" class="tool-card group bg-white p-5 rounded-2xl border border-earth-100 shadow-sm hover:shadow-md hover:border-earth-500/40 cursor-pointer smooth-transition flex flex-col justify-between">
+        <!-- CARD 4: QR CODE GENERATOR -->
+        <div onclick="switchView('qrcode')" class="tool-card group cyber-panel p-5 hover:border-cyber-green cursor-pointer transition-all duration-300 flex flex-col justify-between hover:shadow-[0_0_20px_rgba(0,255,102,0.2)]">
           <div>
             <div class="flex items-center justify-between mb-4">
-              <div class="w-10 h-10 rounded-xl bg-earth-50 text-earth-500 flex items-center justify-center group-hover:bg-earth-500 group-hover:text-white smooth-transition">
+              <div class="w-10 h-10 bg-cyber-green/10 border border-cyber-green text-cyber-green flex items-center justify-center group-hover:bg-cyber-green group-hover:text-cyber-black transition-all">
                 <i data-lucide="qr-code" class="w-5 h-5"></i>
               </div>
-              <span class="text-[10px] font-medium bg-earth-50 text-earth-muted px-2 py-0.5 rounded-full border border-earth-100">實用工具</span>
+              <span class="text-[10px] font-mono font-bold bg-cyber-green/10 text-cyber-green border border-cyber-green/30 px-2 py-0.5 uppercase">
+                MATRIX ENCODER
+              </span>
             </div>
-            <h3 class="font-bold text-earth-dark group-hover:text-earth-500 smooth-transition">QR Code 產生器</h3>
-            <p class="text-xs text-earth-muted mt-1 leading-relaxed">即時將網址或文字轉為 QR Code 並支援高畫質圖片下載。</p>
+            <h3 class="text-lg font-bold font-orbitron text-white group-hover:text-cyber-green transition-colors">
+              QR Code 矩陣生成器
+            </h3>
+            <p class="text-xs text-cyber-dim mt-2 leading-relaxed font-sans">
+              即時將網址或數據編碼轉換為高密度二維碼，支援高解析度圖檔導出。
+            </p>
           </div>
-          <div class="mt-5 pt-3 border-t border-earth-50 flex items-center justify-between text-xs font-medium text-earth-500">
-            <span>開啟工具</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 smooth-transition"></i>
+          <div class="mt-6 pt-3 border-t border-cyber-border flex items-center justify-between text-xs font-mono font-bold text-cyber-green">
+            <span>// ACCESS SYSTEM</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
           </div>
         </div>
 
       </div>
     </section>
 
-    <!-- NEW TOOL VIEW: FLEET KPI DASHBOARD -->
+    <!-- TOOL VIEW 1: FLEET KPI DASHBOARD (CYBERPUNK HIGH CONTRAST) -->
     <section id="view-fleet" class="hidden space-y-6">
-      <button onclick="switchView('home')" class="inline-flex items-center space-x-1.5 text-xs text-earth-muted hover:text-earth-dark font-medium smooth-transition">
-        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        <span>返回工具列表</span>
-      </button>
+      
+      <!-- Back Action Header -->
+      <div class="flex items-center justify-between">
+        <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-mono text-cyber-cyan hover:text-cyber-yellow font-bold uppercase tracking-wider transition-colors">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          <span>[ RETURN TO MATRIX ]</span>
+        </button>
 
-      <!-- Dashboard Title Header -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-earth-100 shadow-sm">
-        <div>
-          <div class="flex items-center space-x-2">
-            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-earth-sage/10 text-earth-sage border border-earth-sage/20">營運效能</span>
-            <span class="text-xs text-earth-muted">數據更新至: 2025 Oct</span>
-          </div>
-          <h2 class="text-2xl font-bold text-earth-dark mt-1 flex items-center gap-2">
-            <i data-lucide="truck" class="w-6 h-6 text-earth-500"></i>
-            車隊營運核心 KPI 儀表板
-          </h2>
+        <div class="text-xs font-mono text-cyber-dim">
+          DATA SINK STATUS: <span class="text-cyber-green font-bold glow-green">SYNCHRONIZED</span>
         </div>
       </div>
 
-      <!-- Core Summary KPI Cards Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- KPI Card 1 -->
-        <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm space-y-2">
-          <div class="flex items-center justify-between text-earth-muted text-xs font-medium">
-            <span>最新單月總訂單數</span>
-            <i data-lucide="package" class="w-4 h-4 text-earth-500"></i>
+      <!-- Dashboard Header Banner -->
+      <div class="cyber-panel p-6 border-l-4 border-l-cyber-cyan">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-3">
+              <span class="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-cyber-cyan text-cyber-black uppercase">
+                FLEET COMMAND
+              </span>
+              <span class="text-xs font-mono text-cyber-yellow">LAST_UPDATE: 2025.OCT</span>
+            </div>
+            <h2 class="text-3xl font-black font-orbitron text-white mt-1 tracking-wider">
+              FLEET_KPI <span class="text-cyber-cyan glow-cyan">OPERATIONS</span>
+            </h2>
           </div>
-          <div class="text-2xl font-black text-earth-dark">44,412 <span class="text-xs font-normal text-earth-muted">單</span></div>
-          <div class="text-[11px] text-earth-sage flex items-center gap-1 font-medium">
+          <div class="flex items-center space-x-3 text-xs font-mono">
+            <div class="bg-cyber-black/80 border border-cyber-border p-2 text-center">
+              <div class="text-cyber-dim text-[10px]">TOTAL FLEET HOURS</div>
+              <div class="text-cyber-yellow font-bold text-sm">9,861 HRS</div>
+            </div>
+            <div class="bg-cyber-black/80 border border-cyber-border p-2 text-center">
+              <div class="text-cyber-dim text-[10px]">RECORD EFFICIENCY</div>
+              <div class="text-cyber-cyan font-bold text-sm">4.5 ORDERS/HR</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Core Summary KPI Cards Grid (4 Key Highlights) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- KPI Card 1 -->
+        <div class="cyber-panel p-5 border-t-2 border-t-cyber-cyan space-y-2">
+          <div class="flex items-center justify-between text-cyber-dim text-xs font-mono">
+            <span>MONTHLY TOTAL ORDERS</span>
+            <i data-lucide="package" class="w-4 h-4 text-cyber-cyan"></i>
+          </div>
+          <div class="text-3xl font-black font-orbitron text-white glow-cyan">
+            44,412 <span class="text-xs font-mono font-normal text-cyber-dim">單</span>
+          </div>
+          <div class="text-xs font-mono text-cyber-green flex items-center gap-1">
             <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-            <span>較前月 +2.6% (10月)</span>
+            <span>+2.6% vs AUG (OCT DATA)</span>
           </div>
         </div>
 
         <!-- KPI Card 2 -->
-        <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm space-y-2">
-          <div class="flex items-center justify-between text-earth-muted text-xs font-medium">
-            <span>每小時配送效率 (訂單)</span>
-            <i data-lucide="zap" class="w-4 h-4 text-earth-500"></i>
+        <div class="cyber-panel p-5 border-t-2 border-t-cyber-yellow space-y-2">
+          <div class="flex items-center justify-between text-cyber-dim text-xs font-mono">
+            <span>DELIVERY EFFICIENCY (ORDER/HR)</span>
+            <i data-lucide="zap" class="w-4 h-4 text-cyber-yellow"></i>
           </div>
-          <div class="text-2xl font-black text-earth-dark">4.5 <span class="text-xs font-normal text-earth-muted">單/小時</span></div>
-          <div class="text-[11px] text-earth-sage flex items-center gap-1 font-medium">
+          <div class="text-3xl font-black font-orbitron text-cyber-yellow glow-yellow">
+            4.5 <span class="text-xs font-mono font-normal text-cyber-dim">單/小時</span>
+          </div>
+          <div class="text-xs font-mono text-cyber-green flex items-center gap-1">
             <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-            <span>從 7月 (4.1) 連續 4個月提升</span>
+            <span>PEAK EFFICIENCY (JUL: 4.1)</span>
           </div>
         </div>
 
         <!-- KPI Card 3 -->
-        <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm space-y-2">
-          <div class="flex items-center justify-between text-earth-muted text-xs font-medium">
-            <span>每車平均每日承載</span>
-            <i data-lucide="box" class="w-4 h-4 text-earth-500"></i>
+        <div class="cyber-panel p-5 border-t-2 border-t-cyber-green space-y-2">
+          <div class="flex items-center justify-between text-cyber-dim text-xs font-mono">
+            <span>AVG DAILY CBM PER TRUCK</span>
+            <i data-lucide="box" class="w-4 h-4 text-cyber-green"></i>
           </div>
-          <div class="text-2xl font-black text-earth-dark">7.9 <span class="text-xs font-normal text-earth-muted">CBM</span></div>
-          <div class="text-[11px] text-earth-sage flex items-center gap-1 font-medium">
+          <div class="text-3xl font-black font-orbitron text-cyber-green glow-green">
+            7.9 <span class="text-xs font-mono font-normal text-cyber-dim">CBM</span>
+          </div>
+          <div class="text-xs font-mono text-cyber-green flex items-center gap-1">
             <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            <span>歷史新高 (優於 7月 7.0 CBM)</span>
+            <span>HISTORIC HIGH (CAPACITY)</span>
           </div>
         </div>
 
         <!-- KPI Card 4 -->
-        <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm space-y-2">
-          <div class="flex items-center justify-between text-earth-muted text-xs font-medium">
-            <span>總配送時間</span>
-            <i data-lucide="clock" class="w-4 h-4 text-earth-500"></i>
+        <div class="cyber-panel p-5 border-t-2 border-t-cyber-magenta space-y-2">
+          <div class="flex items-center justify-between text-cyber-dim text-xs font-mono">
+            <span>TOTAL OPERATION HOURS</span>
+            <i data-lucide="clock" class="w-4 h-4 text-cyber-magenta"></i>
           </div>
-          <div class="text-2xl font-black text-earth-dark">9,861 <span class="text-xs font-normal text-earth-muted">小時</span></div>
-          <div class="text-[11px] text-earth-muted flex items-center gap-1">
-            <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-earth-sage"></i>
-            <span>總配送工時保持平穩</span>
+          <div class="text-3xl font-black font-orbitron text-white glow-magenta">
+            9,861 <span class="text-xs font-mono font-normal text-cyber-dim">小時</span>
+          </div>
+          <div class="text-xs font-mono text-cyber-cyan flex items-center gap-1">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyber-cyan"></i>
+            <span>OPTIMIZED WORKFLOW</span>
           </div>
         </div>
       </div>
 
-      <!-- Interactive Charts Grid -->
+      <!-- Charts Matrix -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
         <!-- Main Line Chart -->
-        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-earth-100 shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
-            <h3 class="font-bold text-earth-dark text-base flex items-center gap-2">
-              <i data-lucide="line-chart" class="w-4 h-4 text-earth-500"></i>
-              月度配送效率與訂單增長趨勢
+        <div class="lg:col-span-2 cyber-panel p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-cyber-border pb-3">
+            <h3 class="font-bold font-orbitron text-white text-base flex items-center gap-2">
+              <i data-lucide="line-chart" class="w-4 h-4 text-cyber-cyan"></i>
+              月度效率與訂單運量趨勢分析
             </h3>
-            <span class="text-xs text-earth-muted">2025 Jul - Oct</span>
+            <span class="text-xs font-mono text-cyber-yellow">// 2025 JUL - OCT</span>
           </div>
           <div class="relative h-64 w-full">
             <canvas id="fleetTrendChart"></canvas>
           </div>
         </div>
 
-        <!-- Product Category Distribution Chart -->
-        <div class="bg-white p-6 rounded-2xl border border-earth-100 shadow-sm space-y-4 flex flex-col justify-between">
-          <div>
-            <h3 class="font-bold text-earth-dark text-base flex items-center gap-2 mb-2">
-              <i data-lucide="pie-chart" class="w-4 h-4 text-earth-500"></i>
-              貨品類別結構 (西藥 vs 腎水)
+        <!-- Category Pie Chart -->
+        <div class="cyber-panel p-6 space-y-4 flex flex-col justify-between">
+          <div class="border-b border-cyber-border pb-3">
+            <h3 class="font-bold font-orbitron text-white text-base flex items-center gap-2">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-cyber-magenta"></i>
+              物料結構拆分 (10月)
             </h3>
-            <p class="text-xs text-earth-muted">10 月訂單與配送板數比例分析</p>
+            <p class="text-xs font-mono text-cyber-dim mt-1">西藥與腎水物料之訂單總數比例</p>
           </div>
           <div class="relative h-52 w-full my-auto flex items-center justify-center">
             <canvas id="fleetCategoryChart"></canvas>
@@ -270,219 +425,230 @@
         </div>
       </div>
 
-      <!-- Fleet Excel Data Table -->
-      <div class="bg-white p-6 rounded-2xl border border-earth-100 shadow-sm space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="font-bold text-earth-dark text-base flex items-center gap-2">
-            <i data-lucide="table" class="w-4 h-4 text-earth-500"></i>
-            車隊營運明細數據表 (來自 Excel)
+      <!-- Data Table Cyber Style -->
+      <div class="cyber-panel p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-cyber-border pb-3">
+          <h3 class="font-bold font-orbitron text-white text-base flex items-center gap-2">
+            <i data-lucide="database" class="w-4 h-4 text-cyber-yellow"></i>
+            車隊歷史營運數據總表 (EXCEL DATASET)
           </h3>
-          <span class="text-xs text-earth-muted">包含西藥與腎水拆分</span>
+          <span class="text-xs font-mono text-cyber-dim">[ READ-ONLY MATRIX ]</span>
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left text-earth-dark border-collapse">
+          <table class="w-full text-xs font-mono text-left border-collapse">
             <thead>
-              <tr class="bg-earth-50 text-earth-muted font-semibold border-b border-earth-100">
-                <th class="p-3">月份</th>
-                <th class="p-3">總配送時間 (小時)</th>
-                <th class="p-3">效率 (訂單/小時)</th>
-                <th class="p-3">效率 (板數/小時)</th>
-                <th class="p-3">每車每日承載 CBM</th>
-                <th class="p-3">總訂單數</th>
-                <th class="p-3">總配送板數</th>
-                <th class="p-3">西藥訂單</th>
-                <th class="p-3">西藥板數</th>
-                <th class="p-3">腎水訂單</th>
-                <th class="p-3">腎水板數</th>
+              <tr class="bg-cyber-black text-cyber-cyan border-b border-cyber-border">
+                <th class="p-3 uppercase">MONTH</th>
+                <th class="p-3 uppercase">TOTAL HRS</th>
+                <th class="p-3 uppercase text-cyber-yellow">EFF (ORD/HR)</th>
+                <th class="p-3 uppercase">EFF (PAL/HR)</th>
+                <th class="p-3 uppercase text-cyber-green">AVG CBM</th>
+                <th class="p-3 uppercase">TOTAL ORDERS</th>
+                <th class="p-3 uppercase">TOTAL PALLETS</th>
+                <th class="p-3 uppercase">MED ORDERS</th>
+                <th class="p-3 uppercase">MED PALLETS</th>
+                <th class="p-3 uppercase">RENAL ORDERS</th>
+                <th class="p-3 uppercase">RENAL PALLETS</th>
               </tr>
             </thead>
-            <tbody id="fleetTableBody" class="divide-y divide-earth-100">
+            <tbody id="fleetTableBody" class="divide-y divide-cyber-border text-slate-300">
               <!-- JS Populated Row Data -->
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- New Entry Calculator Form -->
-      <div class="bg-white p-6 rounded-2xl border border-earth-100 shadow-sm space-y-4">
-        <h3 class="font-bold text-earth-dark text-base flex items-center gap-2">
-          <i data-lucide="calculator" class="w-4 h-4 text-earth-500"></i>
-          單月 KPI 數據計算與預測工具
-        </h3>
-        <p class="text-xs text-earth-muted">輸入月度工時與配送量，自動試算配送效率與車隊 KPI：</p>
+      <!-- Live KPI Simulator Form -->
+      <div class="cyber-panel p-6 space-y-4">
+        <div class="border-b border-cyber-border pb-3">
+          <h3 class="font-bold font-orbitron text-white text-base flex items-center gap-2">
+            <i data-lucide="cpu" class="w-4 h-4 text-cyber-cyan"></i>
+            單月 KPI 數據模擬與試算器
+          </h3>
+          <p class="text-xs font-mono text-cyber-dim mt-0.5">輸入預測工時與訂單數量，算定車隊運載效率指標：</p>
+        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label class="text-xs text-earth-muted font-medium">總配送時間 (小時)</label>
-            <input type="number" id="calcHours" value="10000" class="w-full mt-1 p-2.5 bg-earth-50 border border-earth-100 rounded-xl text-xs text-earth-dark focus:outline-none focus:border-earth-500">
+            <label class="text-xs font-mono text-cyber-dim">預估總配送小時 (HRS)</label>
+            <input type="number" id="calcHours" value="10000" class="w-full mt-1 p-2.5 bg-cyber-black border border-cyber-border font-mono text-xs text-cyber-cyan focus:outline-none focus:border-cyber-cyan">
           </div>
           <div>
-            <label class="text-xs text-earth-muted font-medium">總訂單數量 (單)</label>
-            <input type="number" id="calcOrders" value="45000" class="w-full mt-1 p-2.5 bg-earth-50 border border-earth-100 rounded-xl text-xs text-earth-dark focus:outline-none focus:border-earth-500">
+            <label class="text-xs font-mono text-cyber-dim">預估總訂單量 (ORDERS)</label>
+            <input type="number" id="calcOrders" value="45000" class="w-full mt-1 p-2.5 bg-cyber-black border border-cyber-border font-mono text-xs text-cyber-cyan focus:outline-none focus:border-cyber-cyan">
           </div>
           <div>
-            <label class="text-xs text-earth-muted font-medium">總配送板數 (板)</label>
-            <input type="number" id="calcPallets" value="3100" class="w-full mt-1 p-2.5 bg-earth-50 border border-earth-100 rounded-xl text-xs text-earth-dark focus:outline-none focus:border-earth-500">
+            <label class="text-xs font-mono text-cyber-dim">預估總板數 (PALLETS)</label>
+            <input type="number" id="calcPallets" value="3100" class="w-full mt-1 p-2.5 bg-cyber-black border border-cyber-border font-mono text-xs text-cyber-cyan focus:outline-none focus:border-cyber-cyan">
           </div>
           <div class="flex items-end">
-            <button onclick="calculateKPI()" class="w-full py-2.5 bg-earth-500 hover:bg-earth-600 text-white rounded-xl text-xs font-medium smooth-transition">計算配送效率</button>
+            <button onclick="calculateKPI()" class="w-full py-2.5 bg-cyber-cyan text-cyber-black font-bold font-mono text-xs cyber-btn hover:bg-cyber-yellow transition-all">
+              // EXECUTE CALC
+            </button>
           </div>
         </div>
 
-        <div id="calcResult" class="hidden mt-4 p-4 bg-earth-50 rounded-xl border border-earth-100 text-xs space-y-2">
-          <div class="font-bold text-earth-dark">試算結果分析：</div>
-          <div class="grid grid-cols-2 md:grid-cols-2 gap-2 text-earth-dark">
-            <div>• 每小時配送效率 (訂單)： <span id="resOrdersHr" class="font-bold text-earth-500">--</span> 單/小時</div>
-            <div>• 每小時配送效率 (板數)： <span id="resPalletsHr" class="font-bold text-earth-500">--</span> 板/小時</div>
+        <div id="calcResult" class="hidden mt-4 p-4 bg-cyber-black border border-cyber-cyan text-xs font-mono space-y-2">
+          <div class="font-bold text-cyber-yellow">// SIMULATION_OUTPUT:</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>> 每小時配送訂單效率: <span id="resOrdersHr" class="font-bold text-cyber-cyan text-sm">--</span> 單/小時</div>
+            <div>> 每小時配送板數效率: <span id="resPalletsHr" class="font-bold text-cyber-green text-sm">--</span> 板/小時</div>
           </div>
         </div>
       </div>
 
     </section>
 
-    <!-- TOOL VIEW 1: Translator -->
+    <!-- TOOL VIEW 2: TRANSLATOR -->
     <section id="view-translator" class="hidden space-y-4">
-      <button onclick="switchView('home')" class="inline-flex items-center space-x-1.5 text-xs text-earth-muted hover:text-earth-dark mb-2 font-medium smooth-transition">
+      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-mono text-cyber-yellow hover:text-white font-bold uppercase transition-colors">
         <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        <span>返回工具列表</span>
+        <span>[ RETURN TO MATRIX ]</span>
       </button>
 
-      <div class="bg-white rounded-2xl p-6 border border-earth-100 shadow-sm max-w-4xl mx-auto space-y-4">
-        <div class="border-b border-earth-100 pb-3 flex items-center justify-between">
-          <h2 class="text-lg font-bold text-earth-dark flex items-center gap-2">
-            <i data-lucide="languages" class="w-5 h-5 text-earth-500"></i>
-            英文轉繁體中文翻譯
+      <div class="cyber-panel p-6 max-w-4xl mx-auto space-y-4">
+        <div class="border-b border-cyber-border pb-3">
+          <h2 class="text-xl font-bold font-orbitron text-white flex items-center gap-2">
+            <i data-lucide="languages" class="w-5 h-5 text-cyber-yellow"></i>
+            英文轉繁體中文神經翻譯模組
           </h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Input -->
           <div class="space-y-2">
-            <label class="text-xs font-medium text-earth-muted">英文原文 (English Input)</label>
-            <textarea id="transInput" rows="8" placeholder="請輸入需要翻譯的英文內容..." class="w-full p-3 bg-earth-50 border border-earth-100 rounded-xl text-sm focus:outline-none focus:border-earth-500 text-earth-dark resize-none"></textarea>
+            <label class="text-xs font-mono text-cyber-dim">// ENGLISH INPUT MATRIX</label>
+            <textarea id="transInput" rows="8" placeholder="Enter English raw text..." class="w-full p-3 bg-cyber-black border border-cyber-border text-xs font-mono text-cyber-yellow focus:outline-none focus:border-cyber-yellow resize-none"></textarea>
           </div>
-          <!-- Output -->
           <div class="space-y-2">
-            <label class="text-xs font-medium text-earth-muted">繁體中文譯文 (Traditional Chinese)</label>
-            <div id="transOutput" class="w-full h-48 md:h-auto p-3 bg-earth-50 border border-earth-100 rounded-xl text-sm text-earth-dark overflow-y-auto whitespace-pre-wrap">譯文將顯示於此...</div>
+            <label class="text-xs font-mono text-cyber-dim">// TRADITIONAL CHINESE OUTPUT</label>
+            <div id="transOutput" class="w-full h-48 md:h-auto p-3 bg-cyber-black border border-cyber-border text-xs font-mono text-cyber-cyan overflow-y-auto whitespace-pre-wrap">譯文輸出區域...</div>
           </div>
         </div>
 
         <div class="flex items-center justify-between pt-2">
-          <button onclick="clearTranslator()" class="text-xs text-earth-muted hover:text-earth-dark px-3 py-1.5 font-medium">清空內容</button>
+          <button onclick="clearTranslator()" class="text-xs font-mono text-cyber-dim hover:text-white">CLEAR ALL</button>
           <div class="space-x-2">
-            <button onclick="copyTranslation()" class="px-4 py-2 bg-earth-100 hover:bg-earth-200 text-earth-dark rounded-xl text-xs font-medium smooth-transition">複製譯文</button>
-            <button id="transBtn" onclick="runTranslation()" class="px-5 py-2 bg-earth-500 hover:bg-earth-600 text-white rounded-xl text-xs font-medium shadow-sm smooth-transition">開始翻譯</button>
+            <button onclick="copyTranslation()" class="px-4 py-2 border border-cyber-border bg-cyber-black text-cyber-cyan text-xs font-mono font-bold hover:border-cyber-cyan">COPY RESULT</button>
+            <button id="transBtn" onclick="runTranslation()" class="px-5 py-2 bg-cyber-yellow text-cyber-black text-xs font-mono font-bold cyber-btn hover:bg-cyber-cyan">TRANSLATE</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- TOOL VIEW 2: Pomodoro -->
+    <!-- TOOL VIEW 3: POMODORO -->
     <section id="view-pomodoro" class="hidden space-y-4">
-      <button onclick="switchView('home')" class="inline-flex items-center space-x-1.5 text-xs text-earth-muted hover:text-earth-dark mb-2 font-medium smooth-transition">
+      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-mono text-cyber-magenta hover:text-white font-bold uppercase transition-colors">
         <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        <span>返回工具列表</span>
+        <span>[ RETURN TO MATRIX ]</span>
       </button>
 
-      <div class="bg-white rounded-2xl p-8 border border-earth-100 shadow-sm max-w-md mx-auto text-center space-y-6">
+      <div class="cyber-panel p-8 max-w-md mx-auto text-center space-y-6">
         <div>
-          <span id="pomoStatusBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-earth-50 text-earth-500 border border-earth-100">專注模式 (25m)</span>
-          <h2 class="text-xl font-bold text-earth-dark mt-2">番茄鐘</h2>
+          <span id="pomoStatusBadge" class="px-3 py-1 text-xs font-mono font-bold bg-cyber-magenta/20 text-cyber-magenta border border-cyber-magenta/40 glow-magenta">
+            FOCUS PULSE (25M)
+          </span>
+          <h2 class="text-2xl font-black font-orbitron text-white mt-3">CHRONO_PULSE</h2>
         </div>
 
-        <!-- Timer Display -->
-        <div class="relative py-6">
-          <div id="pomoTimer" class="text-6xl font-black tracking-tight text-earth-dark font-mono">25:00</div>
+        <div class="py-6">
+          <div id="pomoTimer" class="text-6xl font-black font-orbitron text-cyber-cyan glow-cyan tracking-wider">25:00</div>
         </div>
 
-        <!-- Controls -->
         <div class="flex items-center justify-center space-x-3">
-          <button id="pomoResetBtn" onclick="resetPomodoro()" class="p-3 bg-earth-50 hover:bg-earth-100 text-earth-dark rounded-xl smooth-transition">
+          <button id="pomoResetBtn" onclick="resetPomodoro()" class="p-3 border border-cyber-border bg-cyber-black text-white hover:border-cyber-cyan">
             <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
           </button>
-          <button id="pomoStartBtn" onclick="togglePomodoro()" class="px-8 py-3 bg-earth-500 hover:bg-earth-600 text-white font-medium rounded-xl shadow-md smooth-transition flex items-center space-x-2">
+          <button id="pomoStartBtn" onclick="togglePomodoro()" class="px-8 py-3 bg-cyber-magenta text-white font-bold font-mono text-sm cyber-btn hover:bg-cyber-cyan hover:text-cyber-black transition-all flex items-center space-x-2">
             <i id="pomoPlayIcon" data-lucide="play" class="w-5 h-5"></i>
-            <span id="pomoBtnText">開始專注</span>
+            <span id="pomoBtnText">START PULSE</span>
           </button>
-          <button onclick="switchPomoMode()" class="p-3 bg-earth-50 hover:bg-earth-100 text-earth-dark rounded-xl smooth-transition" title="切換模式">
+          <button onclick="switchPomoMode()" class="p-3 border border-cyber-border bg-cyber-black text-white hover:border-cyber-magenta" title="SWITCH MODE">
             <i data-lucide="coffee" class="w-5 h-5"></i>
           </button>
         </div>
       </div>
     </section>
 
-    <!-- TOOL VIEW 3: QR Code Generator -->
+    <!-- TOOL VIEW 4: QR CODE GENERATOR -->
     <section id="view-qrcode" class="hidden space-y-4">
-      <button onclick="switchView('home')" class="inline-flex items-center space-x-1.5 text-xs text-earth-muted hover:text-earth-dark mb-2 font-medium smooth-transition">
+      <button onclick="switchView('home')" class="inline-flex items-center space-x-2 text-xs font-mono text-cyber-green hover:text-white font-bold uppercase transition-colors">
         <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        <span>返回工具列表</span>
+        <span>[ RETURN TO MATRIX ]</span>
       </button>
 
-      <div class="bg-white rounded-2xl p-6 border border-earth-100 shadow-sm max-w-xl mx-auto space-y-6">
-        <div class="border-b border-earth-100 pb-3">
-          <h2 class="text-lg font-bold text-earth-dark flex items-center gap-2">
-            <i data-lucide="qr-code" class="w-5 h-5 text-earth-500"></i>
-            QR Code 產生器
+      <div class="cyber-panel p-6 max-w-xl mx-auto space-y-6">
+        <div class="border-b border-cyber-border pb-3">
+          <h2 class="text-xl font-bold font-orbitron text-white flex items-center gap-2">
+            <i data-lucide="qr-code" class="w-5 h-5 text-cyber-green"></i>
+            二維碼數據矩陣編碼器
           </h2>
         </div>
 
         <div class="space-y-2">
-          <label class="text-xs font-medium text-earth-muted">請輸入網址或任意文字：</label>
-          <input type="text" id="qrInput" oninput="generateQRCode()" placeholder="https://example.com 或 任何文字內容" class="w-full px-4 py-2.5 bg-earth-50 border border-earth-100 rounded-xl text-sm focus:outline-none focus:border-earth-500 text-earth-dark">
+          <label class="text-xs font-mono text-cyber-dim">// INPUT STRING OR URL</label>
+          <input type="text" id="qrInput" oninput="generateQRCode()" placeholder="https://domain.com or string content..." class="w-full px-4 py-2.5 bg-cyber-black border border-cyber-border font-mono text-xs text-cyber-green focus:outline-none focus:border-cyber-green">
         </div>
 
-        <!-- Display Area -->
-        <div class="flex flex-col items-center justify-center p-6 bg-earth-50 rounded-2xl border border-dashed border-earth-200 min-h-[220px]">
-          <div id="qrcodeBox" class="p-3 bg-white rounded-xl shadow-sm"></div>
-          <p id="qrPlaceholder" class="text-xs text-earth-muted mt-2">輸入內容後將在此自動生成 QR Code</p>
+        <div class="flex flex-col items-center justify-center p-6 bg-cyber-black border border-dashed border-cyber-border min-h-[220px]">
+          <div id="qrcodeBox" class="p-3 bg-white"></div>
+          <p id="qrPlaceholder" class="text-xs font-mono text-cyber-dim mt-2">// WAITING FOR DATA INPUT...</p>
         </div>
 
-        <button id="downloadQrBtn" onclick="downloadQRCode()" disabled class="w-full py-2.5 bg-earth-500 hover:bg-earth-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-medium shadow-sm smooth-transition">下載 QR Code 圖片 (PNG)</button>
+        <button id="downloadQrBtn" onclick="downloadQRCode()" disabled class="w-full py-2.5 bg-cyber-green disabled:opacity-30 text-cyber-black font-bold font-mono text-xs cyber-btn hover:bg-cyber-yellow transition-all">
+          DOWNLOAD MATRIX IMAGE (PNG)
+        </button>
       </div>
     </section>
 
   </main>
 
-  <!-- Footer -->
-  <footer class="mt-auto border-t border-earth-100 bg-white/40 py-4 text-center text-xs text-earth-muted">
-    <p>© 2026 Minimal Hub · 極簡大地色工具箱與車隊 KPI 面板</p>
+  <!-- Cyber Footer -->
+  <footer class="mt-auto border-t border-cyber-border bg-cyber-dark/80 py-4 text-center text-xs font-mono text-cyber-dim z-10">
+    <p>© 2026 CYBER_FLEET MATRIX · HIGH-CONTRAST TACTICAL DASHBOARD</p>
   </footer>
 
   <script>
     // Initialize Icons
     lucide.createIcons();
 
-    // Excel Source Data Array
+    // Live Clock Logic
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').innerText = now.toTimeString().split(' ')[0];
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Fleet Excel Dataset
     const fleetData = [
-      { year: 2025, month: 'Jul', hours: 10914, effOrders: 4.1, effPallets: 0.26, cbm: 7.0, totalOrders: 44252, totalPallets: 2810, wMedOrders: 42482, wMedPallets: 2268, renalOrders: 1770, renalPallets: 543 },
-      { year: 2025, month: 'Aug', hours: 10074, effOrders: 4.2, effPallets: 0.30, cbm: 7.6, totalOrders: 42677, totalPallets: 3056, wMedOrders: 40987, wMedPallets: 2492, renalOrders: 1690, renalPallets: 564 },
-      { year: 2025, month: 'Sep', hours: 9848,  effOrders: 4.4, effPallets: 0.31, cbm: 7.7, totalOrders: 43287, totalPallets: 3017, wMedOrders: 41393, wMedPallets: 2410, renalOrders: 1894, renalPallets: 607 },
-      { year: 2025, month: 'Oct', hours: 9861,  effOrders: 4.5, effPallets: 0.31, cbm: 7.9, totalOrders: 44412, totalPallets: 3022, wMedOrders: 42660, wMedPallets: 2431, renalOrders: 1752, renalPallets: 592 }
+      { year: 2025, month: 'JUL', hours: 10914, effOrders: 4.1, effPallets: 0.26, cbm: 7.0, totalOrders: 44252, totalPallets: 2810, wMedOrders: 42482, wMedPallets: 2268, renalOrders: 1770, renalPallets: 543 },
+      { year: 2025, month: 'AUG', hours: 10074, effOrders: 4.2, effPallets: 0.30, cbm: 7.6, totalOrders: 42677, totalPallets: 3056, wMedOrders: 40987, wMedPallets: 2492, renalOrders: 1690, renalPallets: 564 },
+      { year: 2025, month: 'SEP', hours: 9848,  effOrders: 4.4, effPallets: 0.31, cbm: 7.7, totalOrders: 43287, totalPallets: 3017, wMedOrders: 41393, wMedPallets: 2410, renalOrders: 1894, renalPallets: 607 },
+      { year: 2025, month: 'OCT', hours: 9861,  effOrders: 4.5, effPallets: 0.31, cbm: 7.9, totalOrders: 44412, totalPallets: 3022, wMedOrders: 42660, wMedPallets: 2431, renalOrders: 1752, renalPallets: 592 }
     ];
 
-    // Render Table Data
+    // Render Cyber Table Data
     function renderFleetTable() {
       const tbody = document.getElementById('fleetTableBody');
       tbody.innerHTML = fleetData.map(item => `
-        <tr class="hover:bg-earth-50/60 smooth-transition">
-          <td class="p-3 font-bold">${item.year} ${item.month}</td>
-          <td class="p-3">${item.hours.toLocaleString()}</td>
-          <td class="p-3 font-semibold text-earth-500">${item.effOrders}</td>
-          <td class="p-3">${item.effPallets}</td>
-          <td class="p-3 font-semibold text-earth-sage">${item.cbm}</td>
-          <td class="p-3 font-bold">${item.totalOrders.toLocaleString()}</td>
-          <td class="p-3">${item.totalPallets.toLocaleString()}</td>
-          <td class="p-3 text-earth-muted">${item.wMedOrders.toLocaleString()}</td>
-          <td class="p-3 text-earth-muted">${item.wMedPallets.toLocaleString()}</td>
-          <td class="p-3 text-earth-muted">${item.renalOrders.toLocaleString()}</td>
-          <td class="p-3 text-earth-muted">${item.renalPallets.toLocaleString()}</td>
+        <tr class="hover:bg-cyber-card transition-colors">
+          <td class="p-3 font-bold text-white">${item.year} ${item.month}</td>
+          <td class="p-3 text-slate-300">${item.hours.toLocaleString()}</td>
+          <td class="p-3 font-bold text-cyber-yellow glow-yellow">${item.effOrders}</td>
+          <td class="p-3 text-slate-300">${item.effPallets}</td>
+          <td class="p-3 font-bold text-cyber-green glow-green">${item.cbm}</td>
+          <td class="p-3 font-bold text-white">${item.totalOrders.toLocaleString()}</td>
+          <td class="p-3 text-slate-300">${item.totalPallets.toLocaleString()}</td>
+          <td class="p-3 text-cyber-dim">${item.wMedOrders.toLocaleString()}</td>
+          <td class="p-3 text-cyber-dim">${item.wMedPallets.toLocaleString()}</td>
+          <td class="p-3 text-cyber-dim">${item.renalOrders.toLocaleString()}</td>
+          <td class="p-3 text-cyber-dim">${item.renalPallets.toLocaleString()}</td>
         </tr>
       `).join('');
     }
 
-    // Initialize Fleet Charts
+    // Chart Instances
     let trendChartInstance = null;
     let categoryChartInstance = null;
 
@@ -493,7 +659,7 @@
       const effOrdersData = fleetData.map(d => d.effOrders);
       const totalOrdersData = fleetData.map(d => d.totalOrders);
 
-      // 1. Line Chart
+      // Line Chart (High Contrast Cyber Theme)
       const ctxTrend = document.getElementById('fleetTrendChart').getContext('2d');
       if (trendChartInstance) trendChartInstance.destroy();
       trendChartInstance = new Chart(ctxTrend, {
@@ -502,24 +668,27 @@
           labels: labels,
           datasets: [
             {
-              label: '每小時配送訂單數 (效率)',
+              label: '配送效率 (訂單/小時)',
               data: effOrdersData,
-              borderColor: '#8C6D53',
-              backgroundColor: 'rgba(140, 109, 83, 0.1)',
+              borderColor: '#00f0ff',
+              backgroundColor: 'rgba(0, 240, 255, 0.12)',
               borderWidth: 3,
               fill: true,
               yAxisID: 'y1',
-              tension: 0.3
+              tension: 0.2,
+              pointBackgroundColor: '#00f0ff',
+              pointRadius: 5
             },
             {
-              label: '總訂單數量',
+              label: '總訂單數',
               data: totalOrdersData,
-              borderColor: '#6B7A63',
-              borderDash: [5, 5],
+              borderColor: '#ffe600',
+              borderDash: [4, 4],
               borderWidth: 2,
               pointRadius: 4,
               yAxisID: 'y2',
-              tension: 0.3
+              tension: 0.2,
+              pointBackgroundColor: '#ffe600'
             }
           ]
         },
@@ -527,27 +696,29 @@
           responsive: true,
           maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { color: '#e2e8f0', font: { family: 'Share Tech Mono', size: 11 } } }
+          },
           scales: {
             y1: {
-              type: 'linear',
-              display: true,
-              position: 'left',
-              title: { display: true, text: '單 / 小時', color: '#7A7067' },
-              grid: { color: '#E8E3D9' }
+              type: 'linear', display: true, position: 'left',
+              ticks: { color: '#00f0ff', font: { family: 'Share Tech Mono' } },
+              grid: { color: '#1f263e' }
             },
             y2: {
-              type: 'linear',
-              display: true,
-              position: 'right',
-              title: { display: true, text: '總訂單數', color: '#7A7067' },
+              type: 'linear', display: true, position: 'right',
+              ticks: { color: '#ffe600', font: { family: 'Share Tech Mono' } },
               grid: { drawOnChartArea: false }
             },
-            x: { grid: { display: false } }
+            x: {
+              ticks: { color: '#e2e8f0', font: { family: 'Share Tech Mono' } },
+              grid: { color: '#1f263e' }
+            }
           }
         }
       });
 
-      // 2. Pie Chart (Oct 2025 breakdown)
+      // Pie Chart (Doughnut Cyber)
       const latest = fleetData[fleetData.length - 1];
       const ctxCat = document.getElementById('fleetCategoryChart').getContext('2d');
       if (categoryChartInstance) categoryChartInstance.destroy();
@@ -557,15 +728,16 @@
           labels: ['西藥訂單', '腎水訂單'],
           datasets: [{
             data: [latest.wMedOrders, latest.renalOrders],
-            backgroundColor: ['#8C6D53', '#D6CBC0'],
-            borderWidth: 0
+            backgroundColor: ['#00f0ff', '#ff0055'],
+            borderColor: '#07080d',
+            borderWidth: 3
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 12, color: '#2D2825' } }
+            legend: { position: 'bottom', labels: { color: '#e2e8f0', font: { family: 'Share Tech Mono' } } }
           }
         }
       });
@@ -578,7 +750,7 @@
       const pallets = parseFloat(document.getElementById('calcPallets').value) || 0;
 
       if (hours <= 0) {
-        alert('請輸入有效的配送小時數');
+        alert('[ERROR] INVALID HOURS INPUT');
         return;
       }
 
@@ -590,7 +762,7 @@
       document.getElementById('calcResult').classList.remove('hidden');
     }
 
-    // Single Page Navigation (SPA View Switcher)
+    // Navigation Switcher
     function switchView(viewName) {
       const views = ['home', 'fleet', 'translator', 'pomodoro', 'qrcode'];
       views.forEach(v => {
@@ -625,13 +797,13 @@
       const btn = document.getElementById('transBtn');
 
       if (!text) {
-        output.innerText = '請先輸入需要翻譯的英文內容。';
+        output.innerText = '// PLEASE ENTER ENGLISH TEXT CONTENT...';
         return;
       }
 
       btn.disabled = true;
-      btn.innerText = '翻譯中...';
-      output.innerText = '正在翻譯中，請稍候...';
+      btn.innerText = 'TRANSLATING...';
+      output.innerText = '// PROCESSING NEURAL TRANSLATION...';
 
       try {
         const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh-TW`);
@@ -639,26 +811,26 @@
         if (data.responseData && data.responseData.translatedText) {
           output.innerText = data.responseData.translatedText;
         } else {
-          output.innerText = '翻譯失敗，請稍後再試。';
+          output.innerText = '[ERROR] TRANSLATION FAILED.';
         }
       } catch (err) {
-        output.innerText = '網路連線失敗或 API 暫時無法回應。';
+        output.innerText = '[ERROR] NETWORK CONNECTION FAILED.';
       } finally {
         btn.disabled = false;
-        btn.innerText = '開始翻譯';
+        btn.innerText = 'TRANSLATE';
       }
     }
 
     function clearTranslator() {
       document.getElementById('transInput').value = '';
-      document.getElementById('transOutput').innerText = '譯文將顯示於此...';
+      document.getElementById('transOutput').innerText = '譯文輸出區域...';
     }
 
     function copyTranslation() {
       const outputText = document.getElementById('transOutput').innerText;
-      if (outputText && outputText !== '譯文將顯示於此...') {
+      if (outputText && outputText !== '譯文輸出區域...') {
         navigator.clipboard.writeText(outputText);
-        alert('已成功複製譯文！');
+        alert('[SUCCESS] RESULT COPIED TO CLIPBOARD');
       }
     }
 
@@ -678,11 +850,11 @@
       if (pomoIsRunning) {
         clearInterval(pomoInterval);
         pomoIsRunning = false;
-        document.getElementById('pomoBtnText').innerText = '繼續';
+        document.getElementById('pomoBtnText').innerText = 'RESUME PULSE';
         document.getElementById('pomoPlayIcon').setAttribute('data-lucide', 'play');
       } else {
         pomoIsRunning = true;
-        document.getElementById('pomoBtnText').innerText = '暫停';
+        document.getElementById('pomoBtnText').innerText = 'PAUSE PULSE';
         document.getElementById('pomoPlayIcon').setAttribute('data-lucide', 'pause');
         
         pomoInterval = setInterval(() => {
@@ -692,7 +864,7 @@
           } else {
             clearInterval(pomoInterval);
             playBeepSound();
-            alert(pomoMode === 'work' ? '專注時間結束！休息 5 分鐘吧！' : '休息時間結束！準備開始專注！');
+            alert(pomoMode === 'work' ? '[PULSE COMPLETE] Take a 5-minute break!' : '[REST COMPLETE] Ready for focus pulse!');
             switchPomoMode();
           }
         }, 1000);
@@ -704,7 +876,7 @@
       clearInterval(pomoInterval);
       pomoIsRunning = false;
       pomoTimeLeft = (pomoMode === 'work') ? 25 * 60 : 5 * 60;
-      document.getElementById('pomoBtnText').innerText = '開始專注';
+      document.getElementById('pomoBtnText').innerText = 'START PULSE';
       document.getElementById('pomoPlayIcon').setAttribute('data-lucide', 'play');
       updatePomoDisplay();
       lucide.createIcons();
@@ -714,12 +886,12 @@
       pomoMode = pomoMode === 'work' ? 'break' : 'work';
       const badge = document.getElementById('pomoStatusBadge');
       if (pomoMode === 'break') {
-        badge.innerText = '休息模式 (5m)';
-        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-earth-sage/10 text-earth-sage border border-earth-sage/20';
+        badge.innerText = 'REST PULSE (5M)';
+        badge.className = 'px-3 py-1 text-xs font-mono font-bold bg-cyber-green/20 text-cyber-green border border-cyber-green/40 glow-green';
         pomoTimeLeft = 5 * 60;
       } else {
-        badge.innerText = '專注模式 (25m)';
-        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-earth-50 text-earth-500 border border-earth-100';
+        badge.innerText = 'FOCUS PULSE (25M)';
+        badge.className = 'px-3 py-1 text-xs font-mono font-bold bg-cyber-magenta/20 text-cyber-magenta border border-cyber-magenta/40 glow-magenta';
         pomoTimeLeft = 25 * 60;
       }
       resetPomodoro();
@@ -729,11 +901,11 @@
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
         osc.connect(ctx.destination);
         osc.start();
-        osc.stop(ctx.currentTime + 0.5);
+        osc.stop(ctx.currentTime + 0.3);
       } catch(e){}
     }
 
@@ -761,7 +933,7 @@
         text: input,
         width: 160,
         height: 160,
-        colorDark : "#2D2825",
+        colorDark : "#07080d",
         colorLight : "#FFFFFF",
         correctLevel : QRCode.CorrectLevel.H
       });
@@ -781,7 +953,7 @@
       if (imageSrc) {
         const a = document.createElement('a');
         a.href = imageSrc;
-        a.download = 'qrcode.png';
+        a.download = 'cyber_qrcode.png';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -809,36 +981,6 @@
         deferredPrompt = null;
       }
     });
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        const swCode = `
-          self.addEventListener('install', (e) => self.skipWaiting());
-          self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
-        `;
-        const blob = new Blob([swCode], { type: 'application/javascript' });
-        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-      });
-    }
-
-    const manifestData = {
-      name: "Minimal Hub",
-      short_name: "MinimalHub",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#F7F5F0",
-      theme_color: "#8C6D53",
-      icons: [{
-        src: "https://cdn-icons-png.flaticon.com/512/1006/1006771.png",
-        sizes: "512x512",
-        type: "image/png"
-      }]
-    };
-    const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
-    const manifestLink = document.createElement('link');
-    manifestLink.rel = 'manifest';
-    manifestLink.href = URL.createObjectURL(manifestBlob);
-    document.head.appendChild(manifestLink);
   </script>
 </body>
 </html>
