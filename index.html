@@ -100,7 +100,7 @@
             FLEET<span class="text-dash-blue">_HUB</span>
           </h1>
           <p class="text-xs font-mono text-dash-muted">
-            OPERATIONAL COMMAND & MATRIX v3.0
+            OPERATIONAL COMMAND & MATRIX v3.3
           </p>
         </div>
       </div>
@@ -121,7 +121,7 @@
   </header>
 
   <!-- Main Container -->
-  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 z-10">
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 z-10 space-y-6">
 
     <!-- FLEET KPI DASHBOARD SECTION -->
     <section id="view-fleet" class="space-y-6">
@@ -137,7 +137,7 @@
           <!-- Excel Upload Button -->
           <label class="cursor-pointer bg-dash-green hover:bg-dash-green/90 text-dash-main text-xs font-bold px-4 py-2 rounded-xl dash-btn transition-all flex items-center space-x-1.5 shadow-lg">
             <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-            <span>上傳最新 update.xlsx</span>
+            <span>上傳最新 Update.xlsx</span>
             <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="handleFileUpload(event)">
           </label>
           
@@ -167,17 +167,17 @@
               <div id="hdrTotalHours" class="text-dash-yellow font-bold text-sm mt-0.5">-- HRS</div>
             </div>
             <div class="bg-dash-main/80 border border-dash-border p-2.5 rounded-xl text-center min-w-[120px]">
-              <div class="text-dash-muted text-[10px]">RECORD EFFICIENCY</div>
-              <div id="hdrRecordEff" class="text-dash-green font-bold text-sm mt-0.5">-- ORDERS/HR</div>
+              <div class="text-dash-muted text-[10px]">LATEST KPI RATE</div>
+              <div id="hdrLatestOtif" class="text-dash-green font-bold text-sm mt-0.5">-- %</div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Core Summary KPI Cards Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        <!-- KPI Card 1 -->
+        <!-- KPI Card 1: Total Orders -->
         <div class="dash-card p-5 space-y-3">
           <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
             <span>MONTHLY TOTAL ORDERS</span>
@@ -194,7 +194,7 @@
           </div>
         </div>
 
-        <!-- KPI Card 2 -->
+        <!-- KPI Card 2: Delivery Efficiency -->
         <div class="dash-card p-5 space-y-3">
           <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
             <span>DELIVERY EFFICIENCY</span>
@@ -211,50 +211,51 @@
           </div>
         </div>
 
-        <!-- KPI Card 3 -->
+        <!-- KPI Card 3: Latest KPI Rate -->
         <div class="dash-card p-5 space-y-3">
           <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
-            <span>AVG DAILY CBM PER TRUCK</span>
+            <span>LATEST KPI RATE</span>
             <div class="p-2 rounded-lg bg-dash-green/10 text-dash-green">
-              <i data-lucide="box" class="w-4 h-4"></i>
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
             </div>
           </div>
           <div class="text-3xl font-bold text-dash-green tracking-tight">
-            <span id="kpiCbm">--</span> <span class="text-xs font-normal text-dash-muted">CBM</span>
+            <span id="kpiOtif">--</span> <span class="text-xs font-normal text-dash-muted">%</span>
           </div>
           <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
             <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-            <span>CAPACITY UTILIZATION</span>
+            <span>ON-TIME IN-FULL</span>
           </div>
         </div>
 
-        <!-- KPI Card 4 -->
-        <div class="dash-card p-5 space-y-3">
+        <!-- KPI Card 4: Fleet Utilization -->
+        <div class="dash-card p-5 space-y-3 border-l-2 border-l-dash-purple">
           <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
-            <span>TOTAL OPERATION HOURS</span>
-            <div class="p-2 rounded-lg bg-dash-purple/10 text-dash-purple">
-              <i data-lucide="clock" class="w-4 h-4"></i>
+            <span class="font-mono uppercase">FLEET UTILIZATION</span>
+            <div class="p-2 rounded-lg bg-dash-purple/20 text-dash-purple">
+              <i data-lucide="truck" class="w-4 h-4"></i>
             </div>
           </div>
-          <div class="text-3xl font-bold text-white tracking-tight">
-            <span id="kpiHours">--</span> <span class="text-xs font-normal text-dash-muted">Hr</span>
+          <div class="text-3xl font-bold text-dash-purple tracking-tight font-mono">
+            <span id="kpiUtilization">--</span> <span class="text-xs font-normal text-dash-muted">CBM</span>
           </div>
-          <div class="text-xs text-dash-blue flex items-center gap-1 font-semibold">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-            <span>WORKFLOW EFFICIENCY</span>
+          <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+            <span>Truck Load Capacity</span>
           </div>
         </div>
+
       </div>
 
-      <!-- Charts Matrix -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Charts & Summary Matrix Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        <!-- Main Line Chart -->
-        <div class="lg:col-span-2 dash-card p-6 space-y-4">
+        <!-- 1. Main Line Chart: Efficiency & Orders -->
+        <div class="dash-card p-6 space-y-4">
           <div class="flex items-center justify-between border-b border-dash-border pb-4">
             <h3 class="font-bold text-white text-base flex items-center gap-2">
               <i data-lucide="line-chart" class="w-4 h-4 text-dash-blue"></i>
-              Monthly Efficiency & Order Volume Trend Analysis
+              Monthly Efficiency & Volume
             </h3>
             <span class="text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
           </div>
@@ -263,22 +264,80 @@
           </div>
         </div>
 
-        <!-- Category Pie Chart -->
-        <div class="dash-card p-6 space-y-4 flex flex-col justify-between">
+        <!-- 2. OTIF Chart: Monthly OTIF Trend -->
+        <div class="dash-card p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-dash-border pb-4">
+            <div>
+              <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <i data-lucide="target" class="w-4 h-4 text-dash-green"></i>
+                Monthly KPI (OTIF) Trend
+              </h3>
+              <p class="text-xs text-dash-muted mt-0.5">On-Time In-Full Delivery Performance (%)</p>
+            </div>
+            <span class="text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="fleetOtifChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 3. Category Pie Chart -->
+        <div class="dash-card p-6 space-y-4">
           <div class="border-b border-dash-border pb-4 flex items-center justify-between">
             <div>
               <h3 class="font-bold text-white text-base flex items-center gap-2">
                 <i data-lucide="pie-chart" class="w-4 h-4 text-dash-yellow"></i>
-                Product_Type(<span id="pieMonthLabel">最新</span>)
+                Product Distribution (<span id="pieMonthLabel">最新</span>)
               </h3>
-              <p class="text-xs text-dash-muted mt-1">Ratio of total orders for Pharma & Baxter</p>
+              <p class="text-xs text-dash-muted mt-0.5">Pharma vs Baxter Order Breakdown</p>
             </div>
             <span class="text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
           </div>
-          <div class="relative h-52 w-full my-auto flex items-center justify-center">
+          <div class="relative h-64 w-full my-auto flex items-center justify-center">
             <canvas id="fleetCategoryChart"></canvas>
           </div>
         </div>
+
+        <!-- 4. Operational KPI Summary Matrix -->
+        <div class="dash-card p-6 space-y-4">
+          <div class="border-b border-dash-border pb-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <i data-lucide="layout-grid" class="w-4 h-4 text-dash-purple"></i>
+                Operational KPI Summary Matrix
+              </h3>
+              <p class="text-xs text-dash-muted mt-0.5">Key Performance Indicator Benchmarks</p>
+            </div>
+            <span class="text-xs font-mono text-dash-muted">[ LIVE MATRIX ]</span>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3 font-mono text-xs pt-1">
+            <div class="bg-dash-main/70 border border-dash-border p-3.5 rounded-xl space-y-1">
+              <div class="text-dash-muted text-[11px]">AVG EFFICIENCY (ORD/HR)</div>
+              <div id="matrixAvgEffOrd" class="text-dash-yellow font-bold text-lg">--</div>
+              <div class="text-[10px] text-dash-muted">Historical Average</div>
+            </div>
+
+            <div class="bg-dash-main/70 border border-dash-border p-3.5 rounded-xl space-y-1">
+              <div class="text-dash-muted text-[11px]">AVG EFFICIENCY (PLT/HR)</div>
+              <div id="matrixAvgEffPlt" class="text-dash-blue font-bold text-lg">--</div>
+              <div class="text-[10px] text-dash-muted">Pallet Rate / Hour</div>
+            </div>
+
+            <div class="bg-dash-main/70 border border-dash-border p-3.5 rounded-xl space-y-1">
+              <div class="text-dash-muted text-[11px]">TARGET OTIF</div>
+              <div class="text-dash-green font-bold text-lg">98.00 %</div>
+              <div class="text-[10px] text-dash-muted">Standard SLA Compliance</div>
+            </div>
+
+            <div class="bg-dash-main/70 border border-dash-border p-3.5 rounded-xl space-y-1">
+              <div class="text-dash-muted text-[11px]">HIGHEST OTIF</div>
+              <div id="matrixHighestOtif" class="text-dash-blue font-bold text-lg">-- %</div>
+              <div class="text-[10px] text-dash-muted">Historical Best Month</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Data Table Cyber Style -->
@@ -286,7 +345,7 @@
         <div class="flex items-center justify-between border-b border-dash-border pb-4">
           <h3 class="font-bold text-white text-base flex items-center gap-2">
             <i data-lucide="database" class="w-4 h-4 text-dash-green"></i>
-            Summary Of Historical Record
+            <span class="text-dash-blue">Transportation</span> Historical Record
           </h3>
           <span class="text-xs font-mono text-dash-muted">[ READ-ONLY MATRIX ]</span>
         </div>
@@ -296,10 +355,11 @@
             <thead>
               <tr class="bg-dash-main text-dash-muted border-b border-dash-border font-mono">
                 <th class="p-3.5 rounded-l-lg">MONTH</th>
+                <th class="p-3.5 text-dash-green">KPI (OTIF)</th>
                 <th class="p-3.5">TOTAL HRS</th>
                 <th class="p-3.5 text-dash-yellow">EFF (ORD/HR)</th>
                 <th class="p-3.5">EFF (PLT/HR)</th>
-                <th class="p-3.5 text-dash-green">AVG CBM</th>
+                <th class="p-3.5 text-dash-blue">AVG CBM</th>
                 <th class="p-3.5">TOTAL ORDERS</th>
                 <th class="p-3.5">TOTAL PALLETS</th>
                 <th class="p-3.5">PHARMA ORDERS</th>
@@ -374,11 +434,10 @@
 
     // 預設基礎數據
     const defaultFleetData = [
-      { year: 2025, month: 'JUL', hours: 10914, effOrders: 4.1, effPallets: 0.26, cbm: 7.0, totalOrders: 44252, totalPallets: 2810, wMedOrders: 42482, wMedPallets: 2268, renalOrders: 1770, renalPallets: 543 },
-      { year: 2025, month: 'AUG', hours: 10074, effOrders: 4.2, effPallets: 0.30, cbm: 7.6, totalOrders: 42677, totalPallets: 3056, wMedOrders: 40987, wMedPallets: 2492, renalOrders: 1690, renalPallets: 564 },
-      { year: 2025, month: 'SEP', hours: 9848,  effOrders: 4.4, effPallets: 0.31, cbm: 7.7, totalOrders: 43287, totalPallets: 3017, wMedOrders: 41393, wMedPallets: 2410, renalOrders: 1894, renalPallets: 607 },
-      { year: 2025, month: 'OCT', hours: 9861,  effOrders: 4.5, effPallets: 0.31, cbm: 7.9, totalOrders: 44412, totalPallets: 3022, wMedOrders: 42660, wMedPallets: 2431, renalOrders: 1752, renalPallets: 592 },
-      { year: 2025, month: 'NOV', hours: 10074, effOrders: 4.2, effPallets: 0.30, cbm: 7.6, totalOrders: 42677, totalPallets: 3056, wMedOrders: 40987, wMedPallets: 2492, renalOrders: 1690, renalPallets: 564 }
+      { year: 2025, month: 'JUL', hours: 10914, effOrders: 4.1, effPallets: 0.26, cbm: 7.0, totalOrders: 44252, totalPallets: 2810, wMedOrders: 42482, wMedPallets: 2268, renalOrders: 1770, renalPallets: 543, otif: 99.36 },
+      { year: 2025, month: 'AUG', hours: 10074, effOrders: 4.2, effPallets: 0.30, cbm: 7.6, totalOrders: 42677, totalPallets: 3056, wMedOrders: 40987, wMedPallets: 2492, renalOrders: 1690, renalPallets: 564, otif: 99.31 },
+      { year: 2025, month: 'SEP', hours: 9848,  effOrders: 4.4, effPallets: 0.31, cbm: 7.7, totalOrders: 43287, totalPallets: 3017, wMedOrders: 41393, wMedPallets: 2410, renalOrders: 1894, renalPallets: 607, otif: 98.30 },
+      { year: 2025, month: 'OCT', hours: 9861,  effOrders: 4.5, effPallets: 0.31, cbm: 7.9, totalOrders: 44412, totalPallets: 3022, wMedOrders: 42660, wMedPallets: 2431, renalOrders: 1752, renalPallets: 592, otif: 99.22 }
     ];
 
     let fleetData = [];
@@ -407,6 +466,21 @@
       }
     }
 
+    // 輔助函式：解析 OTIF 值
+    function parseOtifValue(val) {
+      if (val === undefined || val === null || val === '') return 0;
+      let num = 0;
+      if (typeof val === 'string') {
+        num = parseFloat(val.replace('%', '').trim());
+      } else {
+        num = Number(val);
+      }
+      if (num <= 1 && num > 0) {
+        num = num * 100;
+      }
+      return Number(num.toFixed(2));
+    }
+
     // 處理 Excel 檔案上傳
     function handleFileUpload(event) {
       const file = event.target.files[0];
@@ -422,23 +496,28 @@
           const worksheet = workbook.Sheets[firstSheetName];
           const rawJson = XLSX.utils.sheet_to_json(worksheet);
 
-          // 自動清洗與格式轉換
           const parsedData = rawJson
             .filter(row => row['總訂單數量'] !== undefined && row['總訂單數量'] !== null && !isNaN(row['總訂單數量']))
-            .map(row => ({
-              year: Number(row['年份']) || 2026,
-              month: String(row['月份']).toUpperCase(),
-              hours: Number(row['總配送時間(小時):']) || 0,
-              effOrders: Number(row['每小時配送效率(訂單)']) || 0,
-              effPallets: Number(row['每小時配送效率(板數)']) || 0,
-              cbm: Number(row['每車平均每日承載CBM']) || 0,
-              totalOrders: Number(row['總訂單數量']) || 0,
-              totalPallets: Number(row['總配送板數']) || 0,
-              wMedOrders: Number(row['西藥訂單數量']) || 0,
-              wMedPallets: Number(row['西藥配送板數']) || 0,
-              renalOrders: Number(row['腎水訂單數量']) || 0,
-              renalPallets: Number(row['腎水配送板數']) || 0
-            }));
+            .map(row => {
+              const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
+              const rawOtif = otifKey ? row[otifKey] : 0;
+              
+              return {
+                year: Number(row['年份']) || 2026,
+                month: String(row['月份']).toUpperCase(),
+                hours: Number(row['總配送時間(小時):'] || row['總配送時間(小時)']) || 0,
+                effOrders: Number(row['每小時配送效率(訂單)']) || 0,
+                effPallets: Number(row['每小時配送效率(板數)']) || 0,
+                cbm: Number(row['每車平均每日承載CBM']) || 0,
+                totalOrders: Number(row['總訂單數量']) || 0,
+                totalPallets: Number(row['總配送板數']) || 0,
+                wMedOrders: Number(row['西藥訂單數量']) || 0,
+                wMedPallets: Number(row['西藥配送板數']) || 0,
+                renalOrders: Number(row['腎水訂單數量']) || 0,
+                renalPallets: Number(row['腎水配送板數']) || 0,
+                otif: parseOtifValue(rawOtif)
+              };
+            });
 
           if (parsedData.length === 0) {
             alert('[錯誤] 無法在 Excel 中找到有效數據列，請檢查欄位名稱！');
@@ -456,7 +535,7 @@
       reader.readAsArrayBuffer(file);
     }
 
-    // 更新頂部數據指標卡片
+    // 更新頂部數據指標卡片與 Operational Summary Matrix
     function updateHeaderAndCards() {
       if (!fleetData || fleetData.length === 0) return;
 
@@ -465,14 +544,12 @@
 
       document.getElementById('lastUpdateTag').innerText = `LAST_UPDATE: ${latest.year}.${latest.month}`;
       document.getElementById('hdrTotalHours').innerText = `${latest.hours.toLocaleString()} HRS`;
-      
-      const maxEff = Math.max(...fleetData.map(d => d.effOrders));
-      document.getElementById('hdrRecordEff').innerText = `${maxEff} ORDERS/HR`;
+      document.getElementById('hdrLatestOtif').innerText = `${latest.otif.toFixed(2)} %`;
 
       document.getElementById('kpiTotalOrders').innerText = latest.totalOrders.toLocaleString();
       document.getElementById('kpiEfficiency').innerText = latest.effOrders;
-      document.getElementById('kpiCbm').innerText = latest.cbm;
-      document.getElementById('kpiHours').innerText = latest.hours.toLocaleString();
+      document.getElementById('kpiOtif').innerText = latest.otif.toFixed(2);
+      document.getElementById('kpiUtilization').innerText = latest.cbm;
       document.getElementById('pieMonthLabel').innerText = `${latest.month}`;
 
       if (prev && prev.totalOrders > 0) {
@@ -488,6 +565,19 @@
       } else {
         document.getElementById('kpiOrdersDiff').innerHTML = `<span>LATEST RECORD</span>`;
       }
+
+      // 更新 Summary Matrix 計算數值
+      const totalCount = fleetData.length;
+      const avgEffOrd = (fleetData.reduce((acc, curr) => acc + curr.effOrders, 0) / totalCount).toFixed(2);
+      const avgEffPlt = (fleetData.reduce((acc, curr) => acc + curr.effPallets, 0) / totalCount).toFixed(2);
+      
+      // 動態找出 OTIF 最高值
+      const highestOtif = Math.max(...fleetData.map(d => d.otif || 0)).toFixed(2);
+
+      document.getElementById('matrixAvgEffOrd').innerText = avgEffOrd;
+      document.getElementById('matrixAvgEffPlt').innerText = avgEffPlt;
+      document.getElementById('matrixHighestOtif').innerText = `${highestOtif} %`;
+
       lucide.createIcons();
     }
 
@@ -496,10 +586,11 @@
       tbody.innerHTML = fleetData.map(item => `
         <tr class="hover:bg-dash-hover transition-colors">
           <td class="p-3.5 font-bold text-white">${item.year} ${item.month}</td>
+          <td class="p-3.5 font-bold text-dash-green">${item.otif ? item.otif.toFixed(2) + '%' : '--'}</td>
           <td class="p-3.5 text-dash-muted">${item.hours.toLocaleString()}</td>
           <td class="p-3.5 font-bold text-dash-yellow">${item.effOrders}</td>
           <td class="p-3.5 text-dash-muted">${item.effPallets}</td>
-          <td class="p-3.5 font-bold text-dash-green">${item.cbm}</td>
+          <td class="p-3.5 font-bold text-dash-blue">${item.cbm}</td>
           <td class="p-3.5 font-bold text-white">${item.totalOrders.toLocaleString()}</td>
           <td class="p-3.5 text-dash-muted">${item.totalPallets.toLocaleString()}</td>
           <td class="p-3.5 text-dash-muted">${item.wMedOrders.toLocaleString()}</td>
@@ -511,8 +602,11 @@
     }
 
     let trendChartInstance = null;
+    let otifChartInstance = null;
     let categoryChartInstance = null;
+    
     let trendAutoTimer = null;
+    let otifAutoTimer = null;
     let categoryAutoTimer = null;
 
     function startChartAutoLoop(chart, timerVarSetter) {
@@ -541,13 +635,15 @@
       renderFleetTable();
 
       if (trendAutoTimer) clearInterval(trendAutoTimer);
+      if (otifAutoTimer) clearInterval(otifAutoTimer);
       if (categoryAutoTimer) clearInterval(categoryAutoTimer);
 
       const labels = fleetData.map(d => `${d.month}`);
       const effOrdersData = fleetData.map(d => d.effOrders);
       const totalOrdersData = fleetData.map(d => d.totalOrders);
+      const otifData = fleetData.map(d => d.otif);
 
-      // 1. Line Chart
+      // 1. Line Chart: Efficiency & Orders
       const ctxTrend = document.getElementById('fleetTrendChart').getContext('2d');
       if (trendChartInstance) trendChartInstance.destroy();
       trendChartInstance = new Chart(ctxTrend, {
@@ -565,8 +661,7 @@
               yAxisID: 'y1',
               tension: 0.3,
               pointBackgroundColor: '#38a5ff',
-              pointRadius: 6,
-              pointHoverRadius: 9
+              pointRadius: 5
             },
             {
               label: 'Total Orders',
@@ -574,8 +669,7 @@
               borderColor: '#ffb020',
               borderDash: [4, 4],
               borderWidth: 2,
-              pointRadius: 5,
-              pointHoverRadius: 8,
+              pointRadius: 4,
               yAxisID: 'y2',
               tension: 0.3,
               pointBackgroundColor: '#ffb020'
@@ -588,27 +682,59 @@
           interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans', size: 11 } } },
+            tooltip: { backgroundColor: '#242430', borderColor: '#333342', borderWidth: 1, titleColor: '#ffffff' }
+          },
+          scales: {
+            y1: { type: 'linear', display: true, position: 'left', ticks: { color: '#38a5ff', font: { family: 'JetBrains Mono' } }, grid: { color: '#333342' } },
+            y2: { type: 'linear', display: true, position: 'right', ticks: { color: '#ffb020', font: { family: 'JetBrains Mono' } }, grid: { drawOnChartArea: false } },
+            x: { ticks: { color: '#8e8e9e', font: { family: 'JetBrains Mono' } }, grid: { color: '#333342' } }
+          }
+        }
+      });
+
+      // 2. Line Chart: OTIF Performance
+      const ctxOtif = document.getElementById('fleetOtifChart').getContext('2d');
+      if (otifChartInstance) otifChartInstance.destroy();
+      otifChartInstance = new Chart(ctxOtif, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'OTIF Rate (%)',
+              data: otifData,
+              borderColor: '#2cd997',
+              backgroundColor: 'rgba(44, 217, 151, 0.15)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.2,
+              pointBackgroundColor: '#2cd997',
+              pointRadius: 6,
+              pointHoverRadius: 9
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans', size: 11 } } },
             tooltip: {
-              enabled: true,
               backgroundColor: '#242430',
               borderColor: '#333342',
               borderWidth: 1,
               titleColor: '#ffffff',
-              bodyColor: '#38a5ff',
-              padding: 10,
-              displayColors: true
+              callbacks: {
+                label: (context) => ` OTIF: ${context.parsed.y.toFixed(2)}%`
+              }
             }
           },
           scales: {
-            y1: {
-              type: 'linear', display: true, position: 'left',
-              ticks: { color: '#38a5ff', font: { family: 'JetBrains Mono' } },
+            y: {
+              min: 95,
+              max: 100,
+              ticks: { color: '#2cd997', font: { family: 'JetBrains Mono' }, callback: (v) => v + '%' },
               grid: { color: '#333342' }
-            },
-            y2: {
-              type: 'linear', display: true, position: 'right',
-              ticks: { color: '#ffb020', font: { family: 'JetBrains Mono' } },
-              grid: { drawOnChartArea: false }
             },
             x: {
               ticks: { color: '#8e8e9e', font: { family: 'JetBrains Mono' } },
@@ -618,7 +744,7 @@
         }
       });
 
-      // 2. Doughnut Chart
+      // 3. Doughnut Chart: Product Distribution
       const latest = fleetData[fleetData.length - 1];
       const ctxCat = document.getElementById('fleetCategoryChart').getContext('2d');
       if (categoryChartInstance) categoryChartInstance.destroy();
@@ -639,20 +765,13 @@
           maintainAspectRatio: false,
           plugins: {
             legend: { position: 'bottom', labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans' } } },
-            tooltip: {
-              enabled: true,
-              backgroundColor: '#242430',
-              borderColor: '#333342',
-              borderWidth: 1,
-              titleColor: '#ffffff',
-              bodyColor: '#2cd997',
-              padding: 10
-            }
+            tooltip: { backgroundColor: '#242430', borderColor: '#333342', borderWidth: 1 }
           }
         }
       });
 
       startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
+      startChartAutoLoop(otifChartInstance, (t) => otifAutoTimer = t);
       startChartAutoLoop(categoryChartInstance, (t) => categoryAutoTimer = t);
     }
 
