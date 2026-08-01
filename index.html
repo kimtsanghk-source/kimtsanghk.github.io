@@ -186,7 +186,7 @@
             </div>
           </div>
           <div class="text-3xl font-bold text-white tracking-tight">
-            <span id="kpiTotalOrders">--</span> <span class="text-xs font-normal text-dash-muted">單</span>
+            <span id="kpiTotalOrders">--</span> <span class="text-xs font-normal text-dash-muted">Order</span>
           </div>
           <div id="kpiOrdersDiff" class="text-xs text-dash-yellow flex items-center gap-1 font-semibold">
             <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
@@ -203,7 +203,7 @@
             </div>
           </div>
           <div class="text-3xl font-bold text-dash-yellow tracking-tight">
-            <span id="kpiEfficiency">--</span> <span class="text-xs font-normal text-dash-muted">單/小時</span>
+            <span id="kpiEfficiency">--</span> <span class="text-xs font-normal text-dash-muted">Order/Hr</span>
           </div>
           <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
             <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
@@ -237,7 +237,7 @@
             </div>
           </div>
           <div class="text-3xl font-bold text-white tracking-tight">
-            <span id="kpiHours">--</span> <span class="text-xs font-normal text-dash-muted">小時</span>
+            <span id="kpiHours">--</span> <span class="text-xs font-normal text-dash-muted">Hr</span>
           </div>
           <div class="text-xs text-dash-blue flex items-center gap-1 font-semibold">
             <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
@@ -269,9 +269,9 @@
             <div>
               <h3 class="font-bold text-white text-base flex items-center gap-2">
                 <i data-lucide="pie-chart" class="w-4 h-4 text-dash-yellow"></i>
-                結構拆分表 (<span id="pieMonthLabel">最新</span>)
+                Product_Type(<span id="pieMonthLabel">最新</span>)
               </h3>
-              <p class="text-xs text-dash-muted mt-1">西藥與腎水物料之訂單總數比例</p>
+              <p class="text-xs text-dash-muted mt-1">Ratio of total orders for Pharma & Baxter</p>
             </div>
             <span class="text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
           </div>
@@ -286,7 +286,7 @@
         <div class="flex items-center justify-between border-b border-dash-border pb-4">
           <h3 class="font-bold text-white text-base flex items-center gap-2">
             <i data-lucide="database" class="w-4 h-4 text-dash-green"></i>
-            車隊歷史營運數據總表 (EXCEL DATASET)
+            Summary Of Historical Record
           </h3>
           <span class="text-xs font-mono text-dash-muted">[ READ-ONLY MATRIX ]</span>
         </div>
@@ -298,14 +298,14 @@
                 <th class="p-3.5 rounded-l-lg">MONTH</th>
                 <th class="p-3.5">TOTAL HRS</th>
                 <th class="p-3.5 text-dash-yellow">EFF (ORD/HR)</th>
-                <th class="p-3.5">EFF (PAL/HR)</th>
+                <th class="p-3.5">EFF (PLT/HR)</th>
                 <th class="p-3.5 text-dash-green">AVG CBM</th>
                 <th class="p-3.5">TOTAL ORDERS</th>
                 <th class="p-3.5">TOTAL PALLETS</th>
-                <th class="p-3.5">MED ORDERS</th>
-                <th class="p-3.5">MED PALLETS</th>
-                <th class="p-3.5">RENAL ORDERS</th>
-                <th class="p-3.5 rounded-r-lg">RENAL PALLETS</th>
+                <th class="p-3.5">PHARMA ORDERS</th>
+                <th class="p-3.5">PHARMA PALLETS</th>
+                <th class="p-3.5">BAXTER ORDERS</th>
+                <th class="p-3.5 rounded-r-lg">BAXTER PALLETS</th>
               </tr>
             </thead>
             <tbody id="fleetTableBody" class="divide-y divide-dash-border/60 text-gray-200 font-mono">
@@ -556,7 +556,7 @@
           labels: labels,
           datasets: [
             {
-              label: '配送效率 (訂單/小時)',
+              label: 'Delivery Efficiency (Ord/Hr)',
               data: effOrdersData,
               borderColor: '#38a5ff',
               backgroundColor: 'rgba(56, 165, 255, 0.15)',
@@ -569,7 +569,7 @@
               pointHoverRadius: 9
             },
             {
-              label: '總訂單數',
+              label: 'Total Orders',
               data: totalOrdersData,
               borderColor: '#ffb020',
               borderDash: [4, 4],
@@ -625,7 +625,7 @@
       categoryChartInstance = new Chart(ctxCat, {
         type: 'doughnut',
         data: {
-          labels: ['西藥訂單', '腎水訂單'],
+          labels: ['Pharma Orders', 'Baxter Orders'],
           datasets: [{
             data: [latest ? latest.wMedOrders : 0, latest ? latest.renalOrders : 0],
             backgroundColor: ['#38a5ff', '#ffb020'],
