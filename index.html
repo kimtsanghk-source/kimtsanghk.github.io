@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-HK" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DCH AURIGA // Transportation Dashboard</title>
+  <meta name="theme-color" content="#181820">
+  <meta name="description" content="Transportation Dashboard">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- SheetJS (XLSX Parser) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #181820;
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(56, 165, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(44, 217, 151, 0.04) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    .dash-card {
+      background-color: #242430;
+      border: 1px solid #333342;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(8px);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dash-card:hover {
+      border-color: #424254;
+    }
+
+    .dash-btn {
+      border-radius: 0.75rem;
+      transition: all 0.2s ease-in-out;
+    }
+    .dash-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #181820; }
+    ::-webkit-scrollbar-thumb { background: #333342; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #38a5ff; }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            dash: {
+              main: '#181820',
+              card: '#242430',
+              border: '#333342',
+              hover: '#2a2a38',
+              text: '#ffffff',
+              muted: '#8e8e9e',
+              green: '#2cd997',
+              blue: '#38a5ff',
+              yellow: '#ffb020',
+              purple: '#7c5cfc',
+              red: '#ff5252'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden">
+
+  <!-- Header / Navigation -->
+  <header class="bg-dash-main/90 border-b border-dash-border sticky top-0 z-40 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-dash-blue/10 border border-dash-blue/30 text-dash-blue flex items-center justify-center font-bold shadow-sm">
+          <i data-lucide="truck" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            FLEET<span class="text-dash-blue">_HUB</span>
+          </h1>
+          <p class="text-xs font-mono text-dash-muted">
+            TRANSPORTATION DASHBOARD & MATRIX v1.0
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="hidden sm:flex items-center space-x-2 text-xs font-mono text-dash-muted border border-dash-border px-3.5 py-1.5 rounded-full bg-dash-card">
+          <span class="w-2 h-2 rounded-full bg-dash-green animate-pulse"></span>
+          <span>SYSTEM ONLINE</span>
+          <span class="text-white font-bold ml-1" id="liveClock">00:00:00</span>
+        </div>
+
+        <button id="pwaInstallBtn" class="hidden items-center space-x-1.5 bg-dash-blue hover:bg-dash-blue/90 text-white text-xs font-semibold px-4 py-2 rounded-xl dash-btn transition-all">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>INSTALL APP</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 z-10 space-y-6">
+
+    <!-- FLEET KPI DASHBOARD SECTION -->
+    <section id="view-fleet" class="space-y-6">
+      
+      <!-- Excel Upload Action Bar -->
+      <div class="flex items-center justify-between gap-4">
+        <div class="text-xs font-mono text-dash-muted flex items-center gap-2">
+          <i data-lucide="database" class="w-4 h-4 text-dash-blue"></i>
+          <span>DATA MATRIX ENGINE</span>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <!-- Excel Upload Button -->
+          <label class="cursor-pointer bg-dash-green hover:bg-dash-green/90 text-dash-main text-xs font-bold px-4 py-2 rounded-xl dash-btn transition-all flex items-center space-x-1.5 shadow-lg">
+            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+            <span>上傳最新 Update.xlsx</span>
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="handleFileUpload(event)">
+          </label>
+          
+          <button onclick="resetDefaultData()" class="text-xs font-mono text-dash-muted hover:text-dash-red transition-colors" title="重置為預設數據">
+            [RESET]
+          </button>
+        </div>
+      </div>
+
+      <!-- Dashboard Header Banner -->
+      <div class="dash-card p-6 border-l-4 border-l-dash-blue">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-3 mb-1.5">
+              <span class="px-2.5 py-0.5 text-[10px] font-bold bg-dash-blue/20 text-dash-blue rounded-md uppercase tracking-wider">
+                FLEET COMMAND
+              </span>
+              <span id="lastUpdateTag" class="text-xs font-mono text-dash-muted">LAST_UPDATE: --</span>
+            </div>
+            <h2 class="text-2xl font-bold text-white tracking-tight">
+              Transportation_KPI_<span class="text-dash-blue">Dashboard</span>
+            </h2>
+          </div>
+          <div class="flex items-center space-x-3 text-xs font-mono">
+            <div class="bg-dash-main/80 border border-dash-border p-2.5 rounded-xl text-center min-w-[120px]">
+              <div class="text-dash-muted text-[10px]">TOTAL FLEET HOURS</div>
+              <div id="hdrTotalHours" class="text-dash-yellow font-bold text-sm mt-0.5">-- HRS</div>
+            </div>
+            <div class="bg-dash-main/80 border border-dash-border p-2.5 rounded-xl text-center min-w-[120px]">
+              <div class="text-dash-muted text-[10px]">LATEST KPI RATE</div>
+              <div id="hdrLatestOtif" class="text-dash-green font-bold text-sm mt-0.5">-- %</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Core Summary KPI Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- KPI Card 1: Total Orders -->
+        <div class="dash-card p-5 space-y-3">
+          <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
+            <span>MONTHLY TOTAL ORDERS</span>
+            <div class="p-2 rounded-lg bg-dash-blue/10 text-dash-blue">
+              <i data-lucide="package" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-3xl font-bold text-white tracking-tight">
+            <span id="kpiTotalOrders">--</span> <span class="text-xs font-normal text-dash-muted">Order</span>
+          </div>
+          <div id="kpiOrdersDiff" class="text-xs text-dash-yellow flex items-center gap-1 font-semibold">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+            <span>LATEST MONTH</span>
+          </div>
+        </div>
+
+        <!-- KPI Card 2: Delivery Efficiency -->
+        <div class="dash-card p-5 space-y-3">
+          <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
+            <span>DELIVERY EFFICIENCY</span>
+            <div class="p-2 rounded-lg bg-dash-yellow/10 text-dash-yellow">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-3xl font-bold text-dash-yellow tracking-tight">
+            <span id="kpiEfficiency">--</span> <span class="text-xs font-normal text-dash-muted">Order/Hr</span>
+          </div>
+          <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>REAL-TIME METRIC</span>
+          </div>
+        </div>
+
+        <!-- KPI Card 3: Latest KPI Rate -->
+        <div class="dash-card p-5 space-y-3">
+          <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
+            <span>LATEST KPI RATE</span>
+            <div class="p-2 rounded-lg bg-dash-green/10 text-dash-green">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-3xl font-bold text-dash-green tracking-tight">
+            <span id="kpiOtif">--</span> <span class="text-xs font-normal text-dash-muted">%</span>
+          </div>
+          <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            <span>ON-TIME IN-FULL</span>
+          </div>
+        </div>
+
+        <!-- KPI Card 4: Fleet Utilization -->
+        <div class="dash-card p-5 space-y-3 border-l-2 border-l-dash-purple">
+          <div class="flex items-center justify-between text-dash-muted text-xs font-medium">
+            <span class="font-mono uppercase">FLEET UTILIZATION</span>
+            <div class="p-2 rounded-lg bg-dash-purple/20 text-dash-purple">
+              <i data-lucide="truck" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-3xl font-bold text-dash-purple tracking-tight font-mono">
+            <span id="kpiUtilization">--</span> <span class="text-xs font-normal text-dash-muted">CBM</span>
+          </div>
+          <div class="text-xs text-dash-green flex items-center gap-1 font-semibold">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+            <span>Truck Load Capacity</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Charts & Summary Matrix Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- 1. Main Line Chart: Efficiency & Orders -->
+        <div class="dash-card p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-dash-border pb-4">
+            <h3 class="font-bold text-white text-base flex items-center gap-2">
+              <i data-lucide="line-chart" class="w-4 h-4 text-dash-blue"></i>
+              Monthly Efficiency & Volume
+            </h3>
+            <span class="text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="fleetTrendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 2. OTIF Chart: Monthly OTIF Trend -->
+        <div class="dash-card p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-dash-border pb-4">
+            <div>
+              <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <i data-lucide="target" class="w-4 h-4 text-dash-green"></i>
+                Monthly KPI (OTIF) Trend
+              </h3>
+              <p class="text-xs text-dash-muted mt-0.5">On-Time In-Full Delivery Performance (%)</p>
+            </div>
+            <span class="text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="fleetOtifChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 3. Category Pie Chart -->
+        <div class="dash-card p-6 space-y-4">
+          <div class="border-b border-dash-border pb-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-dash-yellow"></i>
+                Product Distribution (<span id="pieMonthLabel">最新</span>)
+              </h3>
+              <p class="text-xs text-dash-muted mt-0.5">Pharma vs Baxter Order Breakdown</p>
+            </div>
+            <span class="text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
+          </div>
+          <div class="relative h-64 w-full my-auto flex items-center justify-center">
+            <canvas id="fleetCategoryChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 4. Operational KPI Summary Matrix -->
+        <div class="dash-card p-6 space-y-4">
+          <div class="border-b border-dash-border pb-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <i data-lucide="layout-grid" class="w-4 h-4 text-dash-purple"></i>
+                Operational KPI Summary Matrix
+              </h3>
+              <p class="text-xs text-dash-muted mt-0.5">Key Performance Indicator Benchmarks</p>
+            </div>
+            <span class="text-xs font-mono text-dash-muted">[ LIVE MATRIX ]</span>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3 font-mono text-xs pt-1">
+            <div class="bg-dash-main/70 border border-dash-border p-3.5 rounded-xl space-y-1">
+              <div class="text-dash-muted text-[11px]">AVG EFFICIENCY (ORD/HR)</div>
+              <div id="matrixAvgEffOrd" class="text-dash-yellow font-bold text-lg">--</div>
+              <div class="text-[10px] text-dash-muted">Historical Average</div>
+            </div>
+
+            <div class="bg-dash-main/70 border border-dash-border p-3.5 rounded-xl space-y-1">
+              <div class="text-dash-muted text-[11px]">AVG EFFICIENCY (PLT/HR)</div>
+              <div id="matrixAvgEffPlt" class="text-dash-blue font-bold text-lg">--</div>
+              <div class="text-[10px] text-dash-muted">Pallet Rate / Hour</div>
+            </div>
+
+            <div class="bg-dash-main/70 border border-dash-border p-3.5 rounded-xl space-y-1">
+              <div class="text-dash-muted text-[11px]">TARGET OTIF</div>
+              <div class="text-dash-green font-bold text-lg">98.00 %</div>
+              <div class="text-[10px] text-dash-muted">Standard SLA Compliance</div>
+            </div>
+
+            <div class="bg-dash-main/70 border border-dash-border p-3.5 rounded-xl space-y-1">
+              <div class="text-dash-muted text-[11px]">HIGHEST OTIF</div>
+              <div id="matrixHighestOtif" class="text-dash-blue font-bold text-lg">-- %</div>
+              <div class="text-[10px] text-dash-muted">Historical Best Month</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Data Table Cyber Style -->
+      <div class="dash-card p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-dash-border pb-4">
+          <h3 class="font-bold text-white text-base flex items-center gap-2">
+            <i data-lucide="database" class="w-4 h-4 text-dash-green"></i>
+            <span class="text-dash-blue">Transportation</span> Historical Record
+          </h3>
+          <span class="text-xs font-mono text-dash-muted">[ READ-ONLY MATRIX ]</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="bg-dash-main text-dash-muted border-b border-dash-border font-mono">
+                <th class="p-3.5 rounded-l-lg">MONTH</th>
+                <th class="p-3.5 text-dash-green">KPI (OTIF)</th>
+                <th class="p-3.5">TOTAL HRS</th>
+                <th class="p-3.5 text-dash-yellow">EFF (ORD/HR)</th>
+                <th class="p-3.5">EFF (PLT/HR)</th>
+                <th class="p-3.5 text-dash-blue">AVG CBM</th>
+                <th class="p-3.5">TOTAL ORDERS</th>
+                <th class="p-3.5">TOTAL PALLETS</th>
+                <th class="p-3.5">PHARMA ORDERS</th>
+                <th class="p-3.5">PHARMA PALLETS</th>
+                <th class="p-3.5">BAXTER ORDERS</th>
+                <th class="p-3.5 rounded-r-lg">BAXTER PALLETS</th>
+              </tr>
+            </thead>
+            <tbody id="fleetTableBody" class="divide-y divide-dash-border/60 text-gray-200 font-mono">
+              <!-- JS Populated Row Data -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Live KPI Simulator Form -->
+      <div class="dash-card p-6 space-y-4">
+        <div class="border-b border-dash-border pb-4">
+          <h3 class="font-bold text-white text-base flex items-center gap-2">
+            <i data-lucide="cpu" class="w-4 h-4 text-dash-blue"></i>
+            單月 KPI 數據模擬與試算器
+          </h3>
+          <p class="text-xs text-dash-muted mt-1">輸入預測工時與訂單數量，算定車隊運載效率指標：</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="text-xs font-medium text-dash-muted">預估總配送小時 (HRS)</label>
+            <input type="number" id="calcHours" value="10000" class="w-full mt-1.5 p-2.5 bg-dash-main border border-dash-border rounded-xl font-mono text-xs text-white focus:outline-none focus:border-dash-blue">
+          </div>
+          <div>
+            <label class="text-xs font-medium text-dash-muted">預估總訂單量 (ORDERS)</label>
+            <input type="number" id="calcOrders" value="45000" class="w-full mt-1.5 p-2.5 bg-dash-main border border-dash-border rounded-xl font-mono text-xs text-white focus:outline-none focus:border-dash-blue">
+          </div>
+          <div>
+            <label class="text-xs font-medium text-dash-muted">預估總板數 (PALLETS)</label>
+            <input type="number" id="calcPallets" value="3100" class="w-full mt-1.5 p-2.5 bg-dash-main border border-dash-border rounded-xl font-mono text-xs text-white focus:outline-none focus:border-dash-blue">
+          </div>
+          <div class="flex items-end">
+            <button onclick="calculateKPI()" class="w-full py-2.5 bg-dash-blue text-white font-semibold text-xs rounded-xl dash-btn hover:bg-dash-blue/90 transition-all">
+              EXECUTE CALC
+            </button>
+          </div>
+        </div>
+
+        <div id="calcResult" class="hidden mt-4 p-4 bg-dash-main border border-dash-blue/40 rounded-xl text-xs font-mono space-y-2">
+          <div class="font-bold text-dash-yellow">// SIMULATION_OUTPUT:</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>> 每小時配送訂單效率: <span id="resOrdersHr" class="font-bold text-dash-green text-sm">--</span> 單/小時</div>
+            <div>> 每小時配送板數效率: <span id="resPalletsHr" class="font-bold text-dash-blue text-sm">--</span> 板/小時</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="mt-auto border-t border-dash-border bg-dash-main/80 py-4 text-center text-xs font-mono text-dash-muted z-10">
+    <p>© 2026 FLEET MATRIX · DARK MODE DASHBOARD</p>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').innerText = now.toTimeString().split(' ')[0];
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 預設基礎數據
+    const defaultFleetData = [
+      { year: 2025, month: 'JUL', hours: 10914, effOrders: 4.1, effPallets: 0.26, cbm: 7.0, totalOrders: 44252, totalPallets: 2810, wMedOrders: 42482, wMedPallets: 2268, renalOrders: 1770, renalPallets: 543, otif: 99.36 },
+      { year: 2025, month: 'AUG', hours: 10074, effOrders: 4.2, effPallets: 0.30, cbm: 7.6, totalOrders: 42677, totalPallets: 3056, wMedOrders: 40987, wMedPallets: 2492, renalOrders: 1690, renalPallets: 564, otif: 99.31 },
+      { year: 2025, month: 'SEP', hours: 9848,  effOrders: 4.4, effPallets: 0.31, cbm: 7.7, totalOrders: 43287, totalPallets: 3017, wMedOrders: 41393, wMedPallets: 2410, renalOrders: 1894, renalPallets: 607, otif: 98.30 },
+      { year: 2025, month: 'OCT', hours: 9861,  effOrders: 4.5, effPallets: 0.31, cbm: 7.9, totalOrders: 44412, totalPallets: 3022, wMedOrders: 42660, wMedPallets: 2431, renalOrders: 1752, renalPallets: 592, otif: 99.22 }
+    ];
+
+    let fleetData = [];
+
+    // 初始化讀取本地快取或預設值
+    function loadInitialData() {
+      const saved = localStorage.getItem('fleet_dashboard_data');
+      if (saved) {
+        try {
+          fleetData = JSON.parse(saved);
+        } catch(e) {
+          fleetData = [...defaultFleetData];
+        }
+      } else {
+        fleetData = [...defaultFleetData];
+      }
+      initFleetCharts();
+    }
+
+    // 重置數據為預設值
+    function resetDefaultData() {
+      if (confirm('確定要清除上傳的 Excel 數據並重置為預設狀態嗎？')) {
+        localStorage.removeItem('fleet_dashboard_data');
+        fleetData = [...defaultFleetData];
+        initFleetCharts();
+      }
+    }
+
+    // 輔助函式：解析 OTIF 值
+    function parseOtifValue(val) {
+      if (val === undefined || val === null || val === '') return 0;
+      let num = 0;
+      if (typeof val === 'string') {
+        num = parseFloat(val.replace('%', '').trim());
+      } else {
+        num = Number(val);
+      }
+      if (num <= 1 && num > 0) {
+        num = num * 100;
+      }
+      return Number(num.toFixed(2));
+    }
+
+    // 處理 Excel 檔案上傳
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const rawJson = XLSX.utils.sheet_to_json(worksheet);
+
+          const parsedData = rawJson
+            .filter(row => row['總訂單數量'] !== undefined && row['總訂單數量'] !== null && !isNaN(row['總訂單數量']))
+            .map(row => {
+              const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
+              const rawOtif = otifKey ? row[otifKey] : 0;
+              
+              return {
+                year: Number(row['年份']) || 2026,
+                month: String(row['月份']).toUpperCase(),
+                hours: Number(row['總配送時間(小時):'] || row['總配送時間(小時)']) || 0,
+                effOrders: Number(row['每小時配送效率(訂單)']) || 0,
+                effPallets: Number(row['每小時配送效率(板數)']) || 0,
+                cbm: Number(row['每車平均每日承載CBM']) || 0,
+                totalOrders: Number(row['總訂單數量']) || 0,
+                totalPallets: Number(row['總配送板數']) || 0,
+                wMedOrders: Number(row['西藥訂單數量']) || 0,
+                wMedPallets: Number(row['西藥配送板數']) || 0,
+                renalOrders: Number(row['腎水訂單數量']) || 0,
+                renalPallets: Number(row['腎水配送板數']) || 0,
+                otif: parseOtifValue(rawOtif)
+              };
+            });
+
+          if (parsedData.length === 0) {
+            alert('[錯誤] 無法在 Excel 中找到有效數據列，請檢查欄位名稱！');
+            return;
+          }
+
+          fleetData = parsedData;
+          localStorage.setItem('fleet_dashboard_data', JSON.stringify(fleetData));
+          initFleetCharts();
+          alert(`[成功] 已成功讀取 ${fleetData.length} 個月份的最新數據！`);
+        } catch (err) {
+          alert('[失敗] 解析 Excel 檔案時出錯：' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // 更新頂部數據指標卡片與 Operational Summary Matrix
+    function updateHeaderAndCards() {
+      if (!fleetData || fleetData.length === 0) return;
+
+      const latest = fleetData[fleetData.length - 1];
+      const prev = fleetData.length > 1 ? fleetData[fleetData.length - 2] : null;
+
+      document.getElementById('lastUpdateTag').innerText = `LAST_UPDATE: ${latest.year}.${latest.month}`;
+      document.getElementById('hdrTotalHours').innerText = `${latest.hours.toLocaleString()} HRS`;
+      document.getElementById('hdrLatestOtif').innerText = `${latest.otif.toFixed(2)} %`;
+
+      document.getElementById('kpiTotalOrders').innerText = latest.totalOrders.toLocaleString();
+      document.getElementById('kpiEfficiency').innerText = latest.effOrders;
+      document.getElementById('kpiOtif').innerText = latest.otif.toFixed(2);
+      document.getElementById('kpiUtilization').innerText = latest.cbm;
+      document.getElementById('pieMonthLabel').innerText = `${latest.month}`;
+
+      if (prev && prev.totalOrders > 0) {
+        const diffPercent = (((latest.totalOrders - prev.totalOrders) / prev.totalOrders) * 100).toFixed(1);
+        const diffIcon = diffPercent >= 0 ? 'trending-up' : 'trending-down';
+        const diffClass = diffPercent >= 0 ? 'text-dash-green' : 'text-dash-yellow';
+        
+        document.getElementById('kpiOrdersDiff').className = `text-xs ${diffClass} flex items-center gap-1 font-semibold`;
+        document.getElementById('kpiOrdersDiff').innerHTML = `
+          <i data-lucide="${diffIcon}" class="w-3.5 h-3.5"></i>
+          <span>${diffPercent >= 0 ? '+' : ''}${diffPercent}% vs ${prev.month}</span>
+        `;
+      } else {
+        document.getElementById('kpiOrdersDiff').innerHTML = `<span>LATEST RECORD</span>`;
+      }
+
+      // 更新 Summary Matrix 計算數值
+      const totalCount = fleetData.length;
+      const avgEffOrd = (fleetData.reduce((acc, curr) => acc + curr.effOrders, 0) / totalCount).toFixed(2);
+      const avgEffPlt = (fleetData.reduce((acc, curr) => acc + curr.effPallets, 0) / totalCount).toFixed(2);
+      
+      // 動態找出 OTIF 最高值
+      const highestOtif = Math.max(...fleetData.map(d => d.otif || 0)).toFixed(2);
+
+      document.getElementById('matrixAvgEffOrd').innerText = avgEffOrd;
+      document.getElementById('matrixAvgEffPlt').innerText = avgEffPlt;
+      document.getElementById('matrixHighestOtif').innerText = `${highestOtif} %`;
+
+      lucide.createIcons();
+    }
+
+    function renderFleetTable() {
+      const tbody = document.getElementById('fleetTableBody');
+      tbody.innerHTML = fleetData.map(item => `
+        <tr class="hover:bg-dash-hover transition-colors">
+          <td class="p-3.5 font-bold text-white">${item.year} ${item.month}</td>
+          <td class="p-3.5 font-bold text-dash-green">${item.otif ? item.otif.toFixed(2) + '%' : '--'}</td>
+          <td class="p-3.5 text-dash-muted">${item.hours.toLocaleString()}</td>
+          <td class="p-3.5 font-bold text-dash-yellow">${item.effOrders}</td>
+          <td class="p-3.5 text-dash-muted">${item.effPallets}</td>
+          <td class="p-3.5 font-bold text-dash-blue">${item.cbm}</td>
+          <td class="p-3.5 font-bold text-white">${item.totalOrders.toLocaleString()}</td>
+          <td class="p-3.5 text-dash-muted">${item.totalPallets.toLocaleString()}</td>
+          <td class="p-3.5 text-dash-muted">${item.wMedOrders.toLocaleString()}</td>
+          <td class="p-3.5 text-dash-muted">${item.wMedPallets.toLocaleString()}</td>
+          <td class="p-3.5 text-dash-muted">${item.renalOrders.toLocaleString()}</td>
+          <td class="p-3.5 text-dash-muted">${item.renalPallets.toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    let trendChartInstance = null;
+    let otifChartInstance = null;
+    let categoryChartInstance = null;
+    
+    let trendAutoTimer = null;
+    let otifAutoTimer = null;
+    let categoryAutoTimer = null;
+
+    function startChartAutoLoop(chart, timerVarSetter) {
+      let currentIndex = 0;
+      const interval = setInterval(() => {
+        if (!chart || !chart.data || !chart.data.labels || chart.data.labels.length === 0) return;
+        
+        const dataLength = chart.data.labels.length;
+        const activeElements = chart.data.datasets.map((_, dsIndex) => ({
+          datasetIndex: dsIndex,
+          index: currentIndex
+        }));
+
+        chart.setActiveElements(activeElements);
+        chart.tooltip.setActiveElements(activeElements, { x: 0, y: 0 });
+        chart.update();
+
+        currentIndex = (currentIndex + 1) % dataLength;
+      }, 2000);
+
+      timerVarSetter(interval);
+    }
+
+    function initFleetCharts() {
+      updateHeaderAndCards();
+      renderFleetTable();
+
+      if (trendAutoTimer) clearInterval(trendAutoTimer);
+      if (otifAutoTimer) clearInterval(otifAutoTimer);
+      if (categoryAutoTimer) clearInterval(categoryAutoTimer);
+
+      const labels = fleetData.map(d => `${d.month}`);
+      const effOrdersData = fleetData.map(d => d.effOrders);
+      const totalOrdersData = fleetData.map(d => d.totalOrders);
+      const otifData = fleetData.map(d => d.otif);
+
+      // 1. Line Chart: Efficiency & Orders
+      const ctxTrend = document.getElementById('fleetTrendChart').getContext('2d');
+      if (trendChartInstance) trendChartInstance.destroy();
+      trendChartInstance = new Chart(ctxTrend, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Delivery Efficiency (Ord/Hr)',
+              data: effOrdersData,
+              borderColor: '#38a5ff',
+              backgroundColor: 'rgba(56, 165, 255, 0.15)',
+              borderWidth: 3,
+              fill: true,
+              yAxisID: 'y1',
+              tension: 0.3,
+              pointBackgroundColor: '#38a5ff',
+              pointRadius: 5
+            },
+            {
+              label: 'Total Orders',
+              data: totalOrdersData,
+              borderColor: '#ffb020',
+              borderDash: [4, 4],
+              borderWidth: 2,
+              pointRadius: 4,
+              yAxisID: 'y2',
+              tension: 0.3,
+              pointBackgroundColor: '#ffb020'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans', size: 11 } } },
+            tooltip: { backgroundColor: '#242430', borderColor: '#333342', borderWidth: 1, titleColor: '#ffffff' }
+          },
+          scales: {
+            y1: { type: 'linear', display: true, position: 'left', ticks: { color: '#38a5ff', font: { family: 'JetBrains Mono' } }, grid: { color: '#333342' } },
+            y2: { type: 'linear', display: true, position: 'right', ticks: { color: '#ffb020', font: { family: 'JetBrains Mono' } }, grid: { drawOnChartArea: false } },
+            x: { ticks: { color: '#8e8e9e', font: { family: 'JetBrains Mono' } }, grid: { color: '#333342' } }
+          }
+        }
+      });
+
+      // 2. Line Chart: OTIF Performance
+      const ctxOtif = document.getElementById('fleetOtifChart').getContext('2d');
+      if (otifChartInstance) otifChartInstance.destroy();
+      otifChartInstance = new Chart(ctxOtif, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'OTIF Rate (%)',
+              data: otifData,
+              borderColor: '#2cd997',
+              backgroundColor: 'rgba(44, 217, 151, 0.15)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.2,
+              pointBackgroundColor: '#2cd997',
+              pointRadius: 6,
+              pointHoverRadius: 9
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans', size: 11 } } },
+            tooltip: {
+              backgroundColor: '#242430',
+              borderColor: '#333342',
+              borderWidth: 1,
+              titleColor: '#ffffff',
+              callbacks: {
+                label: (context) => ` OTIF: ${context.parsed.y.toFixed(2)}%`
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: 95,
+              max: 100,
+              ticks: { color: '#2cd997', font: { family: 'JetBrains Mono' }, callback: (v) => v + '%' },
+              grid: { color: '#333342' }
+            },
+            x: {
+              ticks: { color: '#8e8e9e', font: { family: 'JetBrains Mono' } },
+              grid: { color: '#333342' }
+            }
+          }
+        }
+      });
+
+      // 3. Doughnut Chart: Product Distribution
+      const latest = fleetData[fleetData.length - 1];
+      const ctxCat = document.getElementById('fleetCategoryChart').getContext('2d');
+      if (categoryChartInstance) categoryChartInstance.destroy();
+      categoryChartInstance = new Chart(ctxCat, {
+        type: 'doughnut',
+        data: {
+          labels: ['Pharma Orders', 'Baxter Orders'],
+          datasets: [{
+            data: [latest ? latest.wMedOrders : 0, latest ? latest.renalOrders : 0],
+            backgroundColor: ['#38a5ff', '#ffb020'],
+            borderColor: '#242430',
+            borderWidth: 4,
+            hoverOffset: 12
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#8e8e9e', font: { family: 'Plus Jakarta Sans' } } },
+            tooltip: { backgroundColor: '#242430', borderColor: '#333342', borderWidth: 1 }
+          }
+        }
+      });
+
+      startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
+      startChartAutoLoop(otifChartInstance, (t) => otifAutoTimer = t);
+      startChartAutoLoop(categoryChartInstance, (t) => categoryAutoTimer = t);
+    }
+
+    function calculateKPI() {
+      const hours = parseFloat(document.getElementById('calcHours').value) || 0;
+      const orders = parseFloat(document.getElementById('calcOrders').value) || 0;
+      const pallets = parseFloat(document.getElementById('calcPallets').value) || 0;
+
+      if (hours <= 0) {
+        alert('[ERROR] INVALID HOURS INPUT');
+        return;
+      }
+
+      const effOrders = (orders / hours).toFixed(2);
+      const effPallets = (pallets / hours).toFixed(2);
+
+      document.getElementById('resOrdersHr').innerText = effOrders;
+      document.getElementById('resPalletsHr').innerText = effPallets;
+      document.getElementById('calcResult').classList.remove('hidden');
+    }
+
+    // 頁面初始化
+    window.addEventListener('DOMContentLoaded', () => {
+      loadInitialData();
+    });
+
+    let deferredPrompt;
+    const pwaBtn = document.getElementById('pwaInstallBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      pwaBtn.classList.remove('hidden');
+      pwaBtn.classList.add('flex');
+    });
+
+    pwaBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          pwaBtn.classList.add('hidden');
+        }
+        deferredPrompt = null;
+      }
+    });
+  </script>
+</body>
+</html>
