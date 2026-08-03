@@ -399,41 +399,39 @@
       return Number(num.toFixed(2));
     }
 
-    // 徹底解決 UTC 時區偏移導致 Month 位移問題
+    // 精準解析月份字串 (不經過 Date 時區轉換，避免 2025-07-01 被誤算為 6 月)
     function parseMonthField(val) {
       if (!val) return null;
 
-      let year = null;
-      let monthIndex = null; // 0 = Jan, 6 = Jul, 11 = Dec
       const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      let str = String(val).trim();
 
-      if (val instanceof Date && !isNaN(val.getTime())) {
-        // 使用 UTC 方法避免時區造成減 1 天演變成前月問題
-        year = val.getUTCFullYear();
-        monthIndex = val.getUTCMonth();
-      } else {
-        const str = String(val).trim();
-        const matchYMD = str.match(/^(\d{4})[-/](\d{1,2})/);
-        if (matchYMD) {
-          year = parseInt(matchYMD[1], 10);
-          monthIndex = parseInt(matchYMD[2], 10) - 1;
-        } else {
-          const matchText = str.match(/([A-Za-z]{3})[_\s-]?(\d{2,4})/);
-          if (matchText) {
-            const mStr = matchText[1].toLowerCase();
-            monthIndex = monthNames.findIndex(m => m.toLowerCase() === mStr);
-            let yNum = parseInt(matchText[2], 10);
-            year = yNum < 100 ? 2000 + yNum : yNum;
-          }
+      // 情況 1: 標準 YYYY-MM-DD 或 YYYY/MM/DD 格式
+      let matchYMD = str.match(/^(\d{4})[-/](\d{1,2})/);
+      if (matchYMD) {
+        let year = parseInt(matchYMD[1], 10);
+        let mIndex = parseInt(matchYMD[2], 10) - 1;
+        if (mIndex >= 0 && mIndex < 12) {
+          return {
+            label: `${monthNames[mIndex]}_${String(year).slice(-2)}`,
+            sortKey: year * 100 + (mIndex + 1)
+          };
         }
       }
 
-      if (year !== null && monthIndex !== null && monthIndex >= 0 && monthIndex < 12) {
-        const shortYear = String(year).slice(-2);
-        return {
-          label: `${monthNames[monthIndex]}_${shortYear}`,
-          sortKey: Date.UTC(year, monthIndex, 1)
-        };
+      // 情況 2: Jun_25 或 Jul-2025 格式
+      let matchText = str.match(/([A-Za-z]{3})[_\s-]?(\d{2,4})/);
+      if (matchText) {
+        let mStr = matchText[1].toLowerCase();
+        let mIndex = monthNames.findIndex(m => m.toLowerCase() === mStr);
+        let yNum = parseInt(matchText[2], 10);
+        let year = yNum < 100 ? 2000 + yNum : yNum;
+        if (mIndex >= 0 && mIndex < 12) {
+          return {
+            label: `${monthNames[mIndex]}_${String(year).slice(-2)}`,
+            sortKey: year * 100 + (mIndex + 1)
+          };
+        }
       }
 
       return null;
@@ -452,11 +450,11 @@
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         
         const arrayBuffer = await response.arrayBuffer();
-        // 取消 cellDates: true 讓 SheetJS 使用 UTC 標準處理
-        const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: true, UTC: true });
+        // 關鍵：將 cellDates 設為 false，並使用 raw: false 取得格式化後的原始日期字串
+        const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: false });
         
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rawJson = XLSX.utils.sheet_to_json(worksheet);
+        const rawJson = XLSX.utils.sheet_to_json(worksheet, { raw: false });
 
         let parsedList = [];
 
@@ -486,7 +484,7 @@
           });
         });
 
-        // 依據 UTC 時間序號排序（舊 -> 新）
+        // 依據 YYYYMM 數值精準排序（舊 -> 新）
         parsedList.sort((a, b) => a.sortKey - b.sortKey);
         fleetData = parsedList;
 
