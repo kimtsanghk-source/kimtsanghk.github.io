@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DCH AURIGA // Transportation Dashboard</title>
+  <title>DCH AURIGA_FLEET // Transportation Dashboard</title>
   <meta name="theme-color" content="#181820">
   <meta name="description" content="Transportation Dashboard">
   
@@ -487,7 +487,6 @@
         localStorage.setItem('theme_preference', 'dark');
       }
       updateThemeUI();
-      // 切換主題時重新初始化圖表以調整文字/網格顏色
       initFleetCharts();
     }
 
@@ -515,20 +514,33 @@
       updateThemeUI();
     }
 
-    // 預設基礎數據
+    // 預設基礎數據 (已包含最新月份數據)
     const defaultFleetData = [
       { year: 2025, month: 'JUL', hours: 10914, effOrders: 4.1, effPallets: 0.26, cbm: 7.0, totalOrders: 44252, totalPallets: 2810, wMedOrders: 42482, wMedPallets: 2268, renalOrders: 1770, renalPallets: 543, otif: 99.36 },
       { year: 2025, month: 'AUG', hours: 10074, effOrders: 4.2, effPallets: 0.30, cbm: 7.6, totalOrders: 42677, totalPallets: 3056, wMedOrders: 40987, wMedPallets: 2492, renalOrders: 1690, renalPallets: 564, otif: 99.31 },
       { year: 2025, month: 'SEP', hours: 9848,  effOrders: 4.4, effPallets: 0.31, cbm: 7.7, totalOrders: 43287, totalPallets: 3017, wMedOrders: 41393, wMedPallets: 2410, renalOrders: 1894, renalPallets: 607, otif: 98.30 },
-      { year: 2025, month: 'OCT', hours: 9861,  effOrders: 4.5, effPallets: 0.31, cbm: 7.9, totalOrders: 44412, totalPallets: 3022, wMedOrders: 42660, wMedPallets: 2431, renalOrders: 1752, renalPallets: 592, otif: 99.22 }
+      { year: 2025, month: 'OCT', hours: 9861,  effOrders: 4.5, effPallets: 0.31, cbm: 7.9, totalOrders: 44412, totalPallets: 3022, wMedOrders: 42660, wMedPallets: 2431, renalOrders: 1752, renalPallets: 592, otif: 99.22 },
+      { year: 2025, month: 'NOV', hours: 9861,  effOrders: 4.4, effPallets: 0.31, cbm: 7.9, totalOrders: 43075, totalPallets: 3034, wMedOrders: 41221, wMedPallets: 2441, renalOrders: 1854, renalPallets: 593, otif: 99.53 },
+      { year: 2025, month: 'DEC', hours: 10471, effOrders: 4.5, effPallets: 0.30, cbm: 7.8, totalOrders: 47214, totalPallets: 3105, wMedOrders: 45437, wMedPallets: 2486, renalOrders: 1777, renalPallets: 619, otif: 99.16 },
+      { year: 2026, month: 'JAN', hours: 9546,  effOrders: 4.5, effPallets: 0.32, cbm: 8.0, totalOrders: 43026, totalPallets: 3046, wMedOrders: 41185, wMedPallets: 2445, renalOrders: 1841, renalPallets: 601, otif: 99.40 }
     ];
 
     let fleetData = [];
 
-    // 初始化讀取本地快取或預設值
+    // --- 新增：資料控制版本號 ---
+    // 每次你更新 defaultFleetData 後，只需將版本號往上加（例如 v1.2, v1.3）
+    const DATA_VERSION = 'v1.1'; 
+
     function loadInitialData() {
+      const savedVersion = localStorage.getItem('fleet_data_version');
       const saved = localStorage.getItem('fleet_dashboard_data');
-      if (saved) {
+
+      // 判斷版本：如果版本不一致，代表 GitHub 上有新發佈的資料，強制清除舊快取！
+      if (savedVersion !== DATA_VERSION) {
+        localStorage.removeItem('fleet_dashboard_data');
+        localStorage.setItem('fleet_data_version', DATA_VERSION);
+        fleetData = [...defaultFleetData];
+      } else if (saved) {
         try {
           fleetData = JSON.parse(saved);
         } catch(e) {
@@ -537,6 +549,7 @@
       } else {
         fleetData = [...defaultFleetData];
       }
+
       initFleetCharts();
     }
 
@@ -544,6 +557,7 @@
     function resetDefaultData() {
       if (confirm('確定要清除上傳的 Excel 數據並重置為預設狀態嗎？')) {
         localStorage.removeItem('fleet_dashboard_data');
+        localStorage.setItem('fleet_data_version', DATA_VERSION);
         fleetData = [...defaultFleetData];
         initFleetCharts();
       }
@@ -654,7 +668,6 @@
       const avgEffOrd = (fleetData.reduce((acc, curr) => acc + curr.effOrders, 0) / totalCount).toFixed(2);
       const avgEffPlt = (fleetData.reduce((acc, curr) => acc + curr.effPallets, 0) / totalCount).toFixed(2);
       
-      // 動態找出 OTIF 最高值
       const highestOtif = Math.max(...fleetData.map(d => d.otif || 0)).toFixed(2);
 
       document.getElementById('matrixAvgEffOrd').innerText = avgEffOrd;
@@ -723,7 +736,6 @@
 
       const isDark = document.documentElement.classList.contains('dark');
       
-      // 動態顏色配置
       const chartColors = {
         grid: isDark ? '#333342' : '#e2e8f0',
         text: isDark ? '#8e8e9e' : '#64748b',
