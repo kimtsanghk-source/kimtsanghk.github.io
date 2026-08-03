@@ -352,7 +352,7 @@
     let trendChartInstance = null, otifChartInstance = null, categoryChartInstance = null;
     let trendAutoTimer = null, otifAutoTimer = null, categoryAutoTimer = null;
 
-    // 解析 OTIF 值
+    // 解析 OTIF 百分比值
     function parseOtifValue(val) {
       if (val === undefined || val === null || val === '') return 0;
       let num = (typeof val === 'string') ? parseFloat(val.replace('%', '').trim()) : Number(val);
@@ -360,24 +360,46 @@
       return Number(num.toFixed(2));
     }
 
-    // 解析月份欄位
+    // 嚴謹解析月份與年份，避免時區或字串造成的誤判位移
     function parseMonthField(val) {
-      if (!val) return 'Unknown';
+      if (!val) return null;
+
+      let year = null;
+      let monthIndex = null;
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
       if (val instanceof Date && !isNaN(val.getTime())) {
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        return `${monthNames[val.getMonth()]}_${String(val.getFullYear()).slice(-2)}`;
+        year = val.getFullYear();
+        monthIndex = val.getMonth();
+      } else {
+        const str = String(val).trim();
+        const matchYMD = str.match(/^(\d{4})[-/](\d{1,2})/);
+        if (matchYMD) {
+          year = parseInt(matchYMD[1], 10);
+          monthIndex = parseInt(matchYMD[2], 10) - 1;
+        } else {
+          const matchText = str.match(/([A-Za-z]{3})[_\s-]?(\d{2,4})/);
+          if (matchText) {
+            const mStr = matchText[1].toLowerCase();
+            monthIndex = monthNames.findIndex(m => m.toLowerCase() === mStr);
+            let yNum = parseInt(matchText[2], 10);
+            year = yNum < 100 ? 2000 + yNum : yNum;
+          }
+        }
       }
-      const str = String(val).trim();
-      const match = str.match(/^(\d{4})[-/](\d{1,2})([-/]\d{1,2})?/);
-      if (match) {
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const mIdx = parseInt(match[2]) - 1;
-        if (mIdx >= 0 && mIdx < 12) return `${monthNames[mIdx]}_${String(match[1]).slice(-2)}`;
+
+      if (year !== null && monthIndex !== null && monthIndex >= 0 && monthIndex < 12) {
+        const shortYear = String(year).slice(-2);
+        return {
+          label: `${monthNames[monthIndex]}_${shortYear}`,
+          sortKey: new Date(year, monthIndex, 1).getTime()
+        };
       }
-      return str;
+
+      return null;
     }
 
-    // 🌟核心：從同目錄獲取 update.xlsx 並自動解析
+    // 自動讀取同目錄下的 update.xlsx 並更新數據
     async function fetchRemoteExcel() {
       const dot = document.getElementById('dataStatusDot');
       const text = document.getElementById('dataStatusText');
@@ -386,7 +408,6 @@
       text.innerText = "LOADING EXCEL...";
 
       try {
-        // 加入時間戳記避免瀏覽器快取舊的 Excel 檔案
         const response = await fetch(`./update.xlsx?t=${new Date().getTime()}`);
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         
@@ -396,25 +417,37 @@
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const rawJson = XLSX.utils.sheet_to_json(worksheet);
 
-        fleetData = rawJson
-          .filter(row => row['總訂單數量'] !== undefined && row['總訂單數量'] !== null && !isNaN(Number(row['總訂單數量'])))
-          .map(row => {
-            const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
-            return {
-              month: parseMonthField(row['月份']),
-              hours: Number(row['總配送時間(小時):'] || row['總配送時間(小時)']) || 0,
-              effOrders: Number(row['每小時配送效率(訂單)']) || 0,
-              effPallets: Number(row['每小時配送效率(板數)']) || 0,
-              cbm: Number(row['每車平均每日承載CBM']) || 0,
-              totalOrders: Number(row['總訂單數量']) || 0,
-              totalPallets: Number(row['總配送板數']) || 0,
-              wMedOrders: Number(row['西藥訂單數量']) || 0,
-              wMedPallets: Number(row['西藥配送板數']) || 0,
-              renalOrders: Number(row['腎水訂單數量']) || 0,
-              renalPallets: Number(row['腎水配送板數']) || 0,
-              otif: parseOtifValue(otifKey ? row[otifKey] : 0)
-            };
+        let parsedList = [];
+
+        rawJson.forEach(row => {
+          const rawOrders = row['總訂單數量'];
+          if (rawOrders === undefined || rawOrders === null || isNaN(Number(rawOrders))) return;
+
+          const monthObj = parseMonthField(row['月份']);
+          if (!monthObj) return;
+
+          const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
+
+          parsedList.push({
+            month: monthObj.label,
+            sortKey: monthObj.sortKey,
+            hours: Number(row['總配送時間(小時):'] || row['總配送時間(小時)']) || 0,
+            effOrders: Number(row['每小時配送效率(訂單)']) || 0,
+            effPallets: Number(row['每小時配送效率(板數)']) || 0,
+            cbm: Number(row['每車平均每日承載CBM']) || 0,
+            totalOrders: Number(rawOrders) || 0,
+            totalPallets: Number(row['總配送板數']) || 0,
+            wMedOrders: Number(row['西藥訂單數量']) || 0,
+            wMedPallets: Number(row['西藥配送板數']) || 0,
+            renalOrders: Number(row['腎水訂單數量']) || 0,
+            renalPallets: Number(row['腎水配送板數']) || 0,
+            otif: parseOtifValue(otifKey ? row[otifKey] : 0)
           });
+        });
+
+        // 依據時間序號排序（舊 -> 新）
+        parsedList.sort((a, b) => a.sortKey - b.sortKey);
+        fleetData = parsedList;
 
         if (fleetData.length > 0) {
           dot.className = "w-2 h-2 rounded-full bg-dash-green animate-pulse";
@@ -509,10 +542,7 @@
       const isDark = document.documentElement.classList.contains('dark');
       const chartColors = {
         grid: isDark ? '#333342' : '#e2e8f0',
-        text: isDark ? '#8e8e9e' : '#64748b',
-        tooltipBg: isDark ? '#242430' : '#ffffff',
-        tooltipBorder: isDark ? '#333342' : '#cbd5e1',
-        tooltipText: isDark ? '#ffffff' : '#0f172a'
+        text: isDark ? '#8e8e9e' : '#64748b'
       };
 
       const labels = fleetData.map(d => `${d.month}`);
