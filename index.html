@@ -399,23 +399,24 @@
       return Number(num.toFixed(2));
     }
 
-    // 精確解析月份與年份（徹底解決 Date getMonth() 的位移偏誤）
+    // 徹底解決 UTC 時區偏移導致 Month 位移問題
     function parseMonthField(val) {
       if (!val) return null;
 
       let year = null;
-      let monthIndex = null; // 0 = Jan, 1 = Feb, ..., 6 = Jul, 11 = Dec
+      let monthIndex = null; // 0 = Jan, 6 = Jul, 11 = Dec
       const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
       if (val instanceof Date && !isNaN(val.getTime())) {
-        year = val.getFullYear();
-        monthIndex = val.getMonth(); // Date 的 getMonth(): 0為一月, 6為七月
+        // 使用 UTC 方法避免時區造成減 1 天演變成前月問題
+        year = val.getUTCFullYear();
+        monthIndex = val.getUTCMonth();
       } else {
         const str = String(val).trim();
         const matchYMD = str.match(/^(\d{4})[-/](\d{1,2})/);
         if (matchYMD) {
           year = parseInt(matchYMD[1], 10);
-          monthIndex = parseInt(matchYMD[2], 10) - 1; // 1月轉0, 7月轉6
+          monthIndex = parseInt(matchYMD[2], 10) - 1;
         } else {
           const matchText = str.match(/([A-Za-z]{3})[_\s-]?(\d{2,4})/);
           if (matchText) {
@@ -431,7 +432,7 @@
         const shortYear = String(year).slice(-2);
         return {
           label: `${monthNames[monthIndex]}_${shortYear}`,
-          sortKey: new Date(year, monthIndex, 1).getTime()
+          sortKey: Date.UTC(year, monthIndex, 1)
         };
       }
 
@@ -451,7 +452,8 @@
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         
         const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: true });
+        // 取消 cellDates: true 讓 SheetJS 使用 UTC 標準處理
+        const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: true, UTC: true });
         
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const rawJson = XLSX.utils.sheet_to_json(worksheet);
@@ -484,7 +486,7 @@
           });
         });
 
-        // 依據時間序號排序（舊 -> 新）
+        // 依據 UTC 時間序號排序（舊 -> 新）
         parsedList.sort((a, b) => a.sortKey - b.sortKey);
         fleetData = parsedList;
 
@@ -673,7 +675,7 @@
 
       startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
       startChartAutoLoop(otifChartInstance, (t) => otifAutoTimer = t);
-      startChartAutoLoop(categoryChartInstance, (t) => categoryAutoTimer = t);
+      startChartAutoLoop(categoryAutoTimer, (t) => categoryAutoTimer = t);
     }
 
     function toggleTheme() {
