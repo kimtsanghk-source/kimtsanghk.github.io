@@ -132,7 +132,7 @@
             FLEET<span class="text-dash-blue">_HUB</span>
           </h1>
           <p class="text-xs font-mono text-slate-500 dark:text-dash-muted">
-            TRANSPORTATION DASHBOARD & MATRIX v1.0
+            TRANSPORTATION DASHBOARD & MATRIX v1.2
           </p>
         </div>
       </div>
@@ -514,28 +514,32 @@
       updateThemeUI();
     }
 
-    // 預設基礎數據 (已包含最新月份數據)
+    // 預設基礎數據 (已完整包含 update.xlsx 內 2025 Jul 至 2026 Jun 的所有數據)
     const defaultFleetData = [
       { year: 2025, month: 'JUL', hours: 10914, effOrders: 4.1, effPallets: 0.26, cbm: 7.0, totalOrders: 44252, totalPallets: 2810, wMedOrders: 42482, wMedPallets: 2268, renalOrders: 1770, renalPallets: 543, otif: 99.36 },
       { year: 2025, month: 'AUG', hours: 10074, effOrders: 4.2, effPallets: 0.30, cbm: 7.6, totalOrders: 42677, totalPallets: 3056, wMedOrders: 40987, wMedPallets: 2492, renalOrders: 1690, renalPallets: 564, otif: 99.31 },
       { year: 2025, month: 'SEP', hours: 9848,  effOrders: 4.4, effPallets: 0.31, cbm: 7.7, totalOrders: 43287, totalPallets: 3017, wMedOrders: 41393, wMedPallets: 2410, renalOrders: 1894, renalPallets: 607, otif: 98.30 },
       { year: 2025, month: 'OCT', hours: 9861,  effOrders: 4.5, effPallets: 0.31, cbm: 7.9, totalOrders: 44412, totalPallets: 3022, wMedOrders: 42660, wMedPallets: 2431, renalOrders: 1752, renalPallets: 592, otif: 99.22 },
-      { year: 2025, month: 'NOV', hours: 9861,  effOrders: 4.4, effPallets: 0.31, cbm: 7.9, totalOrders: 43075, totalPallets: 3034, wMedOrders: 41221, wMedPallets: 2441, renalOrders: 1854, renalPallets: 593, otif: 99.53 },
-      { year: 2025, month: 'DEC', hours: 10471, effOrders: 4.5, effPallets: 0.30, cbm: 7.8, totalOrders: 47214, totalPallets: 3105, wMedOrders: 45437, wMedPallets: 2486, renalOrders: 1777, renalPallets: 619, otif: 99.16 },
-      { year: 2026, month: 'JAN', hours: 9546,  effOrders: 4.5, effPallets: 0.32, cbm: 8.0, totalOrders: 43026, totalPallets: 3046, wMedOrders: 41185, wMedPallets: 2445, renalOrders: 1841, renalPallets: 601, otif: 99.40 }
+      { year: 2025, month: 'NOV', hours: 9755,  effOrders: 4.7, effPallets: 0.35, cbm: 7.6, totalOrders: 44417, totalPallets: 3153, wMedOrders: 42715, wMedPallets: 2617, renalOrders: 1702, renalPallets: 536, otif: 99.42 },
+      { year: 2025, month: 'DEC', hours: 10452, effOrders: 4.6, effPallets: 0.34, cbm: 7.6, totalOrders: 44897, totalPallets: 3155, wMedOrders: 42928, wMedPallets: 2520, renalOrders: 1969, renalPallets: 635, otif: 99.43 },
+      { year: 2026, month: 'JAN', hours: 10267, effOrders: 4.8, effPallets: 0.42, cbm: 9.9, totalOrders: 46461, totalPallets: 4199, wMedOrders: 44446, wMedPallets: 3565, renalOrders: 2015, renalPallets: 634, otif: 99.55 },
+      { year: 2026, month: 'FEB', hours: 8340,  effOrders: 4.6, effPallets: 0.37, cbm: 6.4, totalOrders: 35123, totalPallets: 2657, wMedOrders: 33415, wMedPallets: 2091, renalOrders: 1708, renalPallets: 566, otif: 99.22 },
+      { year: 2026, month: 'MAR', hours: 10999, effOrders: 4.2, effPallets: 0.35, cbm: 8.2, totalOrders: 43875, totalPallets: 3429, wMedOrders: 42004, wMedPallets: 2840, renalOrders: 1871, renalPallets: 590, otif: 99.48 },
+      { year: 2026, month: 'APR', hours: 8735,  effOrders: 5.1, effPallets: 0.37, cbm: 6.9, totalOrders: 40967, totalPallets: 2878, wMedOrders: 39398, wMedPallets: 2369, renalOrders: 1569, renalPallets: 509, otif: 99.24 },
+      { year: 2026, month: 'MAY', hours: 9702,  effOrders: 4.3, effPallets: 0.33, cbm: 7.1, totalOrders: 39634, totalPallets: 2974, wMedOrders: 38156, wMedPallets: 2446, renalOrders: 1478, renalPallets: 529, otif: 99.32 },
+      { year: 2026, month: 'JUN', hours: 10061, effOrders: 4.9, effPallets: 0.37, cbm: 8.1, totalOrders: 46077, totalPallets: 3413, wMedOrders: 44437, wMedPallets: 2840, renalOrders: 1640, renalPallets: 573, otif: 99.09 }
     ];
 
     let fleetData = [];
 
-    // --- 新增：資料控制版本號 ---
-    // 每次你更新 defaultFleetData 後，只需將版本號往上加（例如 v1.2, v1.3）
-    const DATA_VERSION = 'v1.1'; 
+    // 版本號升級為 v1.2，用來強制清空任何瀏覽器中的舊快取
+    const DATA_VERSION = 'v1.2'; 
 
     function loadInitialData() {
       const savedVersion = localStorage.getItem('fleet_data_version');
       const saved = localStorage.getItem('fleet_dashboard_data');
 
-      // 判斷版本：如果版本不一致，代表 GitHub 上有新發佈的資料，強制清除舊快取！
+      // 檢查版本號：若版本不同，清空舊快取並重新載入完整的 defaultFleetData
       if (savedVersion !== DATA_VERSION) {
         localStorage.removeItem('fleet_dashboard_data');
         localStorage.setItem('fleet_data_version', DATA_VERSION);
@@ -555,7 +559,7 @@
 
     // 重置數據為預設值
     function resetDefaultData() {
-      if (confirm('確定要清除上傳的 Excel 數據並重置為預設狀態嗎？')) {
+      if (confirm('確定要清除上傳的數據並重置為預設狀態嗎？')) {
         localStorage.removeItem('fleet_dashboard_data');
         localStorage.setItem('fleet_data_version', DATA_VERSION);
         fleetData = [...defaultFleetData];
@@ -594,7 +598,7 @@
           const rawJson = XLSX.utils.sheet_to_json(worksheet);
 
           const parsedData = rawJson
-            .filter(row => row['總訂單數量'] !== undefined && row['總訂單數量'] !== null && !isNaN(row['總訂單數量']))
+            .filter(row => row['總訂單數量'] !== undefined && row['總訂單數量'] !== null && !isNaN(Number(row['總訂單數量'])))
             .map(row => {
               const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
               const rawOtif = otifKey ? row[otifKey] : 0;
@@ -632,7 +636,7 @@
       reader.readAsArrayBuffer(file);
     }
 
-    // 更新頂部數據指標卡片與 Operational Summary Matrix
+    // 更新頂部數據指標卡片與 Summary Matrix
     function updateHeaderAndCards() {
       if (!fleetData || fleetData.length === 0) return;
 
