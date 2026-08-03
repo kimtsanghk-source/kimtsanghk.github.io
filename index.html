@@ -360,23 +360,23 @@
       return Number(num.toFixed(2));
     }
 
-    // 嚴謹解析月份與年份，避免時區或字串造成的誤判位移
+    // 精確解析月份與年份（徹底解決 Date getMonth() 的位移偏誤）
     function parseMonthField(val) {
       if (!val) return null;
 
       let year = null;
-      let monthIndex = null;
+      let monthIndex = null; // 0 = Jan, 1 = Feb, ..., 6 = Jul, 11 = Dec
       const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
       if (val instanceof Date && !isNaN(val.getTime())) {
         year = val.getFullYear();
-        monthIndex = val.getMonth();
+        monthIndex = val.getMonth(); // Date 的 getMonth(): 0為一月, 6為七月
       } else {
         const str = String(val).trim();
         const matchYMD = str.match(/^(\d{4})[-/](\d{1,2})/);
         if (matchYMD) {
           year = parseInt(matchYMD[1], 10);
-          monthIndex = parseInt(matchYMD[2], 10) - 1;
+          monthIndex = parseInt(matchYMD[2], 10) - 1; // 1月轉0, 7月轉6
         } else {
           const matchText = str.match(/([A-Za-z]{3})[_\s-]?(\d{2,4})/);
           if (matchText) {
