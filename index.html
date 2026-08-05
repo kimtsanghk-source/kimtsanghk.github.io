@@ -400,7 +400,6 @@
   </footer>
 
   <script>
-    // 註冊 Chart.js DataLabels 插件
     Chart.register(ChartDataLabels);
     lucide.createIcons();
 
@@ -408,7 +407,6 @@
     let trendChartInstance = null, otifChartInstance = null, categoryChartInstance = null;
     let trendAutoTimer = null, otifAutoTimer = null, categoryAutoTimer = null;
 
-    // 解析 OTIF 百分比值
     function parseOtifValue(val) {
       if (val === undefined || val === null || val === '') return 0;
       let num = (typeof val === 'string') ? parseFloat(val.replace('%', '').trim()) : Number(val);
@@ -416,7 +414,6 @@
       return Number(num.toFixed(2));
     }
 
-    // 精確解析月份與年份
     function parseMonthField(val) {
       if (!val) return null;
 
@@ -458,7 +455,6 @@
       return null;
     }
 
-    // 自動讀取同目錄下的 update.xlsx 並更新數據
     async function fetchRemoteExcel() {
       const dot = document.getElementById('dataStatusDot');
       const text = document.getElementById('dataStatusText');
@@ -597,6 +593,7 @@
       document.getElementById('calcResult').classList.remove('hidden');
     }
 
+    // 🌟 定時 2 秒 AUTO LOOP 動態輪播函數
     function startChartAutoLoop(chart, timerVarSetter) {
       let currentIndex = 0;
       const interval = setInterval(() => {
@@ -628,7 +625,7 @@
       const effOrdersData = fleetData.map(d => d.effOrders);
       const totalOrdersData = fleetData.map(d => d.totalOrders);
 
-      // 1. Trend Chart
+      // 1. Line Chart
       const ctxTrend = document.getElementById('fleetTrendChart').getContext('2d');
       if (trendChartInstance) trendChartInstance.destroy();
       trendChartInstance = new Chart(ctxTrend, {
@@ -644,7 +641,7 @@
           responsive: true, maintainAspectRatio: false,
           plugins: { 
             legend: { labels: { color: chartColors.text } },
-            datalabels: { display: false } // 關閉折線圖的 DataLabels
+            datalabels: { display: false }
           },
           scales: {
             y1: { type: 'linear', position: 'left', ticks: { color: '#38a5ff' }, grid: { color: chartColors.grid } },
@@ -654,13 +651,12 @@
         }
       });
 
-      // 2. 🌟 專屬 2026 年：圓形 12 月份 OTIF 圖表 (在扇形區域內部標註 Jan ~ Dec)
+      // 2. 🌟 專屬 2026 年：圓形 12 月份 OTIF 圖表 (帶有 2 秒 AUTO LOOP)
       const fullMonths = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
       const circularBgColors = [];
       const circularValues = [];
       const circularTooltips = [];
 
-      // 🌟 只挑出 2026 年的資料 (過濾掉 2025 年)
       const data2026Map = {};
       fleetData.forEach(d => {
         if (d.year === 2026 && d.monthIdx !== undefined) {
@@ -670,21 +666,18 @@
 
       fullMonths.forEach((mName, idx) => {
         const item = data2026Map[idx];
-        circularValues.push(1); // 每個月份弧度大小相同
+        circularValues.push(1);
 
         if (item) {
           circularTooltips.push(`${item.month}: ${item.otif.toFixed(1)}%`);
-          
-          // 顏色判定邏輯：>98% 綠色, 97-98% 黃色, <97% 紅色
           if (item.otif >= 98.0) {
-            circularBgColors.push('#2cd997'); // 綠色
+            circularBgColors.push('#2cd997');
           } else if (item.otif >= 97.0) {
-            circularBgColors.push('#ffb020'); // 黃色
+            circularBgColors.push('#ffb020');
           } else {
-            circularBgColors.push('#ff5252'); // 紅色
+            circularBgColors.push('#ff5252');
           }
         } else {
-          // 尚無數據的月份顯示暗灰色
           circularTooltips.push(`${mName}_26: (N/A)`);
           circularBgColors.push(isDark ? '#2a2a38' : '#e2e8f0');
         }
@@ -701,13 +694,13 @@
             backgroundColor: circularBgColors,
             borderColor: isDark ? '#242430' : '#ffffff',
             borderWidth: 3,
-            hoverOffset: 8
+            hoverOffset: 12
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          cutout: '50%', // 空心圓控制
+          cutout: '50%',
           plugins: {
             legend: { display: false },
             tooltip: {
@@ -717,17 +710,16 @@
                 }
               }
             },
-            // 🌟 在扇形區域正中央印出 JAN ~ DEC 月份名稱
             datalabels: {
               display: true,
-              color: '#000000', // 黑色文字，在綠/黃/紅背景上最清晰
+              color: '#000000',
               font: {
                 family: 'JetBrains Mono',
                 weight: 'bold',
                 size: 10
               },
               formatter: function(value, context) {
-                return fullMonths[context.dataIndex]; // 顯示 JAN, FEB, MAR...
+                return fullMonths[context.dataIndex];
               }
             }
           }
@@ -753,12 +745,14 @@
           responsive: true, maintainAspectRatio: false,
           plugins: { 
             legend: { position: 'bottom', labels: { color: chartColors.text } },
-            datalabels: { display: false } // 關閉圓餅圖的 DataLabels
+            datalabels: { display: false }
           }
         }
       });
 
+      // 🌟 為 3 個圖表同時開啟 2 秒 AUTO LOOP
       startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
+      startChartAutoLoop(otifChartInstance, (t) => otifAutoTimer = t);
       startChartAutoLoop(categoryChartInstance, (t) => categoryAutoTimer = t);
     }
 
