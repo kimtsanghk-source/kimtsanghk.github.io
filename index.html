@@ -11,6 +11,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js Library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js DataLabels Plugin (用來在扇形內顯示月份文字) -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- SheetJS (XLSX Parser) -->
@@ -154,6 +156,7 @@
       </div>
 
       <div class="flex items-center space-x-3">
+        <!-- 手動重新載入按鈕 -->
         <button onclick="fetchRemoteExcel()" class="bg-dash-blue hover:bg-dash-blue/90 text-white font-bold text-xs px-4 py-2 rounded-xl dash-btn transition-all flex items-center space-x-1.5 shadow-lg">
           <i data-lucide="refresh-cw" class="w-4 h-4"></i>
           <span>手動刷新數據</span>
@@ -258,16 +261,16 @@
         <div class="relative h-64 w-full"><canvas id="fleetTrendChart"></canvas></div>
       </div>
 
-      <!-- 2. 全新：圓形月份 OTIF 圖表 (Monthly OTIF Circular Trend) -->
+      <!-- 2. 2026 專屬：圓形 12 月份 OTIF 圖表 -->
       <div class="dash-card p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-200 dark:border-dash-border pb-4">
           <div>
             <h3 class="font-bold text-slate-800 dark:text-white text-base flex items-center gap-2">
-              <i data-lucide="pie-chart" class="w-4 h-4 text-dash-green"></i> Monthly KPI (OTIF) Trend
+              <i data-lucide="pie-chart" class="w-4 h-4 text-dash-green"></i> 2026 Monthly KPI (OTIF) Trend
             </h3>
-            <p class="text-xs text-slate-500 dark:text-dash-muted mt-0.5">Jan - Dec Monthly OTIF Target Status</p>
+            <p class="text-xs text-slate-500 dark:text-dash-muted mt-0.5">2026 Jan - Dec Monthly OTIF Target Status</p>
           </div>
-          <!-- 圖例標籤 Legend -->
+          <!-- 圖例標籤 -->
           <div class="flex items-center gap-2 text-[10px] font-mono">
             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#2cd997]"></span>&gt;98%</span>
             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#ffb020]"></span>97-98%</span>
@@ -397,6 +400,8 @@
   </footer>
 
   <script>
+    // 註冊 Chart.js DataLabels 插件
+    Chart.register(ChartDataLabels);
     lucide.createIcons();
 
     let fleetData = [];
@@ -425,7 +430,9 @@
         if (mIndex >= 0 && mIndex < 12) {
           return {
             label: `${monthNames[mIndex]}_${String(year).slice(-2)}`,
+            year: year,
             monthIdx: mIndex,
+            shortMonth: monthNames[mIndex],
             sortKey: year * 100 + (mIndex + 1)
           };
         }
@@ -440,7 +447,9 @@
         if (mIndex >= 0 && mIndex < 12) {
           return {
             label: `${monthNames[mIndex]}_${String(year).slice(-2)}`,
+            year: year,
             monthIdx: mIndex,
+            shortMonth: monthNames[mIndex],
             sortKey: year * 100 + (mIndex + 1)
           };
         }
@@ -480,7 +489,9 @@
 
           parsedList.push({
             month: monthObj.label,
+            year: monthObj.year,
             monthIdx: monthObj.monthIdx,
+            shortMonth: monthObj.shortMonth,
             sortKey: monthObj.sortKey,
             hours: Number(row['總配送時間(小時):'] || row['總配送時間(小時)']) || 0,
             effOrders: Number(row['每小時配送效率(訂單)']) || 0,
@@ -631,7 +642,10 @@
         },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { labels: { color: chartColors.text } } },
+          plugins: { 
+            legend: { labels: { color: chartColors.text } },
+            datalabels: { display: false } // 關閉折線圖的 DataLabels
+          },
           scales: {
             y1: { type: 'linear', position: 'left', ticks: { color: '#38a5ff' }, grid: { color: chartColors.grid } },
             y2: { type: 'linear', position: 'right', ticks: { color: '#ffb020' }, grid: { drawOnChartArea: false } },
@@ -640,25 +654,26 @@
         }
       });
 
-      // 2. 🌟 全新：圓形 OTIF 月份分布圖表 (12 個月份圓形區塊)
-      const fullMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      // 2. 🌟 專屬 2026 年：圓形 12 月份 OTIF 圖表 (在扇形區域內部標註 Jan ~ Dec)
+      const fullMonths = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
       const circularBgColors = [];
       const circularValues = [];
-      const circularLabels = [];
+      const circularTooltips = [];
 
-      // 建立對應最新年份的 12 個月份映射表
-      const latestYearData = {};
+      // 🌟 只挑出 2026 年的資料 (過濾掉 2025 年)
+      const data2026Map = {};
       fleetData.forEach(d => {
-        if (d.monthIdx !== undefined) {
-          latestYearData[d.monthIdx] = d;
+        if (d.year === 2026 && d.monthIdx !== undefined) {
+          data2026Map[d.monthIdx] = d;
         }
       });
 
       fullMonths.forEach((mName, idx) => {
-        const item = latestYearData[idx];
+        const item = data2026Map[idx];
+        circularValues.push(1); // 每個月份弧度大小相同
+
         if (item) {
-          circularLabels.push(`${item.month} (${item.otif.toFixed(1)}%)`);
-          circularValues.push(1); // 每個月份占用 1 個相同的弧度比例區塊
+          circularTooltips.push(`${item.month}: ${item.otif.toFixed(1)}%`);
           
           // 顏色判定邏輯：>98% 綠色, 97-98% 黃色, <97% 紅色
           if (item.otif >= 98.0) {
@@ -669,10 +684,9 @@
             circularBgColors.push('#ff5252'); // 紅色
           }
         } else {
-          // 未有數據的月份顯示灰色
-          circularLabels.push(`${mName} (N/A)`);
-          circularValues.push(1);
-          circularBgColors.push(isDark ? '#333342' : '#e2e8f0');
+          // 尚無數據的月份顯示暗灰色
+          circularTooltips.push(`${mName}_26: (N/A)`);
+          circularBgColors.push(isDark ? '#2a2a38' : '#e2e8f0');
         }
       });
 
@@ -681,7 +695,7 @@
       otifChartInstance = new Chart(ctxOtif, {
         type: 'doughnut',
         data: {
-          labels: circularLabels,
+          labels: fullMonths,
           datasets: [{
             data: circularValues,
             backgroundColor: circularBgColors,
@@ -693,13 +707,27 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          cutout: '50%', // 空心圓控制
           plugins: {
-            legend: { display: false }, // 使用 CSS 自訂頭部 Legend
+            legend: { display: false },
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  return ` ${context.label}`;
+                  return ` ${circularTooltips[context.dataIndex]}`;
                 }
+              }
+            },
+            // 🌟 在扇形區域正中央印出 JAN ~ DEC 月份名稱
+            datalabels: {
+              display: true,
+              color: '#000000', // 黑色文字，在綠/黃/紅背景上最清晰
+              font: {
+                family: 'JetBrains Mono',
+                weight: 'bold',
+                size: 10
+              },
+              formatter: function(value, context) {
+                return fullMonths[context.dataIndex]; // 顯示 JAN, FEB, MAR...
               }
             }
           }
@@ -723,7 +751,10 @@
         },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { color: chartColors.text } } }
+          plugins: { 
+            legend: { position: 'bottom', labels: { color: chartColors.text } },
+            datalabels: { display: false } // 關閉圓餅圖的 DataLabels
+          }
         }
       });
 
