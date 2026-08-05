@@ -154,7 +154,6 @@
       </div>
 
       <div class="flex items-center space-x-3">
-        <!-- 手動重新載入按鈕 -->
         <button onclick="fetchRemoteExcel()" class="bg-dash-blue hover:bg-dash-blue/90 text-white font-bold text-xs px-4 py-2 rounded-xl dash-btn transition-all flex items-center space-x-1.5 shadow-lg">
           <i data-lucide="refresh-cw" class="w-4 h-4"></i>
           <span>手動刷新數據</span>
@@ -247,6 +246,8 @@
 
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- 1. Monthly Efficiency & Volume -->
       <div class="dash-card p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-200 dark:border-dash-border pb-4">
           <h3 class="font-bold text-slate-800 dark:text-white text-base flex items-center gap-2">
@@ -257,18 +258,28 @@
         <div class="relative h-64 w-full"><canvas id="fleetTrendChart"></canvas></div>
       </div>
 
+      <!-- 2. 全新：圓形月份 OTIF 圖表 (Monthly OTIF Circular Trend) -->
       <div class="dash-card p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-200 dark:border-dash-border pb-4">
           <div>
             <h3 class="font-bold text-slate-800 dark:text-white text-base flex items-center gap-2">
-              <i data-lucide="target" class="w-4 h-4 text-dash-green"></i> Monthly KPI (OTIF) Trend
+              <i data-lucide="pie-chart" class="w-4 h-4 text-dash-green"></i> Monthly KPI (OTIF) Trend
             </h3>
+            <p class="text-xs text-slate-500 dark:text-dash-muted mt-0.5">Jan - Dec Monthly OTIF Target Status</p>
           </div>
-          <span class="text-xs font-mono text-dash-green animate-pulse">[ AUTO LOOP ]</span>
+          <!-- 圖例標籤 Legend -->
+          <div class="flex items-center gap-2 text-[10px] font-mono">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#2cd997]"></span>&gt;98%</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#ffb020]"></span>97-98%</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#ff5252]"></span>&lt;97%</span>
+          </div>
         </div>
-        <div class="relative h-64 w-full"><canvas id="fleetOtifChart"></canvas></div>
+        <div class="relative h-64 w-full flex items-center justify-center">
+          <canvas id="fleetOtifChart"></canvas>
+        </div>
       </div>
 
+      <!-- 3. Product Distribution -->
       <div class="dash-card p-6 space-y-4">
         <div class="border-b border-slate-200 dark:border-dash-border pb-4 flex items-center justify-between">
           <div>
@@ -281,6 +292,7 @@
         <div class="relative h-64 w-full my-auto flex items-center justify-center"><canvas id="fleetCategoryChart"></canvas></div>
       </div>
 
+      <!-- 4. Operational KPI Summary Matrix -->
       <div class="dash-card p-6 space-y-4">
         <div class="border-b border-slate-200 dark:border-dash-border pb-4 flex items-center justify-between">
           <h3 class="font-bold text-slate-800 dark:text-white text-base flex items-center gap-2">
@@ -399,14 +411,13 @@
       return Number(num.toFixed(2));
     }
 
-    // 精準解析月份字串 (不經過 Date 時區轉換，避免 2025-07-01 被誤算為 6 月)
+    // 精確解析月份與年份
     function parseMonthField(val) {
       if (!val) return null;
 
       const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       let str = String(val).trim();
 
-      // 情況 1: 標準 YYYY-MM-DD 或 YYYY/MM/DD 格式
       let matchYMD = str.match(/^(\d{4})[-/](\d{1,2})/);
       if (matchYMD) {
         let year = parseInt(matchYMD[1], 10);
@@ -414,12 +425,12 @@
         if (mIndex >= 0 && mIndex < 12) {
           return {
             label: `${monthNames[mIndex]}_${String(year).slice(-2)}`,
+            monthIdx: mIndex,
             sortKey: year * 100 + (mIndex + 1)
           };
         }
       }
 
-      // 情況 2: Jun_25 或 Jul-2025 格式
       let matchText = str.match(/([A-Za-z]{3})[_\s-]?(\d{2,4})/);
       if (matchText) {
         let mStr = matchText[1].toLowerCase();
@@ -429,6 +440,7 @@
         if (mIndex >= 0 && mIndex < 12) {
           return {
             label: `${monthNames[mIndex]}_${String(year).slice(-2)}`,
+            monthIdx: mIndex,
             sortKey: year * 100 + (mIndex + 1)
           };
         }
@@ -450,7 +462,6 @@
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         
         const arrayBuffer = await response.arrayBuffer();
-        // 關鍵：將 cellDates 設為 false，並使用 raw: false 取得格式化後的原始日期字串
         const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: false });
         
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -469,6 +480,7 @@
 
           parsedList.push({
             month: monthObj.label,
+            monthIdx: monthObj.monthIdx,
             sortKey: monthObj.sortKey,
             hours: Number(row['總配送時間(小時):'] || row['總配送時間(小時)']) || 0,
             effOrders: Number(row['每小時配送效率(訂單)']) || 0,
@@ -484,7 +496,6 @@
           });
         });
 
-        // 依據 YYYYMM 數值精準排序（舊 -> 新）
         parsedList.sort((a, b) => a.sortKey - b.sortKey);
         fleetData = parsedList;
 
@@ -557,7 +568,6 @@
       `).join('');
     }
 
-    // 試算器計算邏輯
     function calculateKPI() {
       const hours = parseFloat(document.getElementById('calcHours').value) || 0;
       const orders = parseFloat(document.getElementById('calcOrders').value) || 0;
@@ -606,9 +616,8 @@
       const labels = fleetData.map(d => `${d.month}`);
       const effOrdersData = fleetData.map(d => d.effOrders);
       const totalOrdersData = fleetData.map(d => d.totalOrders);
-      const otifData = fleetData.map(d => d.otif);
 
-      // Trend Chart
+      // 1. Trend Chart
       const ctxTrend = document.getElementById('fleetTrendChart').getContext('2d');
       if (trendChartInstance) trendChartInstance.destroy();
       trendChartInstance = new Chart(ctxTrend, {
@@ -631,26 +640,73 @@
         }
       });
 
-      // OTIF Chart
+      // 2. 🌟 全新：圓形 OTIF 月份分布圖表 (12 個月份圓形區塊)
+      const fullMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const circularBgColors = [];
+      const circularValues = [];
+      const circularLabels = [];
+
+      // 建立對應最新年份的 12 個月份映射表
+      const latestYearData = {};
+      fleetData.forEach(d => {
+        if (d.monthIdx !== undefined) {
+          latestYearData[d.monthIdx] = d;
+        }
+      });
+
+      fullMonths.forEach((mName, idx) => {
+        const item = latestYearData[idx];
+        if (item) {
+          circularLabels.push(`${item.month} (${item.otif.toFixed(1)}%)`);
+          circularValues.push(1); // 每個月份占用 1 個相同的弧度比例區塊
+          
+          // 顏色判定邏輯：>98% 綠色, 97-98% 黃色, <97% 紅色
+          if (item.otif >= 98.0) {
+            circularBgColors.push('#2cd997'); // 綠色
+          } else if (item.otif >= 97.0) {
+            circularBgColors.push('#ffb020'); // 黃色
+          } else {
+            circularBgColors.push('#ff5252'); // 紅色
+          }
+        } else {
+          // 未有數據的月份顯示灰色
+          circularLabels.push(`${mName} (N/A)`);
+          circularValues.push(1);
+          circularBgColors.push(isDark ? '#333342' : '#e2e8f0');
+        }
+      });
+
       const ctxOtif = document.getElementById('fleetOtifChart').getContext('2d');
       if (otifChartInstance) otifChartInstance.destroy();
       otifChartInstance = new Chart(ctxOtif, {
-        type: 'line',
+        type: 'doughnut',
         data: {
-          labels: labels,
-          datasets: [{ label: 'OTIF Rate (%)', data: otifData, borderColor: '#2cd997', backgroundColor: 'rgba(44, 217, 151, 0.15)', borderWidth: 3, fill: true, tension: 0.2 }]
+          labels: circularLabels,
+          datasets: [{
+            data: circularValues,
+            backgroundColor: circularBgColors,
+            borderColor: isDark ? '#242430' : '#ffffff',
+            borderWidth: 3,
+            hoverOffset: 8
+          }]
         },
         options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { labels: { color: chartColors.text } } },
-          scales: {
-            y: { min: 95, max: 100, ticks: { color: '#2cd997', callback: v => v + '%' }, grid: { color: chartColors.grid } },
-            x: { ticks: { color: chartColors.text }, grid: { color: chartColors.grid } }
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }, // 使用 CSS 自訂頭部 Legend
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.label}`;
+                }
+              }
+            }
           }
         }
       });
 
-      // Doughnut Chart
+      // 3. Doughnut Chart: Product Distribution
       const latest = fleetData[fleetData.length - 1];
       const ctxCat = document.getElementById('fleetCategoryChart').getContext('2d');
       if (categoryChartInstance) categoryChartInstance.destroy();
@@ -672,8 +728,7 @@
       });
 
       startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
-      startChartAutoLoop(otifChartInstance, (t) => otifAutoTimer = t);
-      startChartAutoLoop(categoryAutoTimer, (t) => categoryAutoTimer = t);
+      startChartAutoLoop(categoryChartInstance, (t) => categoryAutoTimer = t);
     }
 
     function toggleTheme() {
