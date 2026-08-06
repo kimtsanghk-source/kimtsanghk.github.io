@@ -124,17 +124,23 @@
             FLEET<span class="text-dash-blue">_HUB</span>
           </h1>
           <p class="text-xs font-mono text-slate-500 dark:text-dash-muted">
-            TRANSPORTATION DASHBOARD (AUTO-SYNC EXCEL)
+            TRANSPORTATION DASHBOARD
           </p>
         </div>
       </div>
 
-      <div class="flex items-center space-x-3 sm:space-x-4">
+      <div class="flex items-center space-x-2 sm:space-x-3">
         <!-- Live Status indicator -->
-        <div class="hidden sm:flex items-center space-x-2 text-xs font-mono border border-slate-200 dark:border-dash-border px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-dash-card">
+        <div class="hidden sm:flex items-center space-x-2 text-xs font-mono border border-slate-200 dark:border-dash-border px-3 py-1.5 rounded-full bg-slate-100 dark:bg-dash-card">
           <span id="dataStatusDot" class="w-2 h-2 rounded-full bg-dash-green animate-pulse"></span>
           <span id="dataStatusText" class="text-slate-800 dark:text-white font-bold">FETCHING EXCEL...</span>
         </div>
+
+        <!-- AutoLoop 暫停 / 啟動開關按鈕 -->
+        <button id="loopToggleBtn" onclick="toggleAutoLoop()" class="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-dash-card dark:hover:bg-dash-hover text-dash-green border border-slate-200 dark:border-dash-border text-xs font-semibold px-3 py-2 rounded-xl dash-btn transition-all" title="暫停/啟動 AutoLoop 輪播">
+          <i id="loopIcon" data-lucide="pause-circle" class="w-4 h-4 text-dash-green"></i>
+          <span id="loopText" class="hidden md:inline font-mono text-[11px]">PAUSE LOOP</span>
+        </button>
 
         <!-- 黑暗/明亮模式切換 -->
         <button id="themeToggleBtn" onclick="toggleTheme()" class="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-dash-card dark:hover:bg-dash-hover text-slate-700 dark:text-gray-200 border border-slate-200 dark:border-dash-border text-xs font-semibold px-3 py-2 rounded-xl dash-btn transition-all">
@@ -256,7 +262,7 @@
           <h3 class="font-bold text-slate-800 dark:text-white text-base flex items-center gap-2">
             <i data-lucide="line-chart" class="w-4 h-4 text-dash-blue"></i> Monthly Efficiency & Volume
           </h3>
-          <span class="text-xs font-mono text-dash-green animate-pulse">[ AUTO LOOP ]</span>
+          <span class="loopBadge text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
         </div>
         <div class="relative h-64 w-full"><canvas id="fleetTrendChart"></canvas></div>
       </div>
@@ -270,11 +276,14 @@
             </h3>
             <p class="text-xs text-slate-500 dark:text-dash-muted mt-0.5">2026 Jan - Dec Monthly OTIF Target Status</p>
           </div>
-          <!-- 圖例標籤 -->
-          <div class="flex items-center gap-2 text-[10px] font-mono">
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#2cd997]"></span>&gt;98%</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#ffb020]"></span>97-98%</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#ff5252]"></span>&lt;97%</span>
+          <!-- 圖例與 Badge -->
+          <div class="flex flex-col items-end gap-1">
+            <span class="loopBadge text-[10px] font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
+            <div class="flex items-center gap-2 text-[10px] font-mono">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#2cd997]"></span>&gt;98%</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#ffb020]"></span>97-98%</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#ff5252]"></span>&lt;97%</span>
+            </div>
           </div>
         </div>
         <div class="relative h-64 w-full flex items-center justify-center">
@@ -290,7 +299,7 @@
               <i data-lucide="pie-chart" class="w-4 h-4 text-dash-yellow"></i> Product Distribution (<span id="pieMonthLabel">最新</span>)
             </h3>
           </div>
-          <span class="text-xs font-mono text-dash-green animate-pulse">[ AUTO LOOP ]</span>
+          <span class="loopBadge text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
         </div>
         <div class="relative h-64 w-full my-auto flex items-center justify-center"><canvas id="fleetCategoryChart"></canvas></div>
       </div>
@@ -396,7 +405,7 @@
   </main>
 
   <footer class="mt-auto border-t border-slate-200 dark:border-dash-border bg-white/80 dark:bg-dash-main/80 py-4 text-center text-xs font-mono text-slate-500 dark:text-dash-muted z-10">
-    <p>© 2026 FLEET MATRIX · AUTO-SYNCED FROM GITHUB REPO</p>
+    <p>DCH Auriga · Transportation KPI Dashboard</p>
   </footer>
 
   <script>
@@ -406,6 +415,7 @@
     let fleetData = [];
     let trendChartInstance = null, otifChartInstance = null, categoryChartInstance = null;
     let trendAutoTimer = null, otifAutoTimer = null, categoryAutoTimer = null;
+    let isAutoLoopRunning = true;
 
     function parseOtifValue(val) {
       if (val === undefined || val === null || val === '') return 0;
@@ -593,8 +603,9 @@
       document.getElementById('calcResult').classList.remove('hidden');
     }
 
-    // 🌟 定時 2 秒 AUTO LOOP 動態輪播函數
     function startChartAutoLoop(chart, timerVarSetter) {
+      if (!isAutoLoopRunning) return;
+
       let currentIndex = 0;
       const interval = setInterval(() => {
         if (!chart || !chart.data || !chart.data.labels || chart.data.labels.length === 0) return;
@@ -605,6 +616,51 @@
         currentIndex = (currentIndex + 1) % chart.data.labels.length;
       }, 2000);
       timerVarSetter(interval);
+    }
+
+    function toggleAutoLoop() {
+      isAutoLoopRunning = !isAutoLoopRunning;
+
+      const btnText = document.getElementById('loopText');
+      const btnIcon = document.getElementById('loopIcon');
+      const btnEl = document.getElementById('loopToggleBtn');
+      const badges = document.querySelectorAll('.loopBadge');
+
+      if (isAutoLoopRunning) {
+        btnText.innerText = 'PAUSE LOOP';
+        btnIcon.setAttribute('data-lucide', 'pause-circle');
+        btnEl.className = "flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-dash-card dark:hover:bg-dash-hover text-dash-green border border-slate-200 dark:border-dash-border text-xs font-semibold px-3 py-2 rounded-xl dash-btn transition-all";
+        
+        badges.forEach(b => {
+          b.innerText = '[ 2s AUTO LOOP ]';
+          b.className = 'loopBadge text-xs font-mono text-dash-green animate-pulse';
+        });
+
+        initFleetCharts();
+      } else {
+        btnText.innerText = 'PLAY LOOP';
+        btnIcon.setAttribute('data-lucide', 'play-circle');
+        btnEl.className = "flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-dash-card dark:hover:bg-dash-hover text-dash-yellow border border-slate-200 dark:border-dash-border text-xs font-semibold px-3 py-2 rounded-xl dash-btn transition-all";
+
+        badges.forEach(b => {
+          b.innerText = '[ LOOP PAUSED ]';
+          b.className = 'loopBadge text-xs font-mono text-dash-yellow';
+        });
+
+        if (trendAutoTimer) clearInterval(trendAutoTimer);
+        if (otifAutoTimer) clearInterval(otifAutoTimer);
+        if (categoryAutoTimer) clearInterval(categoryAutoTimer);
+
+        [trendChartInstance, otifChartInstance, categoryChartInstance].forEach(chart => {
+          if (chart) {
+            chart.setActiveElements([]);
+            chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+            chart.update();
+          }
+        });
+      }
+
+      lucide.createIcons();
     }
 
     function initFleetCharts() {
@@ -651,7 +707,7 @@
         }
       });
 
-      // 2. 🌟 專屬 2026 年：圓形 12 月份 OTIF 圖表 (帶有 2 秒 AUTO LOOP)
+      // 2. 專屬 2026 年：圓形 12 月份 OTIF 圖表
       const fullMonths = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
       const circularBgColors = [];
       const circularValues = [];
@@ -750,10 +806,11 @@
         }
       });
 
-      // 🌟 為 3 個圖表同時開啟 2 秒 AUTO LOOP
-      startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
-      startChartAutoLoop(otifChartInstance, (t) => otifAutoTimer = t);
-      startChartAutoLoop(categoryChartInstance, (t) => categoryAutoTimer = t);
+      if (isAutoLoopRunning) {
+        startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
+        startChartAutoLoop(otifChartInstance, (t) => otifAutoTimer = t);
+        startChartAutoLoop(categoryAutoTimer, (t) => categoryAutoTimer = t);
+      }
     }
 
     function toggleTheme() {
