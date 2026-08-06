@@ -314,7 +314,7 @@
         <div class="relative h-64 w-full my-auto flex items-center justify-center"><canvas id="fleetCategoryChart"></canvas></div>
       </div>
 
-      <!-- 4. Delivery Distribution (百分比圓形圖) -->
+      <!-- 4. Delivery Distribution (百分比圓形圖 - 獨立讀取 Column N 至 U) -->
       <div class="dash-card p-6 space-y-4">
         <div class="border-b border-slate-200 dark:border-dash-border pb-4 flex items-center justify-between">
           <div>
@@ -473,11 +473,11 @@
         const cleanKW = keyword.replace(/[\r\n\s]/g, '').toLowerCase();
         return cleanK.includes(cleanKW);
       });
-      if (!targetKey) return 0;
+      if (!targetKey) return null;
       const val = row[targetKey];
-      if (val === undefined || val === null || val === '') return 0;
+      if (val === undefined || val === null || val === '') return null;
       const num = parseFloat(String(val).replace(/,/g, '').trim());
-      return isNaN(num) ? 0 : num;
+      return isNaN(num) ? null : num;
     }
 
     // 讀取 update.xlsx
@@ -505,16 +505,19 @@
           const monthObj = parseMonthField(row['月份'] || row['Month']);
           if (!monthObj) return;
 
+          // 🌟 核心關註： Column B 至 L 數據讀取 (如果不含總訂單數量或為空，視為未發生的月份，不納入 Core KPI 卡片與折線圖)
+          const isValidKpiRow = rawOrders !== null && rawOrders > 0;
+
           const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
 
-          // 使用模糊比對安全讀取 Column N 至 T 的渠道數據
-          const clinic = getRowVal(row, 'Clinic');
-          const elderly = getRowVal(row, 'Elderly');
-          const homeDel = getRowVal(row, 'Home Delivery');
-          const hospital = getRowVal(row, 'Hospital');
-          const ka = getRowVal(row, 'KA');
-          const macau = getRowVal(row, 'Macau');
-          const selfPick = getRowVal(row, 'Self Pick');
+          // 🌟 渠道數據讀取 (Column N 至 U 獨立讀取)
+          const clinic = getRowVal(row, 'Clinic') || 0;
+          const elderly = getRowVal(row, 'Elderly') || 0;
+          const homeDel = getRowVal(row, 'Home Delivery') || 0;
+          const hospital = getRowVal(row, 'Hospital') || 0;
+          const ka = getRowVal(row, 'KA') || 0;
+          const macau = getRowVal(row, 'Macau') || 0;
+          const selfPick = getRowVal(row, 'Self Pick') || 0;
           const distTotal = getRowVal(row, 'Grand Total') || (clinic + elderly + homeDel + hospital + ka + macau + selfPick);
 
           parsedList.push({
@@ -523,16 +526,17 @@
             monthIdx: monthObj.monthIdx,
             shortMonth: monthObj.shortMonth,
             sortKey: monthObj.sortKey,
-            hours: getRowVal(row, '總配送時間'),
-            effOrders: getRowVal(row, '每小時配送效率(訂單)') || getRowVal(row, '效率(訂單)'),
-            effPallets: getRowVal(row, '每小時配送效率(板數)') || getRowVal(row, '效率(板數)'),
-            cbm: getRowVal(row, 'CBM'),
-            totalOrders: rawOrders,
-            totalPallets: getRowVal(row, '總配送板數'),
-            wMedOrders: getRowVal(row, '西藥訂單'),
-            wMedPallets: getRowVal(row, '西藥配送板數'),
-            renalOrders: getRowVal(row, '腎水訂單'),
-            renalPallets: getRowVal(row, '腎水配送板數'),
+            isValidKpiRow: isValidKpiRow, // 標記是否為有效的 A-L 數據列
+            hours: getRowVal(row, '總配送時間') || 0,
+            effOrders: getRowVal(row, '每小時配送效率(訂單)') || getRowVal(row, '效率(訂單)') || 0,
+            effPallets: getRowVal(row, '每小時配送效率(板數)') || getRowVal(row, '效率(板數)') || 0,
+            cbm: getRowVal(row, 'CBM') || 0,
+            totalOrders: rawOrders || 0,
+            totalPallets: getRowVal(row, '總配送板數') || 0,
+            wMedOrders: getRowVal(row, '西藥訂單') || 0,
+            wMedPallets: getRowVal(row, '西藥配送板數') || 0,
+            renalOrders: getRowVal(row, '腎水訂單') || 0,
+            renalPallets: getRowVal(row, '腎水配送板數') || 0,
             otif: parseOtifValue(otifKey ? row[otifKey] : 0),
             distData: {
               clinic, elderly, homeDel, hospital, ka, macau, selfPick, distTotal
@@ -558,9 +562,12 @@
     }
 
     function updateHeaderAndCards() {
-      if (!fleetData || fleetData.length === 0) return;
-      const latest = fleetData[fleetData.length - 1];
-      const prev = fleetData.length > 1 ? fleetData[fleetData.length - 2] : null;
+      // 過濾出只包含 Column A 至 L 有數據的列
+      const validKpiList = fleetData.filter(d => d.isValidKpiRow);
+      if (!validKpiList || validKpiList.length === 0) return;
+
+      const latest = validKpiList[validKpiList.length - 1];
+      const prev = validKpiList.length > 1 ? validKpiList[validKpiList.length - 2] : null;
 
       document.getElementById('lastUpdateTag').innerText = `LAST_UPDATE: ${latest.month}`;
       document.getElementById('hdrTotalHours').innerText = `${latest.hours.toLocaleString()} HRS`;
@@ -588,8 +595,9 @@
     }
 
     function renderFleetTable() {
+      const validKpiList = fleetData.filter(d => d.isValidKpiRow);
       const tbody = document.getElementById('fleetTableBody');
-      tbody.innerHTML = fleetData.map(item => `
+      tbody.innerHTML = validKpiList.map(item => `
         <tr class="hover:bg-slate-100 dark:hover:bg-dash-hover transition-colors">
           <td class="p-3.5 font-bold text-slate-800 dark:text-white">${item.month}</td>
           <td class="p-3.5 font-bold text-dash-green">${item.otif ? item.otif.toFixed(2) + '%' : '--'}</td>
@@ -701,9 +709,12 @@
         text: isDark ? '#8e8e9e' : '#64748b'
       };
 
-      const labels = fleetData.map(d => `${d.month}`);
-      const effOrdersData = fleetData.map(d => d.effOrders);
-      const totalOrdersData = fleetData.map(d => d.totalOrders);
+      // 🌟 只取 Column A-L 有實際數據的月份繪製 1、3 圖表
+      const validKpiList = fleetData.filter(d => d.isValidKpiRow);
+
+      const labels = validKpiList.map(d => `${d.month}`);
+      const effOrdersData = validKpiList.map(d => d.effOrders);
+      const totalOrdersData = validKpiList.map(d => d.totalOrders);
 
       // 1. Line Chart
       const ctxTrend = document.getElementById('fleetTrendChart').getContext('2d');
@@ -738,7 +749,7 @@
       const circularTooltips = [];
 
       const data2026Map = {};
-      fleetData.forEach(d => {
+      validKpiList.forEach(d => {
         if (d.year === 2026 && d.monthIdx !== undefined) {
           data2026Map[d.monthIdx] = d;
         }
@@ -807,7 +818,7 @@
       });
 
       // 3. Doughnut Chart: Product Distribution
-      const latest = fleetData[fleetData.length - 1];
+      const latest = validKpiList[validKpiList.length - 1];
       const ctxCat = document.getElementById('fleetCategoryChart').getContext('2d');
       if (categoryChartInstance) categoryChartInstance.destroy();
       categoryChartInstance = new Chart(ctxCat, {
@@ -830,8 +841,7 @@
         }
       });
 
-      // 4. 🌟 Delivery Distribution 百分比圓形圖 (Column N - T)
-      // 倒序尋找最新有渠道數據的月份
+      // 4. 🌟 Delivery Distribution 百分比圓形圖 (獨立從 Column N - T 搜尋最新填寫的月份)
       const distItem = [...fleetData].reverse().find(d => d.distData && d.distData.distTotal > 0) || latest;
       
       const distLabels = ['Clinic/Dispensary', 'Elderly Home', 'Home Delivery', 'Hospital', 'KA', 'Macau', 'Self Pick Up'];
@@ -896,7 +906,7 @@
               display: function(context) {
                 const val = context.dataset.data[context.dataIndex];
                 const pct = distTotalVal > 0 ? (val / distTotalVal) * 100 : 0;
-                return pct >= 2; // 2% 以上的扇形標註 %
+                return pct >= 1; // 2% 以上的扇形標註 %
               },
               color: '#ffffff',
               font: { family: 'JetBrains Mono', weight: 'bold', size: 9 },
