@@ -11,7 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js Library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Chart.js DataLabels Plugin (用來在扇形內顯示月份文字) -->
+  <!-- Chart.js DataLabels Plugin (用來在圓形圖上顯示數字與百分比) -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -314,32 +314,22 @@
         <div class="relative h-64 w-full my-auto flex items-center justify-center"><canvas id="fleetCategoryChart"></canvas></div>
       </div>
 
-      <!-- 4. Operational KPI Summary Matrix -->
+      <!-- 4. 🌟 全新：Delivery Distribution (百分比圓形圖 - 替代舊 Matrix 表格) -->
       <div class="dash-card p-6 space-y-4">
         <div class="border-b border-slate-200 dark:border-dash-border pb-4 flex items-center justify-between">
-          <h3 class="font-bold text-slate-800 dark:text-white text-base flex items-center gap-2">
-            <i data-lucide="layout-grid" class="w-4 h-4 text-dash-purple"></i> Operational KPI Summary Matrix
-          </h3>
+          <div>
+            <h3 class="font-bold text-slate-800 dark:text-white text-base flex items-center gap-2">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-dash-purple"></i> Delivery Distribution (<span id="distMonthLabel">最新</span>)
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-dash-muted mt-0.5">Order breakdown across delivery channels (%)</p>
+          </div>
+          <span class="loopBadge text-xs font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
         </div>
-        <div class="grid grid-cols-2 gap-3 font-mono text-xs pt-1">
-          <div class="bg-slate-50 dark:bg-dash-main/70 border border-slate-200 dark:border-dash-border p-3.5 rounded-xl space-y-1">
-            <div class="text-slate-500 dark:text-dash-muted text-[11px]">AVG EFFICIENCY (ORD/HR)</div>
-            <div id="matrixAvgEffOrd" class="text-dash-yellow font-bold text-lg">--</div>
-          </div>
-          <div class="bg-slate-50 dark:bg-dash-main/70 border border-slate-200 dark:border-dash-border p-3.5 rounded-xl space-y-1">
-            <div class="text-slate-500 dark:text-dash-muted text-[11px]">AVG EFFICIENCY (PLT/HR)</div>
-            <div id="matrixAvgEffPlt" class="text-dash-blue font-bold text-lg">--</div>
-          </div>
-          <div class="bg-slate-50 dark:bg-dash-main/70 border border-slate-200 dark:border-dash-border p-3.5 rounded-xl space-y-1">
-            <div class="text-slate-500 dark:text-dash-muted text-[11px]">TARGET OTIF</div>
-            <div class="text-dash-green font-bold text-lg">98.00 %</div>
-          </div>
-          <div class="bg-slate-50 dark:bg-dash-main/70 border border-slate-200 dark:border-dash-border p-3.5 rounded-xl space-y-1">
-            <div class="text-slate-500 dark:text-dash-muted text-[11px]">HIGHEST OTIF</div>
-            <div id="matrixHighestOtif" class="text-dash-blue font-bold text-lg">-- %</div>
-          </div>
+        <div class="relative h-64 w-full my-auto flex items-center justify-center">
+          <canvas id="deliveryDistChart"></canvas>
         </div>
       </div>
+
     </div>
 
     <!-- Data Table -->
@@ -423,8 +413,8 @@
     lucide.createIcons();
 
     let fleetData = [];
-    let trendChartInstance = null, otifChartInstance = null, categoryChartInstance = null;
-    let trendAutoTimer = null, otifAutoTimer = null, categoryAutoTimer = null;
+    let trendChartInstance = null, otifChartInstance = null, categoryChartInstance = null, deliveryDistChartInstance = null;
+    let trendAutoTimer = null, otifAutoTimer = null, categoryAutoTimer = null, deliveryDistAutoTimer = null;
     let isAutoLoopRunning = true;
 
     function parseOtifValue(val) {
@@ -475,6 +465,7 @@
       return null;
     }
 
+    // 讀取 update.xlsx，包含 column N 至 U 的 Delivery Distribution 數據
     async function fetchRemoteExcel() {
       const dot = document.getElementById('dataStatusDot');
       const text = document.getElementById('dataStatusText');
@@ -503,6 +494,16 @@
 
           const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
 
+          // 讀取 Column N 至 T 的渠道配送訂單資料
+          const clinic = Number(row['Clinic/Dispensary\n(ORDER)'] || row['Clinic/Dispensary (ORDER)'] || row['Clinic/Dispensary']) || 0;
+          const elderly = Number(row['Elderly Home\n(ORDER)'] || row['Elderly Home (ORDER)'] || row['Elderly Home']) || 0;
+          const homeDel = Number(row['Home Delivery\n(ORDER)'] || row['Home Delivery (ORDER)'] || row['Home Delivery']) || 0;
+          const hospital = Number(row['Hospital\n(ORDER)'] || row['Hospital (ORDER)'] || row['Hospital']) || 0;
+          const ka = Number(row['KA\n(ORDER)'] || row['KA (ORDER)'] || row['KA']) || 0;
+          const macau = Number(row['Macau\n(ORDER)'] || row['Macau (ORDER)'] || row['Macau']) || 0;
+          const selfPick = Number(row['Self Pick Up\n(ORDER)'] || row['Self Pick Up (ORDER)'] || row['Self Pick Up']) || 0;
+          const distTotal = Number(row['Grand Total'] || row['Grand Total\n(ORDER)']) || (clinic + elderly + homeDel + hospital + ka + macau + selfPick);
+
           parsedList.push({
             month: monthObj.label,
             year: monthObj.year,
@@ -519,7 +520,10 @@
             wMedPallets: Number(row['西藥配送板數']) || 0,
             renalOrders: Number(row['腎水訂單數量']) || 0,
             renalPallets: Number(row['腎水配送板數']) || 0,
-            otif: parseOtifValue(otifKey ? row[otifKey] : 0)
+            otif: parseOtifValue(otifKey ? row[otifKey] : 0),
+            distData: {
+              clinic, elderly, homeDel, hospital, ka, macau, selfPick, distTotal
+            }
           });
         });
 
@@ -566,11 +570,6 @@
           <span>${diffPercent >= 0 ? '+' : ''}${diffPercent}% vs ${prev.month}</span>
         `;
       }
-
-      const totalCount = fleetData.length;
-      document.getElementById('matrixAvgEffOrd').innerText = (fleetData.reduce((a, c) => a + c.effOrders, 0) / totalCount).toFixed(2);
-      document.getElementById('matrixAvgEffPlt').innerText = (fleetData.reduce((a, c) => a + c.effPallets, 0) / totalCount).toFixed(2);
-      document.getElementById('matrixHighestOtif').innerText = `${Math.max(...fleetData.map(d => d.otif || 0)).toFixed(2)} %`;
 
       lucide.createIcons();
     }
@@ -660,8 +659,9 @@
         if (trendAutoTimer) clearInterval(trendAutoTimer);
         if (otifAutoTimer) clearInterval(otifAutoTimer);
         if (categoryAutoTimer) clearInterval(categoryAutoTimer);
+        if (deliveryDistAutoTimer) clearInterval(deliveryDistAutoTimer);
 
-        [trendChartInstance, otifChartInstance, categoryChartInstance].forEach(chart => {
+        [trendChartInstance, otifChartInstance, categoryChartInstance, deliveryDistChartInstance].forEach(chart => {
           if (chart) {
             chart.setActiveElements([]);
             chart.tooltip.setActiveElements([], { x: 0, y: 0 });
@@ -680,6 +680,7 @@
       if (trendAutoTimer) clearInterval(trendAutoTimer);
       if (otifAutoTimer) clearInterval(otifAutoTimer);
       if (categoryAutoTimer) clearInterval(categoryAutoTimer);
+      if (deliveryDistAutoTimer) clearInterval(deliveryDistAutoTimer);
 
       const isDark = document.documentElement.classList.contains('dark');
       const chartColors = {
@@ -816,10 +817,91 @@
         }
       });
 
+      // 4. 🌟 全新：Delivery Distribution 百分比圓形圖 (Column N - T)
+      // 尋找最新包含渠道數據的月份
+      const distItem = [...fleetData].reverse().find(d => d.distData && d.distData.distTotal > 0) || latest;
+      
+      const distLabels = ['Clinic/Dispensary', 'Elderly Home', 'Home Delivery', 'Hospital', 'KA', 'Macau', 'Self Pick Up'];
+      const distValues = distItem && distItem.distData ? [
+        distItem.distData.clinic,
+        distItem.distData.elderly,
+        distItem.distData.homeDel,
+        distItem.distData.hospital,
+        distItem.distData.ka,
+        distItem.distData.macau,
+        distItem.distData.selfPick
+      ] : [0, 0, 0, 0, 0, 0, 0];
+
+      const distTotalVal = distValues.reduce((a, b) => a + b, 0);
+      document.getElementById('distMonthLabel').innerText = distItem ? distItem.month : '最新';
+
+      const ctxDist = document.getElementById('deliveryDistChart').getContext('2d');
+      if (deliveryDistChartInstance) deliveryDistChartInstance.destroy();
+      deliveryDistChartInstance = new Chart(ctxDist, {
+        type: 'doughnut',
+        data: {
+          labels: distLabels,
+          datasets: [{
+            data: distValues,
+            backgroundColor: [
+              '#38a5ff', // Clinic - Blue
+              '#ffb020', // Elderly - Yellow
+              '#2cd997', // Home Del - Green
+              '#7c5cfc', // Hospital - Purple
+              '#ff5252', // KA - Red
+              '#00d2ff', // Macau - Cyan
+              '#ff7675'  // Self Pick - Pink/Orange
+            ],
+            borderColor: isDark ? '#242430' : '#ffffff',
+            borderWidth: 3,
+            hoverOffset: 10
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '45%',
+          plugins: {
+            legend: { 
+              position: 'right', 
+              labels: { 
+                color: chartColors.text,
+                font: { family: 'Plus Jakarta Sans', size: 10 },
+                boxWidth: 12
+              } 
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const val = context.parsed;
+                  const pct = distTotalVal > 0 ? ((val / distTotalVal) * 100).toFixed(1) : 0;
+                  return ` ${context.label}: ${val.toLocaleString()} (${pct}%)`;
+                }
+              }
+            },
+            // 在扇形上標誌百分比 (%)
+            datalabels: {
+              display: function(context) {
+                const val = context.dataset.data[context.dataIndex];
+                const pct = distTotalVal > 0 ? (val / distTotalVal) * 100 : 0;
+                return pct >= 3; // 小於 3% 的扇形隱藏數字，避免太擠
+              },
+              color: '#ffffff',
+              font: { family: 'JetBrains Mono', weight: 'bold', size: 9 },
+              formatter: function(value) {
+                const pct = distTotalVal > 0 ? ((value / distTotalVal) * 100).toFixed(1) : 0;
+                return `${pct}%`;
+              }
+            }
+          }
+        }
+      });
+
       if (isAutoLoopRunning) {
         startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
         startChartAutoLoop(otifChartInstance, (t) => otifAutoTimer = t);
         startChartAutoLoop(categoryChartInstance, (t) => categoryAutoTimer = t);
+        startChartAutoLoop(deliveryDistChartInstance, (t) => deliveryDistAutoTimer = t);
       }
     }
 
