@@ -314,7 +314,7 @@
         <div class="relative h-64 w-full my-auto flex items-center justify-center"><canvas id="fleetCategoryChart"></canvas></div>
       </div>
 
-      <!-- 4. 🌟 全新：Delivery Distribution (百分比圓形圖 - 替代舊 Matrix 表格) -->
+      <!-- 4. Delivery Distribution (百分比圓形圖) -->
       <div class="dash-card p-6 space-y-4">
         <div class="border-b border-slate-200 dark:border-dash-border pb-4 flex items-center justify-between">
           <div>
@@ -465,7 +465,22 @@
       return null;
     }
 
-    // 讀取 update.xlsx，包含 column N 至 U 的 Delivery Distribution 數據
+    // 輔助函式：強健的表頭模糊搜尋，防止 \n 或 \r\n 造成 key 讀取不到
+    function getRowVal(row, keyword) {
+      const keys = Object.keys(row);
+      const targetKey = keys.find(k => {
+        const cleanK = k.replace(/[\r\n\s]/g, '').toLowerCase();
+        const cleanKW = keyword.replace(/[\r\n\s]/g, '').toLowerCase();
+        return cleanK.includes(cleanKW);
+      });
+      if (!targetKey) return 0;
+      const val = row[targetKey];
+      if (val === undefined || val === null || val === '') return 0;
+      const num = parseFloat(String(val).replace(/,/g, '').trim());
+      return isNaN(num) ? 0 : num;
+    }
+
+    // 讀取 update.xlsx
     async function fetchRemoteExcel() {
       const dot = document.getElementById('dataStatusDot');
       const text = document.getElementById('dataStatusText');
@@ -486,23 +501,21 @@
         let parsedList = [];
 
         rawJson.forEach(row => {
-          const rawOrders = row['總訂單數量'];
-          if (rawOrders === undefined || rawOrders === null || isNaN(Number(rawOrders))) return;
-
-          const monthObj = parseMonthField(row['月份']);
+          const rawOrders = getRowVal(row, '總訂單數量');
+          const monthObj = parseMonthField(row['月份'] || row['Month']);
           if (!monthObj) return;
 
           const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
 
-          // 讀取 Column N 至 T 的渠道配送訂單資料
-          const clinic = Number(row['Clinic/Dispensary\n(ORDER)'] || row['Clinic/Dispensary (ORDER)'] || row['Clinic/Dispensary']) || 0;
-          const elderly = Number(row['Elderly Home\n(ORDER)'] || row['Elderly Home (ORDER)'] || row['Elderly Home']) || 0;
-          const homeDel = Number(row['Home Delivery\n(ORDER)'] || row['Home Delivery (ORDER)'] || row['Home Delivery']) || 0;
-          const hospital = Number(row['Hospital\n(ORDER)'] || row['Hospital (ORDER)'] || row['Hospital']) || 0;
-          const ka = Number(row['KA\n(ORDER)'] || row['KA (ORDER)'] || row['KA']) || 0;
-          const macau = Number(row['Macau\n(ORDER)'] || row['Macau (ORDER)'] || row['Macau']) || 0;
-          const selfPick = Number(row['Self Pick Up\n(ORDER)'] || row['Self Pick Up (ORDER)'] || row['Self Pick Up']) || 0;
-          const distTotal = Number(row['Grand Total'] || row['Grand Total\n(ORDER)']) || (clinic + elderly + homeDel + hospital + ka + macau + selfPick);
+          // 使用模糊比對安全讀取 Column N 至 T 的渠道數據
+          const clinic = getRowVal(row, 'Clinic');
+          const elderly = getRowVal(row, 'Elderly');
+          const homeDel = getRowVal(row, 'Home Delivery');
+          const hospital = getRowVal(row, 'Hospital');
+          const ka = getRowVal(row, 'KA');
+          const macau = getRowVal(row, 'Macau');
+          const selfPick = getRowVal(row, 'Self Pick');
+          const distTotal = getRowVal(row, 'Grand Total') || (clinic + elderly + homeDel + hospital + ka + macau + selfPick);
 
           parsedList.push({
             month: monthObj.label,
@@ -510,16 +523,16 @@
             monthIdx: monthObj.monthIdx,
             shortMonth: monthObj.shortMonth,
             sortKey: monthObj.sortKey,
-            hours: Number(row['總配送時間(小時):'] || row['總配送時間(小時)']) || 0,
-            effOrders: Number(row['每小時配送效率(訂單)']) || 0,
-            effPallets: Number(row['每小時配送效率(板數)']) || 0,
-            cbm: Number(row['每車平均每日承載CBM']) || 0,
-            totalOrders: Number(rawOrders) || 0,
-            totalPallets: Number(row['總配送板數']) || 0,
-            wMedOrders: Number(row['西藥訂單數量']) || 0,
-            wMedPallets: Number(row['西藥配送板數']) || 0,
-            renalOrders: Number(row['腎水訂單數量']) || 0,
-            renalPallets: Number(row['腎水配送板數']) || 0,
+            hours: getRowVal(row, '總配送時間'),
+            effOrders: getRowVal(row, '每小時配送效率(訂單)') || getRowVal(row, '效率(訂單)'),
+            effPallets: getRowVal(row, '每小時配送效率(板數)') || getRowVal(row, '效率(板數)'),
+            cbm: getRowVal(row, 'CBM'),
+            totalOrders: rawOrders,
+            totalPallets: getRowVal(row, '總配送板數'),
+            wMedOrders: getRowVal(row, '西藥訂單'),
+            wMedPallets: getRowVal(row, '西藥配送板數'),
+            renalOrders: getRowVal(row, '腎水訂單'),
+            renalPallets: getRowVal(row, '腎水配送板數'),
             otif: parseOtifValue(otifKey ? row[otifKey] : 0),
             distData: {
               clinic, elderly, homeDel, hospital, ka, macau, selfPick, distTotal
@@ -817,8 +830,8 @@
         }
       });
 
-      // 4. 🌟 全新：Delivery Distribution 百分比圓形圖 (Column N - T)
-      // 尋找最新包含渠道數據的月份
+      // 4. 🌟 Delivery Distribution 百分比圓形圖 (Column N - T)
+      // 倒序尋找最新有渠道數據的月份
       const distItem = [...fleetData].reverse().find(d => d.distData && d.distData.distTotal > 0) || latest;
       
       const distLabels = ['Clinic/Dispensary', 'Elderly Home', 'Home Delivery', 'Hospital', 'KA', 'Macau', 'Self Pick Up'];
@@ -879,12 +892,11 @@
                 }
               }
             },
-            // 在扇形上標誌百分比 (%)
             datalabels: {
               display: function(context) {
                 const val = context.dataset.data[context.dataIndex];
                 const pct = distTotalVal > 0 ? (val / distTotalVal) * 100 : 0;
-                return pct >= 3; // 小於 3% 的扇形隱藏數字，避免太擠
+                return pct >= 2; // 2% 以上的扇形標註 %
               },
               color: '#ffffff',
               font: { family: 'JetBrains Mono', weight: 'bold', size: 9 },
