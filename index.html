@@ -74,18 +74,6 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     }
 
-    /* 公司 Logo 樣式 */
-    .company-logo {
-      height: 48px;
-      width: auto;
-      object-fit: contain;
-      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
-      transition: filter 0.3s ease;
-    }
-    html:not(.dark) .company-logo {
-      filter: invert(1) brightness(0.2) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-    }
-
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     html.dark ::-webkit-scrollbar-track { background: #181820; }
     html.dark ::-webkit-scrollbar-thumb { background: #333342; border-radius: 9999px; }
@@ -182,7 +170,7 @@
       </div>
     </div>
 
-    <!-- Dashboard Banner (包含右側 DCH Auriga Logo) -->
+    <!-- Dashboard Banner -->
     <div class="dash-card p-6 border-l-4 border-l-dash-blue">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -195,11 +183,6 @@
           <h2 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
             Transportation_KPI_<span class="text-dash-blue">Dashboard</span>
           </h2>
-        </div>
-
-        <!-- 🌟 DCH Auriga 公司 Logo 位置 -->
-        <div class="flex items-center justify-end">
-          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAVAAAAEBCAYAAAAuOv2LAAAAAXNSR0IArs4c6QAAAHhlWElmTU0AKgAAAAgABAESAAMAAAABAAEAAAEaAAUAAAABAAAAGgEbAAUAAAABAAAAIgEoaAMAAAABAAIAAAECDAAABAAAAM4DAACdDQAEAAAAAQAAAU4AAAAAYm9va21hcmsuY29tAM3e3AAAAAlwSFlzAAALEwAACxMBAJqcGAAAAYVpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KTM2oGAAACZtJREFUeF7t3f3PHVUdx/HP2wtYqIlyRTEtTYIUl2JgL/QPNLp4k1L6S0y80d41xmtilH+i9Z/QH/TK/4C22mS5fK/43A5I4aXp5mS4iL44NWWj8p6mU9sC3b333A/OfL5fE0qAOTvP53POmS985tw9v/e97x04Xm4++EAAgb0IHN6L4/e33IvhL/yB23fA+w4f3Lfn79s/8L4Dv23/vA//vft24b/32L5te/a+f/f49313+769e/m5u2vf4b323v/m/vvd7fO4I4BAFwEBNMW0I4DAC4EAtIeAQLsCAnhL35G9A99/aN+Xv8v44L4d3e3z3xHYfwj0kP94D/x31x9A/3z44/P3f3XfL/9+z92/c3+E4m8/I/CagABaFEEgKyCAWYHp3xdAixwJ/M5/7f/yL3u2AFrkSADL/03xawK4978Xf/rX922R4mI3At34x2qf3f7j/s5/9rO4cR93Aaw54j4CqQA/C/yY3Yl6933z8eIuAtjMhRkBvAgI4E3v1f8SfgawGQszAqsAAtj3Xw5/FvevAtiNhRmBf4NAANv8743m1w/C//7D4S/1A1jzD2QEuhEIIIBd54p9Cewl0On/f1v/E+q+1+/t2/3tY2/s413mSGA/AQG0yJ3Atf9I6/299vP+H3f79kP7eJc5Eth/CPTJ/x35rve3z6/e7/s7Lp++veftuP7iB328yxyBr/8fXvPvf20/i1f/eL44+4/2iA/iUf3v9P99L4fGfXbf3y/0eGf+u8sE3iLAn+8yYp/7i0An/sP9rP28zxx/2s66A9s/XyO202v2v4XAYI+6AGx89r3fK9A9mHefp529z5x+77t/3L04323AevG5e9e/xP1i91m5/A3m9N4d2E1343m/At2D1v15m9nve/c4y0vO3Aew2/Ccvd593nzudt/5Gf0I7D2v36D3/yUu3wHreBcvfgS6Mdr7fG0C72S2e1D6f33P7jWv758d43k8p/fLq75XoLvT1/0I9E7X3e+a0+9/v5+XnflpAt2DvA3X6eut5/0m2C/p3u8A3vnvGfd/At45aO3tfaZ/mD/+2f2+/u17m7/e89p5v/p523veXvx9r7/XveftL/q34To/At2L2O6B6/4y4d2vH5p//9Lvvf3Y6518+Lq5+/n0+0G//sX9vr/bA/i96vA/z2fP27+1v9Nf5p/vff2+m3u3/xNoD/O2F613A3x3uG3366Xfp9/f1/M1fN6G69xP9Nsf/e8ewD/v5332H4Hu5fDk8EftP0I/A24m8C5z3Lfv8N35/j7/d8/7veflm3kAnS0CAtgsIosAAt0EBNDs048AAicE3v//I19EAn8S3v9f0O6f+b8AfgYv30T4uS2eH3wS3u+4P/m31X5AHzzI427v934A/Qf359D4f3f/+f397f33vX1u/v8/f3v32x+/563v1+/z+lX8z3/Gv3f9+f/4v8/fXp3f24vPv3d379+/vv/++eP3/v3P7L3vI3vf3v3z++//xP333X189/e524/3vr3+fe/ud+3/A5r/49A9+4EAAAABJRU55BK8AAAAASUVORK5CYII=" alt="DCH Auriga Logo" class="company-logo">
         </div>
       </div>
     </div>
