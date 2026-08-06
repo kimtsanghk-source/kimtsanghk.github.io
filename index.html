@@ -170,7 +170,7 @@
       </div>
     </div>
 
-    <!-- Dashboard Banner -->
+    <!-- Dashboard Banner (已移除右側小卡片) -->
     <div class="dash-card p-6 border-l-4 border-l-dash-blue">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -183,16 +183,6 @@
           <h2 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
             Transportation_KPI_<span class="text-dash-blue">Dashboard</span>
           </h2>
-        </div>
-        <div class="flex items-center space-x-3 text-xs font-mono">
-          <div class="bg-slate-50 dark:bg-dash-main/80 border border-slate-200 dark:border-dash-border p-2.5 rounded-xl text-center min-w-[120px]">
-            <div class="text-slate-500 dark:text-dash-muted text-[10px]">TOTAL FLEET HOURS</div>
-            <div id="hdrTotalHours" class="text-dash-yellow font-bold text-sm mt-0.5">-- HRS</div>
-          </div>
-          <div class="bg-slate-50 dark:bg-dash-main/80 border border-slate-200 dark:border-dash-border p-2.5 rounded-xl text-center min-w-[120px]">
-            <div class="text-slate-500 dark:text-dash-muted text-[10px]">LATEST KPI RATE</div>
-            <div id="hdrLatestOtif" class="text-dash-green font-bold text-sm mt-0.5">-- %</div>
-          </div>
         </div>
       </div>
     </div>
@@ -277,14 +267,14 @@
         <div class="relative h-64 w-full"><canvas id="fleetTrendChart"></canvas></div>
       </div>
 
-      <!-- 2. 2026 專屬：圓形 12 月份 OTIF 圖表 -->
+      <!-- 2. 2026 專屬：圓形 12 月份 OTIF 圖表 (副標題已更新為 12-Month OTIF Target Status) -->
       <div class="dash-card p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-200 dark:border-dash-border pb-4">
           <div>
             <h3 class="font-bold text-slate-800 dark:text-white text-base flex items-center gap-2">
               <i data-lucide="pie-chart" class="w-4 h-4 text-dash-green"></i> 2026 Monthly KPI (OTIF) Trend
             </h3>
-            <p class="text-xs text-slate-500 dark:text-dash-muted mt-0.5">2026 Jan - Dec Monthly OTIF Target Status</p>
+            <p class="text-xs text-slate-500 dark:text-dash-muted mt-0.5">12-Month OTIF Target Status</p>
           </div>
           <!-- 圖例與 Badge -->
           <div class="flex flex-col items-end gap-1">
@@ -314,7 +304,7 @@
         <div class="relative h-64 w-full my-auto flex items-center justify-center"><canvas id="fleetCategoryChart"></canvas></div>
       </div>
 
-      <!-- 4. Delivery Distribution (百分比圓形圖 - 獨立讀取 Column N 至 U) -->
+      <!-- 4. Delivery Distribution -->
       <div class="dash-card p-6 space-y-4">
         <div class="border-b border-slate-200 dark:border-dash-border pb-4 flex items-center justify-between">
           <div>
@@ -465,7 +455,6 @@
       return null;
     }
 
-    // 輔助函式：強健的表頭模糊搜尋，防止 \n 或 \r\n 造成 key 讀取不到
     function getRowVal(row, keyword) {
       const keys = Object.keys(row);
       const targetKey = keys.find(k => {
@@ -480,7 +469,6 @@
       return isNaN(num) ? null : num;
     }
 
-    // 讀取 update.xlsx
     async function fetchRemoteExcel() {
       const dot = document.getElementById('dataStatusDot');
       const text = document.getElementById('dataStatusText');
@@ -505,12 +493,9 @@
           const monthObj = parseMonthField(row['月份'] || row['Month']);
           if (!monthObj) return;
 
-          // 🌟 核心關註： Column B 至 L 數據讀取 (如果不含總訂單數量或為空，視為未發生的月份，不納入 Core KPI 卡片與折線圖)
           const isValidKpiRow = rawOrders !== null && rawOrders > 0;
-
           const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
 
-          // 🌟 渠道數據讀取 (Column N 至 U 獨立讀取)
           const clinic = getRowVal(row, 'Clinic') || 0;
           const elderly = getRowVal(row, 'Elderly') || 0;
           const homeDel = getRowVal(row, 'Home Delivery') || 0;
@@ -526,7 +511,7 @@
             monthIdx: monthObj.monthIdx,
             shortMonth: monthObj.shortMonth,
             sortKey: monthObj.sortKey,
-            isValidKpiRow: isValidKpiRow, // 標記是否為有效的 A-L 數據列
+            isValidKpiRow: isValidKpiRow,
             hours: getRowVal(row, '總配送時間') || 0,
             effOrders: getRowVal(row, '每小時配送效率(訂單)') || getRowVal(row, '效率(訂單)') || 0,
             effPallets: getRowVal(row, '每小時配送效率(板數)') || getRowVal(row, '效率(板數)') || 0,
@@ -562,7 +547,6 @@
     }
 
     function updateHeaderAndCards() {
-      // 過濾出只包含 Column A 至 L 有數據的列
       const validKpiList = fleetData.filter(d => d.isValidKpiRow);
       if (!validKpiList || validKpiList.length === 0) return;
 
@@ -570,8 +554,6 @@
       const prev = validKpiList.length > 1 ? validKpiList[validKpiList.length - 2] : null;
 
       document.getElementById('lastUpdateTag').innerText = `LAST_UPDATE: ${latest.month}`;
-      document.getElementById('hdrTotalHours').innerText = `${latest.hours.toLocaleString()} HRS`;
-      document.getElementById('hdrLatestOtif').innerText = `${latest.otif.toFixed(2)} %`;
 
       document.getElementById('kpiTotalOrders').innerText = latest.totalOrders.toLocaleString();
       document.getElementById('kpiEfficiency').innerText = latest.effOrders;
@@ -709,7 +691,6 @@
         text: isDark ? '#8e8e9e' : '#64748b'
       };
 
-      // 🌟 只取 Column A-L 有實際數據的月份繪製 1、3 圖表
       const validKpiList = fleetData.filter(d => d.isValidKpiRow);
 
       const labels = validKpiList.map(d => `${d.month}`);
@@ -841,7 +822,7 @@
         }
       });
 
-      // 4. 🌟 Delivery Distribution 百分比圓形圖 (獨立從 Column N - T 搜尋最新填寫的月份)
+      // 4. Delivery Distribution 百分比圓形圖 (Column N - T)
       const distItem = [...fleetData].reverse().find(d => d.distData && d.distData.distTotal > 0) || latest;
       
       const distLabels = ['Clinic/Dispensary', 'Elderly Home', 'Home Delivery', 'Hospital', 'KA', 'Macau', 'Self Pick Up'];
@@ -906,7 +887,7 @@
               display: function(context) {
                 const val = context.dataset.data[context.dataIndex];
                 const pct = distTotalVal > 0 ? (val / distTotalVal) * 100 : 0;
-                return pct >= 1; // 2% 以上的扇形標註 %
+                return pct >= 1;
               },
               color: '#ffffff',
               font: { family: 'JetBrains Mono', weight: 'bold', size: 9 },
