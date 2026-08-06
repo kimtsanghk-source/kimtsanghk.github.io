@@ -170,7 +170,7 @@
       </div>
     </div>
 
-    <!-- Dashboard Banner (已移除右側小卡片) -->
+    <!-- Dashboard Banner -->
     <div class="dash-card p-6 border-l-4 border-l-dash-blue">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -267,7 +267,7 @@
         <div class="relative h-64 w-full"><canvas id="fleetTrendChart"></canvas></div>
       </div>
 
-      <!-- 2. 2026 專屬：圓形 12 月份 OTIF 圖表 (副標題已更新為 12-Month OTIF Target Status) -->
+      <!-- 2. 2026 專屬：圓形 12 月份 OTIF 圖表 -->
       <div class="dash-card p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-200 dark:border-dash-border pb-4">
           <div>
@@ -320,37 +320,6 @@
         </div>
       </div>
 
-    </div>
-
-    <!-- Data Table -->
-    <div class="dash-card p-6 space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-200 dark:border-dash-border pb-4">
-        <h3 class="font-bold text-slate-800 dark:text-white text-base flex items-center gap-2">
-          <i data-lucide="database" class="w-4 h-4 text-dash-green"></i> Transportation Historical Record
-        </h3>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-xs text-left border-collapse">
-          <thead>
-            <tr class="bg-slate-100 dark:bg-dash-main text-slate-500 dark:text-dash-muted border-b border-slate-200 dark:border-dash-border font-mono">
-              <th class="p-3.5 rounded-l-lg">MONTH</th>
-              <th class="p-3.5 text-dash-green">KPI (OTIF)</th>
-              <th class="p-3.5">TOTAL HRS</th>
-              <th class="p-3.5 text-dash-yellow">EFF (ORD/HR)</th>
-              <th class="p-3.5">EFF (PLT/HR)</th>
-              <th class="p-3.5 text-dash-blue">AVG CBM</th>
-              <th class="p-3.5">TOTAL ORDERS</th>
-              <th class="p-3.5">TOTAL PALLETS</th>
-              <th class="p-3.5">PHARMA ORDERS</th>
-              <th class="p-3.5">PHARMA PALLETS</th>
-              <th class="p-3.5">BAXTER ORDERS</th>
-              <th class="p-3.5 rounded-r-lg">BAXTER PALLETS</th>
-            </tr>
-          </thead>
-          <tbody id="fleetTableBody" class="divide-y divide-slate-200 dark:divide-dash-border/60 text-slate-700 dark:text-gray-200 font-mono">
-          </tbody>
-        </table>
-      </div>
     </div>
 
     <!-- Live KPI Simulator Form -->
@@ -576,27 +545,6 @@
       lucide.createIcons();
     }
 
-    function renderFleetTable() {
-      const validKpiList = fleetData.filter(d => d.isValidKpiRow);
-      const tbody = document.getElementById('fleetTableBody');
-      tbody.innerHTML = validKpiList.map(item => `
-        <tr class="hover:bg-slate-100 dark:hover:bg-dash-hover transition-colors">
-          <td class="p-3.5 font-bold text-slate-800 dark:text-white">${item.month}</td>
-          <td class="p-3.5 font-bold text-dash-green">${item.otif ? item.otif.toFixed(2) + '%' : '--'}</td>
-          <td class="p-3.5 text-slate-500 dark:text-dash-muted">${item.hours.toLocaleString()}</td>
-          <td class="p-3.5 font-bold text-dash-yellow">${item.effOrders}</td>
-          <td class="p-3.5 text-slate-500 dark:text-dash-muted">${item.effPallets}</td>
-          <td class="p-3.5 font-bold text-dash-blue">${item.cbm}</td>
-          <td class="p-3.5 font-bold text-slate-800 dark:text-white">${item.totalOrders.toLocaleString()}</td>
-          <td class="p-3.5 text-slate-500 dark:text-dash-muted">${item.totalPallets.toLocaleString()}</td>
-          <td class="p-3.5 text-slate-500 dark:text-dash-muted">${item.wMedOrders.toLocaleString()}</td>
-          <td class="p-3.5 text-slate-500 dark:text-dash-muted">${item.wMedPallets.toLocaleString()}</td>
-          <td class="p-3.5 text-slate-500 dark:text-dash-muted">${item.renalOrders.toLocaleString()}</td>
-          <td class="p-3.5 text-slate-500 dark:text-dash-muted">${item.renalPallets.toLocaleString()}</td>
-        </tr>
-      `).join('');
-    }
-
     function calculateKPI() {
       const hours = parseFloat(document.getElementById('calcHours').value) || 0;
       const orders = parseFloat(document.getElementById('calcOrders').value) || 0;
@@ -678,7 +626,6 @@
 
     function initFleetCharts() {
       updateHeaderAndCards();
-      renderFleetTable();
 
       if (trendAutoTimer) clearInterval(trendAutoTimer);
       if (otifAutoTimer) clearInterval(otifAutoTimer);
@@ -822,7 +769,7 @@
         }
       });
 
-      // 4. Delivery Distribution 百分比圓形圖 (Column N - T)
+      // 4. Delivery Distribution 百分比圓形圖
       const distItem = [...fleetData].reverse().find(d => d.distData && d.distData.distTotal > 0) || latest;
       
       const distLabels = ['Clinic/Dispensary', 'Elderly Home', 'Home Delivery', 'Hospital', 'KA', 'Macau', 'Self Pick Up'];
@@ -902,7 +849,7 @@
 
       if (isAutoLoopRunning) {
         startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
-        startChartAutoLoop(otifChartInstance, (t) => otifAutoTimer = t);
+        startChartAutoLoop(otifAutoTimer, (t) => otifAutoTimer = t);
         startChartAutoLoop(categoryChartInstance, (t) => categoryAutoTimer = t);
         startChartAutoLoop(deliveryDistChartInstance, (t) => deliveryDistAutoTimer = t);
       }
