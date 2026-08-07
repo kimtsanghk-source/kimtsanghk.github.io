@@ -464,7 +464,7 @@
           const monthObj = parseMonthField(row['月份'] || row['Month']);
           if (!monthObj) return;
 
-          const isValidKpiRow = grandTotalVal !== null ? grandTotalVal > 0 : (rawOrders !== null && rawOrders > 0);
+          const isValidKpiRow = (grandTotalVal !== null && grandTotalVal > 0) || (rawOrders !== null && rawOrders > 0);
           const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
 
           const clinic = getRowVal(row, 'Clinic/Dispensary/Optical Store') || getRowVal(row, 'Clinic') || 0;
@@ -519,35 +519,35 @@
     }
 
     function updateHeaderAndCards() {
-      const validKpiList = fleetData.filter(d => d.isValidKpiRow);
+      // 篩選出 Grand Total 具備有效數值的已完結月份
+      const validKpiList = fleetData.filter(d => d.isValidKpiRow && (d.grandTotal > 0));
       if (!validKpiList || validKpiList.length === 0) return;
 
-      const latest = validKpiList[validKpiList.length - 1];
-      const prev = validKpiList.length > 1 ? validKpiList[validKpiList.length - 2] : null;
+      const latest = validKpiList[validKpiList.length - 1]; // 最新有效月份 (Jun_26: 57,479)
+      const prev = validKpiList.length > 1 ? validKpiList[validKpiList.length - 2] : null; // 前一月份 (May_26: 53,663)
 
       document.getElementById('lastUpdateTag').innerText = `LAST_UPDATE: ${latest.month}`;
 
-      // 修改處：讀取 Column U (Grand Total) 的資料
-      const displayTotalOrders = latest.grandTotal || latest.totalOrders;
+      // 正確讀取 Column U (Grand Total)
+      const displayTotalOrders = latest.grandTotal;
       document.getElementById('kpiTotalOrders').innerText = displayTotalOrders.toLocaleString();
       document.getElementById('kpiEfficiency').innerText = latest.effOrders;
       document.getElementById('kpiOtif').innerText = latest.otif.toFixed(2);
       document.getElementById('kpiUtilization').innerText = latest.cbm;
       document.getElementById('pieMonthLabel').innerText = `${latest.month}`;
 
-      if (prev) {
-        const prevDisplayVal = prev.grandTotal || prev.totalOrders;
-        if (prevDisplayVal > 0) {
-          const diffPercent = (((displayTotalOrders - prevDisplayVal) / prevDisplayVal) * 100).toFixed(1);
-          const diffIcon = diffPercent >= 0 ? 'trending-up' : 'trending-down';
-          const diffClass = diffPercent >= 0 ? 'text-dash-green' : 'text-dash-yellow';
-          
-          document.getElementById('kpiOrdersDiff').className = `text-xs ${diffClass} flex items-center gap-1 font-semibold`;
-          document.getElementById('kpiOrdersDiff').innerHTML = `
-            <i data-lucide="${diffIcon}" class="w-3.5 h-3.5"></i>
-            <span>${diffPercent >= 0 ? '+' : ''}${diffPercent}% vs ${prev.month}</span>
-          `;
-        }
+      // 對比前一月份 (May_26)
+      if (prev && prev.grandTotal > 0) {
+        const prevVal = prev.grandTotal;
+        const diffPercent = (((displayTotalOrders - prevVal) / prevVal) * 100).toFixed(1);
+        const diffIcon = diffPercent >= 0 ? 'trending-up' : 'trending-down';
+        const diffClass = diffPercent >= 0 ? 'text-dash-green' : 'text-dash-yellow';
+        
+        document.getElementById('kpiOrdersDiff').className = `text-xs ${diffClass} flex items-center gap-1 font-semibold`;
+        document.getElementById('kpiOrdersDiff').innerHTML = `
+          <i data-lucide="${diffIcon}" class="w-3.5 h-3.5"></i>
+          <span>${diffPercent >= 0 ? '+' : ''}${diffPercent}% vs ${prev.month}</span>
+        `;
       }
 
       lucide.createIcons();
@@ -857,8 +857,8 @@
 
       if (isAutoLoopRunning) {
         startChartAutoLoop(trendChartInstance, (t) => trendAutoTimer = t);
-        startChartAutoLoop(otifChartInstance, (t) => otifAutoTimer = t);
-        startChartAutoLoop(categoryChartInstance, (t) => categoryAutoTimer = t);
+        startChartAutoLoop(otifAutoTimer, (t) => otifAutoTimer = t);
+        startChartAutoLoop(categoryAutoTimer, (t) => categoryAutoTimer = t);
         startChartAutoLoop(deliveryDistChartInstance, (t) => deliveryDistAutoTimer = t);
       }
     }
