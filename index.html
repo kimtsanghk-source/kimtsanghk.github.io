@@ -547,6 +547,7 @@
         document.getElementById('kpiOrdersDiff').innerHTML = `
           <i data-lucide="${diffIcon}" class="w-3.5 h-3.5"></i>
           <span>${diffPercent >= 0 ? '+' : ''}${diffPercent}% vs ${prev.month}</span>
+          <span class="text-[10px] font-normal text-slate-400 dark:text-dash-muted ml-1">All categories</span>
         `;
       }
 
