@@ -11,7 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js Library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Chart.js DataLabels Plugin -->
+  <!-- Chart.js DataLabels Plugin (用來在圓形圖上顯示數字與百分比) -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -130,16 +130,19 @@
       </div>
 
       <div class="flex items-center space-x-2 sm:space-x-3">
+        <!-- Live Status indicator -->
         <div class="hidden sm:flex items-center space-x-2 text-xs font-mono border border-slate-200 dark:border-dash-border px-3 py-1.5 rounded-full bg-slate-100 dark:bg-dash-card">
           <span id="dataStatusDot" class="w-2 h-2 rounded-full bg-dash-green animate-pulse"></span>
           <span id="dataStatusText" class="text-slate-800 dark:text-white font-bold">FETCHING EXCEL...</span>
         </div>
 
+        <!-- AutoLoop 暫停 / 啟動開關按鈕 -->
         <button id="loopToggleBtn" onclick="toggleAutoLoop()" class="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-dash-card dark:hover:bg-dash-hover text-dash-green border border-slate-200 dark:border-dash-border text-xs font-semibold px-3 py-2 rounded-xl dash-btn transition-all" title="暫停/啟動 AutoLoop 輪播">
           <i id="loopIcon" data-lucide="pause-circle" class="w-4 h-4 text-dash-green"></i>
           <span id="loopText" class="hidden md:inline font-mono text-[11px]">PAUSE LOOP</span>
         </button>
 
+        <!-- 黑暗/明亮模式切換 -->
         <button id="themeToggleBtn" onclick="toggleTheme()" class="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-dash-card dark:hover:bg-dash-hover text-slate-700 dark:text-gray-200 border border-slate-200 dark:border-dash-border text-xs font-semibold px-3 py-2 rounded-xl dash-btn transition-all">
           <i id="themeIcon" data-lucide="moon" class="w-4 h-4 text-dash-blue"></i>
           <span id="themeText" class="hidden md:inline font-mono text-[11px]">DARK</span>
@@ -159,6 +162,7 @@
       </div>
 
       <div class="flex items-center space-x-3">
+        <!-- 手動重新載入按鈕 -->
         <button onclick="fetchRemoteExcel()" class="bg-dash-blue hover:bg-dash-blue/90 text-white font-bold text-xs px-4 py-2 rounded-xl dash-btn transition-all flex items-center space-x-1.5 shadow-lg">
           <i data-lucide="refresh-cw" class="w-4 h-4"></i>
           <span>手動刷新數據</span>
@@ -230,7 +234,7 @@
         </div>
       </div>
 
-      <!-- FLEET UTILIZATION -->
+      <!-- FLEET UTILIZATION (IN AVERAGE) -->
       <div class="dash-card p-5 space-y-3 border-l-2 border-l-dash-purple">
         <div class="flex items-center justify-between text-slate-500 dark:text-dash-muted text-xs font-medium">
           <span class="font-mono uppercase">FLEET UTILIZATION (IN AVERAGE)</span>
@@ -263,7 +267,7 @@
         <div class="relative h-64 w-full"><canvas id="fleetTrendChart"></canvas></div>
       </div>
 
-      <!-- 2. 2026 Monthly KPI (OTIF) Trend -->
+      <!-- 2. 2026 專屬：圓形 12 月份 OTIF 圖表 -->
       <div class="dash-card p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-200 dark:border-dash-border pb-4">
           <div>
@@ -272,6 +276,7 @@
             </h3>
             <p class="text-xs text-slate-500 dark:text-dash-muted mt-0.5">12-Month OTIF Target Status</p>
           </div>
+          <!-- 圖例與 Badge -->
           <div class="flex flex-col items-end gap-1">
             <span class="loopBadge text-[10px] font-mono text-dash-green animate-pulse">[ 2s AUTO LOOP ]</span>
             <div class="flex items-center gap-2 text-[10px] font-mono">
@@ -454,12 +459,12 @@
         let parsedList = [];
 
         rawJson.forEach(row => {
-          // 修改關鍵：改為優先從 Column U (Grand Total) 讀取月度總訂單量，若無則降級選取 Column F/總訂單數量[cite: 1]
-          const grandTotalOrders = getRowVal(row, 'Grand Total') || getRowVal(row, '總訂單數量');
+          const rawOrders = getRowVal(row, '總訂單數量');
+          const grandTotalVal = getRowVal(row, 'Grand Total');
           const monthObj = parseMonthField(row['月份'] || row['Month']);
           if (!monthObj) return;
 
-          const isValidKpiRow = grandTotalOrders !== null && grandTotalOrders > 0;
+          const isValidKpiRow = grandTotalVal !== null ? grandTotalVal > 0 : (rawOrders !== null && rawOrders > 0);
           const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
 
           const clinic = getRowVal(row, 'Clinic/Dispensary/Optical Store') || getRowVal(row, 'Clinic') || 0;
@@ -469,7 +474,7 @@
           const ka = getRowVal(row, 'KA') || 0;
           const macau = getRowVal(row, 'Macau') || 0;
           const selfPick = getRowVal(row, 'Self Pick') || 0;
-          const distTotal = grandTotalOrders || (clinic + elderly + homeDel + hospital + ka + macau + selfPick);
+          const distTotal = grandTotalVal || (clinic + elderly + homeDel + hospital + ka + macau + selfPick);
 
           parsedList.push({
             month: monthObj.label,
@@ -482,7 +487,8 @@
             effOrders: getRowVal(row, '每小時配送效率(訂單)') || getRowVal(row, '效率(訂單)') || 0,
             effPallets: getRowVal(row, '每小時配送效率(板數)') || getRowVal(row, '效率(板數)') || 0,
             cbm: getRowVal(row, 'CBM') || 0,
-            totalOrders: grandTotalOrders || 0, // Column U 的真實 Monthly Total Orders[cite: 1]
+            totalOrders: rawOrders || 0,
+            grandTotal: grandTotalVal || 0,
             totalPallets: getRowVal(row, '總配送板數') || 0,
             wMedOrders: getRowVal(row, '西藥訂單') || 0,
             wMedPallets: getRowVal(row, '西藥配送板數') || 0,
@@ -521,22 +527,27 @@
 
       document.getElementById('lastUpdateTag').innerText = `LAST_UPDATE: ${latest.month}`;
 
-      document.getElementById('kpiTotalOrders').innerText = latest.totalOrders.toLocaleString();
+      // 修改處：讀取 Column U (Grand Total) 的資料
+      const displayTotalOrders = latest.grandTotal || latest.totalOrders;
+      document.getElementById('kpiTotalOrders').innerText = displayTotalOrders.toLocaleString();
       document.getElementById('kpiEfficiency').innerText = latest.effOrders;
       document.getElementById('kpiOtif').innerText = latest.otif.toFixed(2);
       document.getElementById('kpiUtilization').innerText = latest.cbm;
       document.getElementById('pieMonthLabel').innerText = `${latest.month}`;
 
-      if (prev && prev.totalOrders > 0) {
-        const diffPercent = (((latest.totalOrders - prev.totalOrders) / prev.totalOrders) * 100).toFixed(1);
-        const diffIcon = diffPercent >= 0 ? 'trending-up' : 'trending-down';
-        const diffClass = diffPercent >= 0 ? 'text-dash-green' : 'text-dash-yellow';
-        
-        document.getElementById('kpiOrdersDiff').className = `text-xs ${diffClass} flex items-center gap-1 font-semibold`;
-        document.getElementById('kpiOrdersDiff').innerHTML = `
-          <i data-lucide="${diffIcon}" class="w-3.5 h-3.5"></i>
-          <span>${diffPercent >= 0 ? '+' : ''}${diffPercent}% vs ${prev.month}</span>
-        `;
+      if (prev) {
+        const prevDisplayVal = prev.grandTotal || prev.totalOrders;
+        if (prevDisplayVal > 0) {
+          const diffPercent = (((displayTotalOrders - prevDisplayVal) / prevDisplayVal) * 100).toFixed(1);
+          const diffIcon = diffPercent >= 0 ? 'trending-up' : 'trending-down';
+          const diffClass = diffPercent >= 0 ? 'text-dash-green' : 'text-dash-yellow';
+          
+          document.getElementById('kpiOrdersDiff').className = `text-xs ${diffClass} flex items-center gap-1 font-semibold`;
+          document.getElementById('kpiOrdersDiff').innerHTML = `
+            <i data-lucide="${diffIcon}" class="w-3.5 h-3.5"></i>
+            <span>${diffPercent >= 0 ? '+' : ''}${diffPercent}% vs ${prev.month}</span>
+          `;
+        }
       }
 
       lucide.createIcons();
@@ -667,7 +678,7 @@
         }
       });
 
-      // 2. 2026 年 OTIF 圖表
+      // 2. 專屬 2026 年：圓形 12 月份 OTIF 圖表
       const fullMonths = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
       const circularBgColors = [];
       const circularValues = [];
@@ -766,7 +777,7 @@
         }
       });
 
-      // 4. Delivery Distribution
+      // 4. Delivery Distribution 百分比圓形圖
       const distItem = [...fleetData].reverse().find(d => d.distData && d.distData.distTotal > 0) || latest;
       
       const distLabels = ['Clinic/Dispensary/Optical Store', 'Elderly Home', 'Home Delivery', 'Hospital', 'KA', 'Macau', 'Self Pick Up'];
@@ -792,13 +803,13 @@
           datasets: [{
             data: distValues,
             backgroundColor: [
-              '#38a5ff',
-              '#ffb020',
-              '#2cd997',
-              '#7c5cfc',
-              '#ff5252',
-              '#00d2ff',
-              '#ff7675'
+              '#38a5ff', // Clinic - Blue
+              '#ffb020', // Elderly - Yellow
+              '#2cd997', // Home Del - Green
+              '#7c5cfc', // Hospital - Purple
+              '#ff5252', // KA - Red
+              '#00d2ff', // Macau - Cyan
+              '#ff7675'  // Self Pick - Pink/Orange
             ],
             borderColor: isDark ? '#242430' : '#ffffff',
             borderWidth: 3,
