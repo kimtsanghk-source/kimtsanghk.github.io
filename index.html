@@ -465,7 +465,7 @@
           const isValidKpiRow = rawOrders !== null && rawOrders > 0;
           const otifKey = Object.keys(row).find(k => k.includes('OTIF') || k.includes('KPI'));
 
-          const clinic = getRowVal(row, 'Clinic') || 0;
+          const clinic = getRowVal(row, 'Clinic/Dispensary/Optical Store') || getRowVal(row, 'Clinic') || 0;
           const elderly = getRowVal(row, 'Elderly') || 0;
           const homeDel = getRowVal(row, 'Home Delivery') || 0;
           const hospital = getRowVal(row, 'Hospital') || 0;
@@ -772,7 +772,7 @@
       // 4. Delivery Distribution 百分比圓形圖
       const distItem = [...fleetData].reverse().find(d => d.distData && d.distData.distTotal > 0) || latest;
       
-      const distLabels = ['Clinic/Dispensary', 'Elderly Home', 'Home Delivery', 'Hospital', 'KA', 'Macau', 'Self Pick Up'];
+      const distLabels = ['Clinic/Dispensary/Optical Store', 'Elderly Home', 'Home Delivery', 'Hospital', 'KA', 'Macau', 'Self Pick Up'];
       const distValues = distItem && distItem.distData ? [
         distItem.distData.clinic,
         distItem.distData.elderly,
