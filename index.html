@@ -197,7 +197,7 @@
         <div class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">
           <span id="kpiTotalOrders">--</span> <span class="text-xs font-normal text-slate-400 dark:text-dash-muted">Order</span>
         </div>
-        <div id="kpiOrdersDiff" class="text-xs text-dash-yellow flex items-center justify-between font-semibold">
+        <div id="kpiOrdersDiff" class="text-xs text-dash-yellow flex items-center justify-between w-full font-semibold">
           <div class="flex items-center gap-1">
             <i data-lucide="trending-up" class="w-3.5 h-3.5"></i><span>LATEST MONTH</span>
           </div>
@@ -546,7 +546,7 @@
         const diffIcon = diffPercent >= 0 ? 'trending-up' : 'trending-down';
         const diffClass = diffPercent >= 0 ? 'text-dash-green' : 'text-dash-yellow';
         
-        document.getElementById('kpiOrdersDiff').className = `text-xs ${diffClass} flex items-center justify-between font-semibold`;
+        document.getElementById('kpiOrdersDiff').className = `text-xs ${diffClass} flex items-center justify-between w-full font-semibold`;
         document.getElementById('kpiOrdersDiff').innerHTML = `
           <div class="flex items-center gap-1">
             <i data-lucide="${diffIcon}" class="w-3.5 h-3.5"></i>
